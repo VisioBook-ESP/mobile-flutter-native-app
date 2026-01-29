@@ -33,11 +33,13 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (context, state) => const _PlaceholderScreen(title: 'Register'),
+        builder: (context, state) =>
+            const _PlaceholderScreen(title: 'Register'),
       ),
       GoRoute(
         path: AppRoutes.dashboard,
-        builder: (context, state) => const _PlaceholderScreen(title: 'Dashboard'),
+        builder: (context, state) =>
+            const _PlaceholderScreen(title: 'Dashboard'),
       ),
       GoRoute(
         path: AppRoutes.projectDetail,
@@ -62,7 +64,8 @@ class AppRouter {
   ) async {
     final isLoggedIn = await _storage.isLoggedIn();
     final isOnSplash = state.matchedLocation == AppRoutes.splash;
-    final isOnAuth = state.matchedLocation == AppRoutes.login ||
+    final isOnAuth =
+        state.matchedLocation == AppRoutes.login ||
         state.matchedLocation == AppRoutes.register;
 
     // Si on est sur splash, laisser le splash gerer la redirection
@@ -93,10 +96,7 @@ class _PlaceholderScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: Center(
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
+        child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
       ),
     );
   }

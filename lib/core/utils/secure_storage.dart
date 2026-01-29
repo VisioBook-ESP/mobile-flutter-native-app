@@ -10,10 +10,10 @@ class SecureStorageService {
   static const String _onboardingCompleteKey = 'onboarding_complete';
 
   SecureStorageService()
-      : _storage = const FlutterSecureStorage(
-          aOptions: AndroidOptions(encryptedSharedPreferences: true),
-          iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
-        );
+    : _storage = const FlutterSecureStorage(
+        aOptions: AndroidOptions(encryptedSharedPreferences: true),
+        iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+      );
 
   // Access Token
   Future<void> saveAccessToken(String token) async {

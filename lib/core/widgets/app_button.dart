@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
 enum AppButtonVariant { primary, outline }
+
 enum AppButtonSize { md, lg }
 
 /// Bouton personnalise
@@ -57,10 +58,7 @@ class _AppButtonState extends State<AppButton> {
           ? AppColors.neutral900.withValues(alpha: 0.05)
           : Colors.transparent;
       textColor = AppColors.neutral900;
-      border = Border.all(
-        color: AppColors.neutral900,
-        width: 2,
-      );
+      border = Border.all(color: AppColors.neutral900, width: 2);
     }
 
     if (isDisabled) {
@@ -71,10 +69,7 @@ class _AppButtonState extends State<AppButton> {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (widget.icon != null) ...[
-          widget.icon!,
-          const SizedBox(width: 8),
-        ],
+        if (widget.icon != null) ...[widget.icon!, const SizedBox(width: 8)],
         if (widget.isLoading)
           SizedBox(
             height: 16,

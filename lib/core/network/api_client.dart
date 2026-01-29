@@ -23,21 +23,23 @@ class ApiClient {
   }
 
   // User Service
-  Future<Response> authRegister(Map<String, dynamic> data) =>
-      _dio.post('${EnvironmentConfig.userServiceUrl}/auth/register', data: data);
+  Future<Response> authRegister(Map<String, dynamic> data) => _dio.post(
+    '${EnvironmentConfig.userServiceUrl}/auth/register',
+    data: data,
+  );
 
   Future<Response> authLogin(Map<String, dynamic> data) =>
       _dio.post('${EnvironmentConfig.userServiceUrl}/auth/login', data: data);
 
   Future<Response> authRefresh(String refreshToken) => _dio.post(
-        '${EnvironmentConfig.userServiceUrl}/auth/refresh',
-        data: {'refreshToken': refreshToken},
-      );
+    '${EnvironmentConfig.userServiceUrl}/auth/refresh',
+    data: {'refreshToken': refreshToken},
+  );
 
   Future<Response> authVerify(String token) => _dio.post(
-        '${EnvironmentConfig.userServiceUrl}/auth/verify',
-        data: {'token': token},
-      );
+    '${EnvironmentConfig.userServiceUrl}/auth/verify',
+    data: {'token': token},
+  );
 
   // Project Service
   Future<Response> getProjects() =>
@@ -49,8 +51,8 @@ class ApiClient {
   Future<Response> createProject(Map<String, dynamic> data) =>
       _dio.post('${EnvironmentConfig.projectServiceUrl}/projects', data: data);
 
-  Future<Response> updateProject(String id, Map<String, dynamic> data) =>
-      _dio.put('${EnvironmentConfig.projectServiceUrl}/projects/$id', data: data);
+  Future<Response> updateProject(String id, Map<String, dynamic> data) => _dio
+      .put('${EnvironmentConfig.projectServiceUrl}/projects/$id', data: data);
 
   Future<Response> deleteProject(String id) =>
       _dio.delete('${EnvironmentConfig.projectServiceUrl}/projects/$id');
@@ -58,29 +60,38 @@ class ApiClient {
   Future<Response> generateProject(String id) =>
       _dio.post('${EnvironmentConfig.projectServiceUrl}/projects/$id/generate');
 
-  Future<Response> getWorkflowStatus(String projectId, String workflowId) =>
-      _dio.get(
-        '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/workflows/$workflowId',
-      );
+  Future<Response> getWorkflowStatus(
+    String projectId,
+    String workflowId,
+  ) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/workflows/$workflowId',
+  );
 
   Future<Response> shareProject(String id, Map<String, dynamic> data) =>
-      _dio.post('${EnvironmentConfig.projectServiceUrl}/projects/$id/share', data: data);
+      _dio.post(
+        '${EnvironmentConfig.projectServiceUrl}/projects/$id/share',
+        data: data,
+      );
 
   // Storage Service
   Future<Response> uploadFile(FormData formData) => _dio.post(
-        '${EnvironmentConfig.storageServiceUrl}/storage/upload',
-        data: formData,
-        options: Options(contentType: 'multipart/form-data'),
-      );
+    '${EnvironmentConfig.storageServiceUrl}/storage/upload',
+    data: formData,
+    options: Options(contentType: 'multipart/form-data'),
+  );
 
-  Future<Response> transformFile(Map<String, dynamic> data) =>
-      _dio.post('${EnvironmentConfig.storageServiceUrl}/storage/transform', data: data);
+  Future<Response> transformFile(Map<String, dynamic> data) => _dio.post(
+    '${EnvironmentConfig.storageServiceUrl}/storage/transform',
+    data: data,
+  );
 
-  Future<Response> getStreamUrl(String videoId) =>
-      _dio.get('${EnvironmentConfig.storageServiceUrl}/storage/stream/$videoId');
+  Future<Response> getStreamUrl(String videoId) => _dio.get(
+    '${EnvironmentConfig.storageServiceUrl}/storage/stream/$videoId',
+  );
 
-  Future<Response> getDownloadUrl(String videoId) =>
-      _dio.get('${EnvironmentConfig.storageServiceUrl}/storage/download/$videoId');
+  Future<Response> getDownloadUrl(String videoId) => _dio.get(
+    '${EnvironmentConfig.storageServiceUrl}/storage/download/$videoId',
+  );
 }
 
 /// Intercepteur pour ajouter le token et gérer le refresh

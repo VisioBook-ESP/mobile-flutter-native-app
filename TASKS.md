@@ -14,7 +14,7 @@
 | 3 | Authentification | P0 | In Progress | 60% |
 | 4 | Dashboard | P0 | In Progress | 60% |
 | 5 | Import Contenu | P0 | In Progress | 60% |
-| 6 | Detail & Configuration | P0 | Todo | 0% |
+| 6 | Detail & Configuration | P0 | In Progress | 80% |
 | 7 | Generation | P0 | Todo | 0% |
 | 8 | Player | P0 | Todo | 0% |
 | 9 | Export | P0 | Todo | 0% |
@@ -207,20 +207,20 @@
 
 ### Detail Projet Screen [P0]
 - [ ] Preview image/video
-- [ ] Titre et date
-- [ ] Resume du texte
-- [ ] Section configuration
-- [ ] Bouton "Generer VisioBook"
+- [x] Titre et date
+- [x] Resume du texte
+- [x] Section configuration
+- [x] Bouton "Generer VisioBook"
 
 ### Style graphique [P0] (US 2.1 - MUST)
-- [ ] Selecteur style (Realiste, Cartoon, Manga, Aquarelle)
-- [ ] Preview du style
+- [x] Selecteur style (Realiste, Cartoon, Manga, Aquarelle)
+- [x] Preview du style
 
 ### Langue audio [P1] (US 2.2 - SHOULD)
-- [ ] Selecteur langue (FR, EN, ES, DE)
+- [x] Selecteur langue (FR, EN, ES, DE)
 
 ### Duree [P2] (US 2.3 - COULD)
-- [ ] Selecteur duree (Courte, Moyenne, Longue, Auto)
+- [x] Selecteur duree (Courte, Moyenne, Longue, Auto)
 
 ### Personnalisation personnages [P3] (US 2.4 - COULD)
 - [ ] Modifier apparence personnages
@@ -229,9 +229,9 @@
 - [ ] Choisir musique de fond
 
 ### API Endpoints [P0]
-- [ ] GET /api/v1/projects/{id}
-- [ ] PUT /api/v1/projects/{id}
-- [ ] POST /api/v1/projects
+- [x] GET /api/v1/projects/{id}
+- [x] PUT /api/v1/projects/{id}
+- [x] POST /api/v1/projects
 
 ---
 

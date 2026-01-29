@@ -8,6 +8,7 @@ import 'package:visiobook_mobile/features/auth/presentation/screens/register_scr
 import 'package:visiobook_mobile/features/import/presentation/screens/file_import_screen.dart';
 import 'package:visiobook_mobile/features/import/presentation/screens/input_mode_screen.dart';
 import 'package:visiobook_mobile/features/import/presentation/screens/text_preview_screen.dart';
+import 'package:visiobook_mobile/features/project_detail/presentation/screens/project_detail_screen.dart';
 import 'package:visiobook_mobile/features/projects/presentation/screens/dashboard_screen.dart';
 
 /// Routes de l'application
@@ -17,6 +18,8 @@ class AppRoutes {
   static const String register = '/register';
   static const String dashboard = '/dashboard';
   static const String projectDetail = '/project/:id';
+  static const String projectConfig = '/project/config';
+  static const String generation = '/project/:id/generate/:workflowId';
   static const String player = '/player/:id';
   // Import routes
   static const String inputMode = '/import';
@@ -56,7 +59,19 @@ class AppRouter {
         path: AppRoutes.projectDetail,
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return _PlaceholderScreen(title: 'Project $id');
+          return ProjectDetailScreen(projectId: id);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.projectConfig,
+        builder: (context, state) => const ProjectDetailScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.generation,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          final workflowId = state.pathParameters['workflowId']!;
+          return _PlaceholderScreen(title: 'Generation $id - $workflowId');
         },
       ),
       GoRoute(

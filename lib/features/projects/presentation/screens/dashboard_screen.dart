@@ -189,6 +189,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final userName = context.watch<AuthProvider>().userName;
+    final greeting = userName != null ? 'Bonjour, $userName !' : 'Bonjour !';
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Row(
@@ -212,7 +215,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Bonjour !',
+                  greeting,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 2),

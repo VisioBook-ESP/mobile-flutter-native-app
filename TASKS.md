@@ -23,6 +23,13 @@
 
 ---
 
+## Note importante
+
+> **MOCK DATA ACTIVE** : Pour tester l'UI sans backend, le mode mock est active dans `lib/config/environment.dart`.
+> Avant de connecter aux vrais microservices, mettre `useMockData = false`.
+
+---
+
 ## Priorites
 
 | Niveau | Signification | POK |

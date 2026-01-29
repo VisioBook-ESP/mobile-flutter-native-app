@@ -13,7 +13,7 @@
 | 2 | Core / Infrastructure | P0 | Done | 100% |
 | 3 | Authentification | P0 | In Progress | 60% |
 | 4 | Dashboard | P0 | In Progress | 60% |
-| 5 | Import Contenu | P0 | Todo | 0% |
+| 5 | Import Contenu | P0 | In Progress | 60% |
 | 6 | Detail & Configuration | P0 | Todo | 0% |
 | 7 | Generation | P0 | Todo | 0% |
 | 8 | Player | P0 | Todo | 0% |
@@ -165,15 +165,15 @@
 > API: Support Storage Service (port 8089)
 
 ### Input Mode Selection [P0]
-- [ ] Option "Scanner un document"
-- [ ] Option "Importer un fichier"
+- [x] Option "Scanner un document"
+- [x] Option "Importer un fichier"
 
 ### Import de fichiers [P0] (US 1.1 - MUST)
-- [ ] File picker
-- [ ] Validation format (PDF, TXT, DOCX, EPUB)
-- [ ] Validation taille (max 50MB)
-- [ ] Progress bar upload
-- [ ] Gestion erreurs
+- [x] File picker
+- [x] Validation format (PDF, TXT, DOCX, EPUB)
+- [x] Validation taille (max 50MB)
+- [x] Progress bar upload
+- [x] Gestion erreurs
 
 ### Scan de texte [P1] (US 1.2 - SHOULD)
 - [ ] Permission camera
@@ -185,18 +185,18 @@
 - [ ] Toggle flash
 
 ### OCR Processing [P1]
-- [ ] Affichage texte extrait
-- [ ] Compteur mots
+- [x] Affichage texte extrait
+- [x] Compteur mots
 - [ ] Option edition manuelle
-- [ ] Bouton "Continuer"
+- [x] Bouton "Continuer"
 
 ### Previsualisation [P1] (US 1.3 - SHOULD)
-- [ ] Afficher preview du texte
+- [x] Afficher preview du texte
 - [ ] Resume automatique
 
 ### API Endpoints [P0]
-- [ ] POST /api/v1/storage/upload
-- [ ] POST /api/v1/storage/transform
+- [x] POST /api/v1/storage/upload
+- [x] POST /api/v1/storage/transform
 
 ---
 

@@ -75,7 +75,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               subtitle: 'PDF, TXT, DOCX, EPUB',
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Navigate to import screen
+                context.push(AppRoutes.fileImport);
               },
             ),
             const SizedBox(height: 12),
@@ -85,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               subtitle: 'Utilisez votre camera',
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Navigate to scan screen
+                context.push(AppRoutes.scan);
               },
             ),
             const SizedBox(height: 24),

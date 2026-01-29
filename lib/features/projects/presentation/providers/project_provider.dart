@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/features/projects/data/project_service.dart';
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
 
@@ -29,11 +30,110 @@ class ProjectProvider extends ChangeNotifier {
   List<Project> get draftProjects =>
       _projects.where((p) => p.status != ProjectStatus.ready).toList();
 
+  /// Donnees mock pour tester l'UI
+  static final List<Project> _mockProjects = [
+    // Projets ready (VisioBooks termines)
+    Project(
+      id: '1',
+      title: 'Le Petit Prince',
+      description: 'Un conte poetique et philosophique',
+      status: ProjectStatus.ready,
+      coverUrl: 'https://picsum.photos/seed/prince/300/400',
+      videoUrl: 'https://example.com/video1.mp4',
+      createdAt: DateTime.now().subtract(const Duration(days: 2)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 1)),
+    ),
+    Project(
+      id: '2',
+      title: 'Les Miserables',
+      description: 'Le chef-d\'oeuvre de Victor Hugo',
+      status: ProjectStatus.ready,
+      coverUrl: 'https://picsum.photos/seed/miserables/300/400',
+      videoUrl: 'https://example.com/video2.mp4',
+      createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 3)),
+    ),
+    Project(
+      id: '5',
+      title: 'L\'Etranger',
+      description: 'Roman d\'Albert Camus',
+      status: ProjectStatus.ready,
+      coverUrl: 'https://picsum.photos/seed/etranger/300/400',
+      videoUrl: 'https://example.com/video5.mp4',
+      createdAt: DateTime.now().subtract(const Duration(days: 10)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 8)),
+    ),
+    Project(
+      id: '6',
+      title: 'Madame Bovary',
+      description: 'Chef-d\'oeuvre de Flaubert',
+      status: ProjectStatus.ready,
+      coverUrl: 'https://picsum.photos/seed/bovary/300/400',
+      videoUrl: 'https://example.com/video6.mp4',
+      createdAt: DateTime.now().subtract(const Duration(days: 15)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 12)),
+    ),
+    Project(
+      id: '7',
+      title: 'Notre-Dame de Paris',
+      description: 'Roman de Victor Hugo',
+      status: ProjectStatus.ready,
+      coverUrl: 'https://picsum.photos/seed/notredame/300/400',
+      videoUrl: 'https://example.com/video7.mp4',
+      createdAt: DateTime.now().subtract(const Duration(days: 20)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 18)),
+    ),
+    // Projets en cours
+    Project(
+      id: '3',
+      title: 'Germinal',
+      description: 'Roman de Emile Zola',
+      status: ProjectStatus.processing,
+      coverUrl: 'https://picsum.photos/seed/germinal/300/400',
+      createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+      updatedAt: DateTime.now(),
+    ),
+    Project(
+      id: '4',
+      title: 'Mon nouveau projet',
+      description: 'Brouillon en cours',
+      status: ProjectStatus.draft,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    ),
+    Project(
+      id: '8',
+      title: 'Candide',
+      description: 'Conte philosophique de Voltaire',
+      status: ProjectStatus.processing,
+      coverUrl: 'https://picsum.photos/seed/candide/300/400',
+      createdAt: DateTime.now().subtract(const Duration(hours: 5)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
+    ),
+    Project(
+      id: '9',
+      title: 'Le Rouge et le Noir',
+      description: 'Roman de Stendhal',
+      status: ProjectStatus.draft,
+      coverUrl: 'https://picsum.photos/seed/rouge/300/400',
+      createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 6)),
+    ),
+  ];
+
   /// Charge tous les projets
   Future<void> loadProjects() async {
     _state = ProjectsState.loading;
     _error = null;
     notifyListeners();
+
+    // Mode mock: retourner des donnees fictives
+    if (EnvironmentConfig.useMockData) {
+      _projects = _mockProjects;
+      _state = ProjectsState.loaded;
+      notifyListeners();
+      return;
+    }
 
     final result = await _projectService.getProjects();
 

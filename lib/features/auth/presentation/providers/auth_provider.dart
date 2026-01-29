@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/features/auth/data/auth_service.dart';
 
 /// Etats possibles de l'authentification
@@ -10,6 +11,7 @@ class AuthProvider extends ChangeNotifier {
 
   AuthState _state = AuthState.initial;
   String? _error;
+  String? _mockUserName;
 
   AuthProvider({required AuthService authService}) : _authService = authService;
 
@@ -17,9 +19,18 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isLoading => _state == AuthState.loading;
   bool get isAuthenticated => _state == AuthState.authenticated;
+  String? get userName => _mockUserName;
 
   /// Verifie l'etat de connexion au demarrage
   Future<void> checkAuthStatus() async {
+    // Mode mock: auto-login
+    if (EnvironmentConfig.useMockData) {
+      _state = AuthState.authenticated;
+      _mockUserName = 'Marine';
+      notifyListeners();
+      return;
+    }
+
     _state = AuthState.loading;
     notifyListeners();
 

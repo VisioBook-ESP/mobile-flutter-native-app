@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/core/utils/secure_storage.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/splash_screen.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/login_screen.dart';
@@ -64,6 +65,11 @@ class AppRouter {
     BuildContext context,
     GoRouterState state,
   ) async {
+    // Mode mock: pas de redirection automatique, laisser le splash gerer
+    if (EnvironmentConfig.useMockData) {
+      return null;
+    }
+
     final isLoggedIn = await _storage.isLoggedIn();
     final isOnSplash = state.matchedLocation == AppRoutes.splash;
     final isOnAuth =

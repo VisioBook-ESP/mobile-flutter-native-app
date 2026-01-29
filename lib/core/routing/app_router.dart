@@ -4,6 +4,7 @@ import 'package:visiobook_mobile/core/utils/secure_storage.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/splash_screen.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/register_screen.dart';
+import 'package:visiobook_mobile/features/projects/presentation/screens/dashboard_screen.dart';
 
 /// Routes de l'application
 class AppRoutes {
@@ -40,8 +41,7 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.dashboard,
-        builder: (context, state) =>
-            const _PlaceholderScreen(title: 'Dashboard'),
+        builder: (context, state) => const DashboardScreen(),
       ),
       GoRoute(
         path: AppRoutes.projectDetail,

@@ -9,7 +9,7 @@
 | Phase | Description | Priorite | Statut | Progression |
 |-------|-------------|----------|--------|-------------|
 | 0 | Setup Projet | P0 | Done | 100% |
-| 1 | CI/CD & Docker | P0 | Done | 100% |
+| 1 | CI/CD | P0 | Done | 100% |
 | 2 | Core / Infrastructure | P0 | Todo | 0% |
 | 3 | Authentification | P0 | Todo | 0% |
 | 4 | Dashboard | P0 | Todo | 0% |
@@ -44,27 +44,20 @@
 
 ---
 
-## Phase 1: CI/CD & Docker [P0] ✅
+## Phase 1: CI/CD [P0] ✅
 
-### Fichiers crees
-- [x] Dockerfile (multi-stage: Flutter build + Nginx)
-- [x] nginx.conf (config SPA)
-- [x] docker-compose.yml (dev - port 3000)
-- [x] docker-compose-prod.yml (prod - image GHCR)
+### Fichier CI
 - [x] .github/workflows/ci.yml
 
-### CI Pipeline
-- [x] Job: Analyze & Test
-- [x] Job: Build Web
-- [x] Job: Build & Push Docker (ghcr.io)
-- [x] Job: Build Android APK
-- [x] Job: Build iOS
+### CI Pipeline (sur PR vers dev)
+- [x] Job: format-check
+- [x] Job: analyze-check
+- [x] Job: test
+- [x] Job: build-android (APK)
+- [x] Job: build-ios
 
-### A configurer (DevOps)
-- [ ] Verifier permissions GHCR pour l'organisation
-- [ ] Tester le pipeline CI complet
-- [ ] Configurer secrets GitHub si necessaire
-- [ ] Configurer registry Docker sur serveur prod
+### A faire
+- [ ] Tester le pipeline CI complet (premier PR)
 
 ---
 

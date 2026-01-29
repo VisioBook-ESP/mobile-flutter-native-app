@@ -42,6 +42,8 @@ class ProjectProvider extends ChangeNotifier {
       status: ProjectStatus.ready,
       coverUrl: 'https://picsum.photos/seed/prince/300/400',
       videoUrl: 'https://example.com/video1.mp4',
+      videoDurationSeconds: 150,
+      style: 'Manga',
       generations: [
         Generation(
           id: 'gen1-1',
@@ -68,6 +70,8 @@ class ProjectProvider extends ChangeNotifier {
       status: ProjectStatus.ready,
       coverUrl: 'https://picsum.photos/seed/miserables/300/400',
       videoUrl: 'https://example.com/video2.mp4',
+      videoDurationSeconds: 320,
+      style: 'Realiste',
       generations: [
         Generation(
           id: 'gen2-1',
@@ -88,6 +92,8 @@ class ProjectProvider extends ChangeNotifier {
       status: ProjectStatus.ready,
       coverUrl: 'https://picsum.photos/seed/etranger/300/400',
       videoUrl: 'https://example.com/video5.mp4',
+      videoDurationSeconds: 185,
+      style: 'Cartoon',
       generations: [
         Generation(
           id: 'gen5-1',
@@ -108,6 +114,8 @@ class ProjectProvider extends ChangeNotifier {
       status: ProjectStatus.ready,
       coverUrl: 'https://picsum.photos/seed/bovary/300/400',
       videoUrl: 'https://example.com/video6.mp4',
+      videoDurationSeconds: 240,
+      style: 'Aquarelle',
       generations: [
         Generation(
           id: 'gen6-1',
@@ -128,6 +136,8 @@ class ProjectProvider extends ChangeNotifier {
       status: ProjectStatus.ready,
       coverUrl: 'https://picsum.photos/seed/notredame/300/400',
       videoUrl: 'https://example.com/video7.mp4',
+      videoDurationSeconds: 280,
+      style: 'Realiste',
       generations: [
         Generation(
           id: 'gen7-1',
@@ -148,6 +158,7 @@ class ProjectProvider extends ChangeNotifier {
       genre: 'Roman social',
       status: ProjectStatus.processing,
       coverUrl: 'https://picsum.photos/seed/germinal/300/400',
+      style: 'Realiste',
       createdAt: DateTime.now().subtract(const Duration(hours: 2)),
       updatedAt: DateTime.now(),
     ),
@@ -167,6 +178,7 @@ class ProjectProvider extends ChangeNotifier {
       genre: 'Conte philosophique',
       status: ProjectStatus.processing,
       coverUrl: 'https://picsum.photos/seed/candide/300/400',
+      style: 'Cartoon',
       createdAt: DateTime.now().subtract(const Duration(hours: 5)),
       updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
     ),
@@ -178,6 +190,7 @@ class ProjectProvider extends ChangeNotifier {
       genre: 'Roman',
       status: ProjectStatus.draft,
       coverUrl: 'https://picsum.photos/seed/rouge/300/400',
+      style: 'Manga',
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
       updatedAt: DateTime.now().subtract(const Duration(hours: 6)),
     ),

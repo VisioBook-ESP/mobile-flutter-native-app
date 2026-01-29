@@ -4,6 +4,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
+import 'package:visiobook_mobile/features/player/presentation/screens/video_player_screen.dart';
+import 'package:visiobook_mobile/features/player/presentation/widgets/generation_selector_sheet.dart';
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
@@ -80,8 +82,58 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
     );
   }
 
-  void _onVisionner() {
-    context.push('/player/${widget.projectId}');
+  Future<void> _onVisionner() async {
+    if (_project == null) return;
+
+    final project = _project!;
+
+    // Determiner quelle video lancer
+    String? videoUrl;
+    String? generationId;
+
+    if (project.generations.length > 1) {
+      // Plusieurs generations: afficher le selecteur
+      final selectedGeneration = await GenerationSelectorSheet.show(
+        context: context,
+        generations: project.generations,
+        projectTitle: project.title,
+      );
+
+      if (selectedGeneration == null || !mounted) return;
+
+      videoUrl = selectedGeneration.videoUrl;
+      generationId = selectedGeneration.id;
+    } else if (project.generations.length == 1) {
+      // Une seule generation
+      videoUrl = project.generations.first.videoUrl;
+      generationId = project.generations.first.id;
+    } else {
+      // Pas de generation, utiliser la video principale du projet
+      videoUrl = project.videoUrl;
+    }
+
+    if (videoUrl == null || videoUrl.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Aucune video disponible')),
+        );
+      }
+      return;
+    }
+
+    // Ouvrir le lecteur video
+    if (mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => VideoPlayerScreen(
+            projectId: project.id,
+            projectTitle: project.title,
+            videoUrl: videoUrl!,
+            generationId: generationId,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -194,15 +246,14 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
     // Build metadata parts
     final parts = <String>[];
 
-    if (project.genre != null) {
-      parts.add('Style ${project.genre}');
+    if (project.style != null) {
+      parts.add('Style ${project.style}');
     }
 
-    // Number of cases/panels (mock for now)
-    parts.add('4 cases');
-
-    // Duration (mock for now)
-    parts.add('2:30');
+    // Duration
+    if (project.videoDurationSeconds != null) {
+      parts.add(project.formattedDuration);
+    }
 
     // Date
     parts.add(_formatDate(project.createdAt));

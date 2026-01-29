@@ -70,6 +70,8 @@ class Project {
   final ProjectStatus status;
   final String? coverUrl;
   final String? videoUrl;
+  final int? videoDurationSeconds;
+  final String? style;
   final List<Generation> generations;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -83,10 +85,20 @@ class Project {
     required this.status,
     this.coverUrl,
     this.videoUrl,
+    this.videoDurationSeconds,
+    this.style,
     this.generations = const [],
     required this.createdAt,
     required this.updatedAt,
   });
+
+  /// Formate la duree en mm:ss
+  String get formattedDuration {
+    if (videoDurationSeconds == null) return '--:--';
+    final minutes = videoDurationSeconds! ~/ 60;
+    final seconds = videoDurationSeconds! % 60;
+    return '${minutes.toString().padLeft(1, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
 
   factory Project.fromJson(Map<String, dynamic> json) {
     return Project(
@@ -98,6 +110,8 @@ class Project {
       status: ProjectStatus.fromString(json['status'] as String? ?? 'draft'),
       coverUrl: json['coverUrl'] as String?,
       videoUrl: json['videoUrl'] as String?,
+      videoDurationSeconds: json['videoDurationSeconds'] as int?,
+      style: json['style'] as String?,
       generations:
           (json['generations'] as List<dynamic>?)
               ?.map((g) => Generation.fromJson(g as Map<String, dynamic>))
@@ -122,6 +136,8 @@ class Project {
       'status': status.name,
       'coverUrl': coverUrl,
       'videoUrl': videoUrl,
+      'videoDurationSeconds': videoDurationSeconds,
+      'style': style,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };

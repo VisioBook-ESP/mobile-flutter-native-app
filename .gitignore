@@ -44,5 +44,14 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Ajout
-.doc
+# Documentation locale (ne pas push)
+/doc/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Generated files
+*.g.dart
+*.freezed.dart

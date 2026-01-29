@@ -10,9 +10,9 @@
 |-------|-------------|----------|--------|-------------|
 | 0 | Setup Projet | P0 | Done | 100% |
 | 1 | CI/CD | P0 | Done | 100% |
-| 2 | Core / Infrastructure | P0 | Todo | 0% |
-| 3 | Authentification | P0 | Todo | 0% |
-| 4 | Dashboard | P0 | Todo | 0% |
+| 2 | Core / Infrastructure | P0 | Done | 100% |
+| 3 | Authentification | P0 | In Progress | 60% |
+| 4 | Dashboard | P0 | In Progress | 60% |
 | 5 | Import Contenu | P0 | Todo | 0% |
 | 6 | Detail & Configuration | P0 | Todo | 0% |
 | 7 | Generation | P0 | Todo | 0% |
@@ -57,21 +57,21 @@
 - [x] Job: build-ios
 
 ### A faire
-- [ ] Tester le pipeline CI complet (premier PR)
+- [x] Tester le pipeline CI complet (premier PR)
 
 ---
 
-## Phase 2: Core / Infrastructure [P0]
+## Phase 2: Core / Infrastructure [P0] ✅
 
 > Prerequis pour toutes les autres phases
 
-- [ ] Dependances pubspec.yaml
-- [ ] Configuration environnement (dev/prod)
-- [ ] Constantes API endpoints
-- [ ] Client HTTP avec intercepteurs
-- [ ] Theme et Design System
-- [ ] Validators (email, password)
-- [ ] Storage local secure (tokens)
+- [x] Dependances pubspec.yaml
+- [x] Configuration environnement (dev/prod)
+- [x] Constantes API endpoints
+- [x] Client HTTP avec intercepteurs
+- [x] Theme et Design System
+- [x] Validators (email, password)
+- [x] Storage local secure (tokens)
 
 ---
 
@@ -81,10 +81,10 @@
 > API: Core User Service (port 8081)
 
 ### Splash Screen [P0]
-- [ ] Widget SplashScreen
+- [x] Widget SplashScreen
 - [ ] Animation logo
-- [ ] Verification token en background
-- [ ] Redirection (Dashboard/Onboarding/Login)
+- [x] Verification token en background
+- [x] Redirection (Dashboard/Onboarding/Login)
 
 ### Onboarding [P0]
 - [ ] Slide 1: "Importez votre texte"
@@ -94,25 +94,25 @@
 - [ ] Boutons Passer / Suivant / Commencer
 
 ### Login Screen [P0]
-- [ ] Champ email avec validation
-- [ ] Champ mot de passe avec toggle visibilite
-- [ ] Bouton "Se connecter"
+- [x] Champ email avec validation
+- [x] Champ mot de passe avec toggle visibilite
+- [x] Bouton "Se connecter"
 - [ ] Lien "Mot de passe oublie"
-- [ ] Lien vers inscription
-- [ ] Gestion etats (loading, error, success)
+- [x] Lien vers inscription
+- [x] Gestion etats (loading, error, success)
 
 ### Register Screen [P0]
-- [ ] Champ prenom
-- [ ] Champ email avec validation
-- [ ] Champ mot de passe (8 chars, 1 maj, 1 chiffre)
+- [x] Champ prenom
+- [x] Champ email avec validation
+- [x] Champ mot de passe (8 chars, 1 maj, 1 chiffre)
 - [ ] Checkbox CGU
-- [ ] Bouton "Creer mon compte"
+- [x] Bouton "Creer mon compte"
 - [ ] Ecran verification email
 
 ### API Endpoints [P0]
-- [ ] POST /api/v1/auth/register
-- [ ] POST /api/v1/auth/login
-- [ ] POST /api/v1/auth/refresh
+- [x] POST /api/v1/auth/register
+- [x] POST /api/v1/auth/login
+- [x] POST /api/v1/auth/refresh
 - [ ] POST /api/v1/auth/verify
 
 ### OAuth [P3] (si Core User Service le supporte)
@@ -128,24 +128,26 @@
 
 ### Dashboard Screen [P0]
 - [ ] Header (menu, logo, notifications)
-- [ ] Greeting "Bonjour, [Prenom] !"
-- [ ] CTA "Nouveau VisioBook"
-- [ ] Grid projets recents (2x2)
+- [x] Greeting "Bonjour, [Prenom] !"
+- [x] CTA "Nouveau VisioBook"
+- [x] Liste projets (horizontal scroll)
 - [ ] Section statistiques
-- [ ] Empty state
+- [x] Empty state
 
 ### Bottom Tab Bar [P0]
-- [ ] Tab Accueil (home)
+- [x] Tab Accueil (home)
 - [ ] Tab Scanner (camera)
 - [ ] Tab Mes Textes (file-text)
 - [ ] Tab Mes VisioBooks (play-circle)
+- [x] Bouton central Add (+)
+- [x] Tab Profil (user)
 
 ### Composants [P0]
-- [ ] ProjectCard (thumbnail, titre, status, date)
+- [x] ProjectCard (thumbnail, titre, status, date)
 - [ ] StatsCard
 
 ### API Endpoints [P0]
-- [ ] GET /api/v1/projects
+- [x] GET /api/v1/projects
 - [ ] GET /api/v1/projects/recent
 
 ---

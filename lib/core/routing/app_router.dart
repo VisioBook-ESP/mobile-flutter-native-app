@@ -5,6 +5,9 @@ import 'package:visiobook_mobile/core/utils/secure_storage.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/splash_screen.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/register_screen.dart';
+import 'package:visiobook_mobile/features/import/presentation/screens/file_import_screen.dart';
+import 'package:visiobook_mobile/features/import/presentation/screens/input_mode_screen.dart';
+import 'package:visiobook_mobile/features/import/presentation/screens/text_preview_screen.dart';
 import 'package:visiobook_mobile/features/projects/presentation/screens/dashboard_screen.dart';
 
 /// Routes de l'application
@@ -15,6 +18,11 @@ class AppRoutes {
   static const String dashboard = '/dashboard';
   static const String projectDetail = '/project/:id';
   static const String player = '/player/:id';
+  // Import routes
+  static const String inputMode = '/import';
+  static const String fileImport = '/import/file';
+  static const String scan = '/import/scan';
+  static const String textPreview = '/import/preview';
 }
 
 /// Configuration du router
@@ -57,6 +65,23 @@ class AppRouter {
           final id = state.pathParameters['id']!;
           return _PlaceholderScreen(title: 'Player $id');
         },
+      ),
+      // Import routes
+      GoRoute(
+        path: AppRoutes.inputMode,
+        builder: (context, state) => const InputModeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.fileImport,
+        builder: (context, state) => const FileImportScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.scan,
+        builder: (context, state) => const _PlaceholderScreen(title: 'Scanner'),
+      ),
+      GoRoute(
+        path: AppRoutes.textPreview,
+        builder: (context, state) => const TextPreviewScreen(),
       ),
     ],
   );

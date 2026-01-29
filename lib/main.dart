@@ -7,6 +7,8 @@ import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/utils/secure_storage.dart';
 import 'package:visiobook_mobile/features/auth/data/auth_service.dart';
 import 'package:visiobook_mobile/features/auth/presentation/providers/auth_provider.dart';
+import 'package:visiobook_mobile/features/import/data/storage_service.dart';
+import 'package:visiobook_mobile/features/import/presentation/providers/import_provider.dart';
 import 'package:visiobook_mobile/features/projects/data/project_service.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
@@ -34,6 +36,7 @@ class VisioBookApp extends StatelessWidget {
     final apiClient = ApiClient(storage: storage);
     final authService = AuthService(apiClient: apiClient, storage: storage);
     final projectService = ProjectService(apiClient: apiClient);
+    final storageService = StorageService(apiClient: apiClient);
 
     // Router
     final appRouter = AppRouter(storage: storage);
@@ -45,6 +48,9 @@ class VisioBookApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => ProjectProvider(projectService: projectService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ImportProvider(storageService: storageService),
         ),
       ],
       child: MaterialApp.router(

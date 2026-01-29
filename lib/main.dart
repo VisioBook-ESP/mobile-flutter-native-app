@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:visiobook_mobile/core/theme/app_theme.dart';
+import 'package:provider/provider.dart';
+import 'package:visiobook_mobile/core/network/api_client.dart';
 import 'package:visiobook_mobile/core/routing/app_router.dart';
+import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/utils/secure_storage.dart';
+import 'package:visiobook_mobile/features/auth/data/auth_service.dart';
+import 'package:visiobook_mobile/features/auth/presentation/providers/auth_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,16 +27,28 @@ class VisioBookApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Services
     final storage = SecureStorageService();
+    final apiClient = ApiClient(storage: storage);
+    final authService = AuthService(apiClient: apiClient, storage: storage);
+
+    // Router
     final appRouter = AppRouter(storage: storage);
 
-    return MaterialApp.router(
-      title: 'VisioBook',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.light,
-      routerConfig: appRouter.router,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(authService: authService),
+        ),
+      ],
+      child: MaterialApp.router(
+        title: 'VisioBook',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.light,
+        routerConfig: appRouter.router,
+      ),
     );
   }
 }

@@ -33,6 +33,7 @@ dependencies:
 
   # UI
   cupertino_icons: ^1.0.8
+  lucide_icons: ^0.257.0
 
   # HTTP & Network
   dio: ^5.4.0

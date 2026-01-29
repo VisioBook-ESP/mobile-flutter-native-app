@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:visiobook_mobile/core/utils/secure_storage.dart';
+import 'package:visiobook_mobile/features/auth/presentation/screens/splash_screen.dart';
+import 'package:visiobook_mobile/features/auth/presentation/screens/login_screen.dart';
+import 'package:visiobook_mobile/features/auth/presentation/screens/register_screen.dart';
 
 /// Routes de l'application
 class AppRoutes {
@@ -25,16 +28,15 @@ class AppRouter {
     routes: [
       GoRoute(
         path: AppRoutes.splash,
-        builder: (context, state) => const _PlaceholderScreen(title: 'Splash'),
+        builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const _PlaceholderScreen(title: 'Login'),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (context, state) =>
-            const _PlaceholderScreen(title: 'Register'),
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: AppRoutes.dashboard,

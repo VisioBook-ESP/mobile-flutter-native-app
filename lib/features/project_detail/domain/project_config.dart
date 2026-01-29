@@ -78,17 +78,8 @@ enum AudioLanguage {
     }
   }
 
-  String get flag {
-    switch (this) {
-      case AudioLanguage.french:
-        return '🇫🇷';
-      case AudioLanguage.english:
-        return '🇬🇧';
-      case AudioLanguage.spanish:
-        return '🇪🇸';
-      case AudioLanguage.german:
-        return '🇩🇪';
-    }
+  String get codeUpperCase {
+    return code.toUpperCase();
   }
 }
 

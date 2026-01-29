@@ -137,7 +137,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                               (l) => OptionItem(
                                 value: l,
                                 label: l.label,
-                                prefix: l.flag,
+                                prefix: l.codeUpperCase,
                               ),
                             )
                             .toList(),

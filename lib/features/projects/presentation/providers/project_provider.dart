@@ -129,7 +129,6 @@ class ProjectProvider extends ChangeNotifier {
 
     // Mode mock: retourner des donnees fictives
     if (EnvironmentConfig.useMockData) {
-      await Future.delayed(const Duration(milliseconds: 500));
       _projects = _mockProjects;
       _state = ProjectsState.loaded;
       notifyListeners();

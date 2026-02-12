@@ -34,13 +34,12 @@ class AuthService {
       });
 
       final data = response.data;
-      final accessToken = data['accessToken'] as String?;
-      final refreshToken = data['refreshToken'] as String?;
-      final userId = data['userId'] as String?;
+      final accessToken = data['access_token'] as String?;
 
-      if (accessToken != null && refreshToken != null) {
+      if (accessToken != null) {
         await _storage.saveAccessToken(accessToken);
-        await _storage.saveRefreshToken(refreshToken);
+        // Extraire le userId du JWT si present
+        final userId = _extractUserIdFromJwt(accessToken);
         if (userId != null) {
           await _storage.saveUserId(userId);
         }
@@ -57,32 +56,36 @@ class AuthService {
 
   /// Inscription
   Future<AuthResult> register({
-    required String firstName,
+    required String username,
     required String email,
     required String password,
+    required String firstName,
+    required String lastName,
   }) async {
     try {
       final response = await _apiClient.authRegister({
-        'firstName': firstName,
         'email': email,
+        'username': username,
         'password': password,
+        'first_name': firstName,
+        'last_name': lastName,
+        'role': 'user',
       });
 
       final data = response.data;
-      final accessToken = data['accessToken'] as String?;
-      final refreshToken = data['refreshToken'] as String?;
-      final userId = data['userId'] as String?;
+      final accessToken = data['access_token'] as String?;
 
-      if (accessToken != null && refreshToken != null) {
+      if (accessToken != null) {
         await _storage.saveAccessToken(accessToken);
-        await _storage.saveRefreshToken(refreshToken);
+        final userId = _extractUserIdFromJwt(accessToken);
         if (userId != null) {
           await _storage.saveUserId(userId);
         }
         return AuthResult(success: true, userId: userId);
       }
 
-      return AuthResult(success: false, error: 'Reponse invalide du serveur');
+      // Si pas de token dans la reponse register, login automatique
+      return login(email: email, password: password);
     } on DioException catch (e) {
       return _handleDioError(e);
     } catch (e) {
@@ -100,6 +103,43 @@ class AuthService {
     return _storage.isLoggedIn();
   }
 
+  /// Extrait le sub (userId) du JWT sans verification de signature
+  String? _extractUserIdFromJwt(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return null;
+
+      // Decoder le payload (base64url)
+      String payload = parts[1];
+      // Ajouter le padding base64 si necessaire
+      switch (payload.length % 4) {
+        case 2:
+          payload += '==';
+          break;
+        case 3:
+          payload += '=';
+          break;
+      }
+      final decoded = Uri.decodeFull(
+        String.fromCharCodes(_base64UrlDecode(payload)),
+      );
+
+      // Parser le JSON
+      final regex = RegExp(r'"sub"\s*:\s*"([^"]+)"');
+      final match = regex.firstMatch(decoded);
+      return match?.group(1);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  List<int> _base64UrlDecode(String input) {
+    String normalized = input.replaceAll('-', '+').replaceAll('_', '/');
+    return List<int>.from(
+      Uri.parse('data:;base64,$normalized').data!.contentAsBytes(),
+    );
+  }
+
   /// Gestion des erreurs Dio
   AuthResult _handleDioError(DioException e) {
     if (e.response != null) {
@@ -107,8 +147,12 @@ class AuthService {
       final data = e.response!.data;
 
       String message = 'Erreur serveur';
-      if (data is Map && data['message'] != null) {
-        message = data['message'];
+      if (data is Map) {
+        if (data['detail'] != null) {
+          message = data['detail'].toString();
+        } else if (data['message'] != null) {
+          message = data['message'].toString();
+        }
       }
 
       switch (statusCode) {
@@ -122,15 +166,12 @@ class AuthService {
         case 409:
           return AuthResult(
             success: false,
-            error: 'Cet email est deja utilise',
+            error: 'Cet email ou nom d\'utilisateur est deja utilise',
           );
         case 422:
           return AuthResult(success: false, error: 'Donnees invalides');
         default:
-          return AuthResult(
-            success: false,
-            error: 'Erreur serveur ($statusCode)',
-          );
+          return AuthResult(success: false, error: message);
       }
     }
 

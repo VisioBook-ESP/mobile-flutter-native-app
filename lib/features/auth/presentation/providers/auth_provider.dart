@@ -11,7 +11,7 @@ class AuthProvider extends ChangeNotifier {
 
   AuthState _state = AuthState.initial;
   String? _error;
-  String? _mockUserName;
+  String? _userName;
 
   AuthProvider({required AuthService authService}) : _authService = authService;
 
@@ -19,14 +19,14 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isLoading => _state == AuthState.loading;
   bool get isAuthenticated => _state == AuthState.authenticated;
-  String? get userName => _mockUserName;
+  String? get userName => _userName;
 
   /// Verifie l'etat de connexion au demarrage
   Future<void> checkAuthStatus() async {
     // Mode mock: auto-login
     if (EnvironmentConfig.useMockData) {
       _state = AuthState.authenticated;
-      _mockUserName = 'Marine';
+      _userName = 'Marine';
       notifyListeners();
       return;
     }
@@ -62,22 +62,27 @@ class AuthProvider extends ChangeNotifier {
 
   /// Inscription
   Future<bool> register({
-    required String firstName,
+    required String username,
     required String email,
     required String password,
+    required String firstName,
+    required String lastName,
   }) async {
     _state = AuthState.loading;
     _error = null;
     notifyListeners();
 
     final result = await _authService.register(
-      firstName: firstName,
+      username: username,
       email: email,
       password: password,
+      firstName: firstName,
+      lastName: lastName,
     );
 
     if (result.success) {
       _state = AuthState.authenticated;
+      _userName = username;
       notifyListeners();
       return true;
     } else {
@@ -92,6 +97,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     await _authService.logout();
     _state = AuthState.unauthenticated;
+    _userName = null;
     _error = null;
     notifyListeners();
   }

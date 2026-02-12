@@ -11,7 +11,7 @@
 | 0 | Setup Projet | P0 | Done | 100% |
 | 1 | CI/CD | P0 | Done | 100% |
 | 2 | Core / Infrastructure | P0 | Done | 100% |
-| 3 | Authentification | P0 | In Progress | 60% |
+| 3 | Authentification | P0 | In Progress | 80% |
 | 4 | Dashboard | P0 | In Progress | 60% |
 | 5 | Import Contenu | P0 | In Progress | 60% |
 | 6 | Detail & Configuration | P0 | In Progress | 80% |
@@ -25,8 +25,8 @@
 
 ## Note importante
 
-> **MOCK DATA ACTIVE** : Pour tester l'UI sans backend, le mode mock est active dans `lib/config/environment.dart`.
-> Avant de connecter aux vrais microservices, mettre `useMockData = false`.
+> **AUTH CONNECTEE** : L'authentification est connectee au Core User Service (51.178.52.51:9999).
+> `useMockData = false` dans `lib/config/environment.dart`. Les autres services ne sont pas encore disponibles.
 
 ---
 
@@ -85,7 +85,7 @@
 ## Phase 3: Authentification [P0]
 
 > Ref: doc/04-mvp-screens.md - Ecrans 1 & 2
-> API: Core User Service (port 8081)
+> API: Core User Service (port 9999)
 
 ### Splash Screen [P0]
 - [x] Widget SplashScreen
@@ -109,7 +109,8 @@
 - [x] Gestion etats (loading, error, success)
 
 ### Register Screen [P0]
-- [x] Champ prenom
+- [x] Champ nom d'utilisateur
+- [x] Champ prenom + nom
 - [x] Champ email avec validation
 - [x] Champ mot de passe (8 chars, 1 maj, 1 chiffre)
 - [ ] Checkbox CGU
@@ -117,8 +118,8 @@
 - [ ] Ecran verification email
 
 ### API Endpoints [P0]
-- [x] POST /api/v1/auth/register
-- [x] POST /api/v1/auth/login
+- [x] POST /api/v1/auth/register (connecte au cluster)
+- [x] POST /api/v1/auth/login (connecte au cluster)
 - [x] POST /api/v1/auth/refresh
 - [ ] POST /api/v1/auth/verify
 
@@ -371,7 +372,7 @@
 
 | Service | Port | Role |
 |---------|------|------|
-| Core User Service | 8081 | Auth, profils, sessions |
+| Core User Service | 9999 | Auth, profils, sessions |
 | Core Project Service | 8086 | Projets, workflows |
 | Support Storage Service | 8089 | Upload, stockage, streaming |
 | AI Analysis Service | 8083 | Analyse IA, generation |

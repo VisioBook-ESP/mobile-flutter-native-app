@@ -17,7 +17,9 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
   final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -26,7 +28,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _usernameController.dispose();
     _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -39,7 +43,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final authProvider = context.read<AuthProvider>();
 
     final success = await authProvider.register(
+      username: _usernameController.text.trim(),
       firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
@@ -103,12 +109,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 24),
                     ],
                     AppInput(
-                      label: 'Prenom',
-                      placeholder: 'Votre prenom',
-                      controller: _firstNameController,
-                      keyboardType: TextInputType.name,
-                      validator: Validators.firstName,
+                      label: 'Nom d\'utilisateur',
+                      placeholder: 'Votre nom d\'utilisateur',
+                      controller: _usernameController,
+                      keyboardType: TextInputType.text,
+                      validator: Validators.username,
                       enabled: !authProvider.isLoading,
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppInput(
+                            label: 'Prenom',
+                            placeholder: 'Votre prenom',
+                            controller: _firstNameController,
+                            keyboardType: TextInputType.name,
+                            validator: Validators.firstName,
+                            enabled: !authProvider.isLoading,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppInput(
+                            label: 'Nom',
+                            placeholder: 'Votre nom',
+                            controller: _lastNameController,
+                            keyboardType: TextInputType.name,
+                            validator: Validators.lastName,
+                            enabled: !authProvider.isLoading,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
                     AppInput(

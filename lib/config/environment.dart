@@ -5,7 +5,7 @@ class EnvironmentConfig {
   static Environment _current = Environment.dev;
 
   /// Mode mock pour tester l'UI sans backend
-  static bool useMockData = true;
+  static bool useMockData = false;
 
   static Environment get current => _current;
 
@@ -17,14 +17,14 @@ class EnvironmentConfig {
   static String get apiBaseUrl {
     switch (_current) {
       case Environment.dev:
-        return 'http://localhost';
+        return 'http://51.178.52.51';
       case Environment.prod:
         return 'https://api.visiobook.com';
     }
   }
 
-  /// Core User Service (port 8081)
-  static String get userServiceUrl => '$apiBaseUrl:8081/api/v1';
+  /// Core User Service (port 9999)
+  static String get userServiceUrl => '$apiBaseUrl:9999/api/v1';
 
   /// Core Project Service (port 8086)
   static String get projectServiceUrl => '$apiBaseUrl:8086/api/v1';

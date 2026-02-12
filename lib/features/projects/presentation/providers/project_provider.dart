@@ -214,12 +214,11 @@ class ProjectProvider extends ChangeNotifier {
 
     if (result.success && result.data != null) {
       _projects = result.data!;
-      _state = ProjectsState.loaded;
     } else {
-      _error = result.error;
-      _state = ProjectsState.error;
+      // Si le service n'est pas disponible, afficher une liste vide
+      _projects = [];
     }
-
+    _state = ProjectsState.loaded;
     notifyListeners();
   }
 

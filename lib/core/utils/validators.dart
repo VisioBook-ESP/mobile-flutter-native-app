@@ -68,6 +68,44 @@ class Validators {
     return null;
   }
 
+  /// Valide un nom de famille
+  static String? lastName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Nom requis';
+    }
+
+    if (value.length < 2) {
+      return 'Minimum 2 caracteres';
+    }
+
+    if (value.length > 50) {
+      return 'Maximum 50 caracteres';
+    }
+
+    return null;
+  }
+
+  /// Valide un nom d'utilisateur
+  static String? username(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Nom d\'utilisateur requis';
+    }
+
+    if (value.length < 3) {
+      return 'Minimum 3 caracteres';
+    }
+
+    if (value.length > 30) {
+      return 'Maximum 30 caracteres';
+    }
+
+    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
+      return 'Lettres, chiffres et underscores uniquement';
+    }
+
+    return null;
+  }
+
   /// Valide un champ requis
   static String? required(String? value, [String fieldName = 'Ce champ']) {
     if (value == null || value.isEmpty) {

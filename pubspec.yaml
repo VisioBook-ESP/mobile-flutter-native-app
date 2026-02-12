@@ -55,8 +55,9 @@ dependencies:
   # Permissions & Media (pour phases suivantes)
   permission_handler: ^11.3.0
   image_picker: ^1.0.0
-  video_player: ^2.8.0
+  video_player: ^2.10.1
   camera: ^0.11.0
+  chewie: ^1.13.0
 
 dev_dependencies:
   flutter_test:

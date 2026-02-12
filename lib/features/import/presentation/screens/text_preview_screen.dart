@@ -6,6 +6,7 @@ import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
 import 'package:visiobook_mobile/features/import/presentation/providers/import_provider.dart';
+import 'package:visiobook_mobile/features/project_detail/presentation/providers/project_detail_provider.dart';
 
 /// Ecran de previsualisation du texte extrait
 class TextPreviewScreen extends StatelessWidget {
@@ -151,26 +152,28 @@ class TextPreviewScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       AppButton(
-                        text: 'Creer le VisioBook',
+                        text: 'Configurer le VisioBook',
                         fullWidth: true,
                         size: AppButtonSize.lg,
                         icon: const Icon(
-                          LucideIcons.sparkles,
+                          LucideIcons.settings,
                           size: 20,
                           color: Colors.white,
                         ),
                         onPressed: () {
-                          // Reset le provider et aller vers la configuration
-                          provider.reset();
-                          // TODO: Navigate to project configuration
-                          context.go(AppRoutes.dashboard);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Configuration du projet bientot disponible',
-                              ),
-                            ),
+                          // Initialiser le ProjectDetailProvider avec les donnees de l'import
+                          final projectDetailProvider = context
+                              .read<ProjectDetailProvider>();
+                          projectDetailProvider.initFromImport(
+                            fileId: result.fileId ?? 'unknown',
+                            fileName: file.name,
+                            extractedText: result.extractedText,
+                            wordCount: result.wordCount,
                           );
+                          // Reset l'import provider
+                          provider.reset();
+                          // Naviguer vers la configuration
+                          context.push(AppRoutes.projectConfig);
                         },
                       ),
                       const SizedBox(height: 12),

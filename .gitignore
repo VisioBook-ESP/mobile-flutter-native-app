@@ -55,3 +55,6 @@ app.*.map.json
 # Generated files
 *.g.dart
 *.freezed.dart
+
+# CocoaPods
+**/Podfile.lock

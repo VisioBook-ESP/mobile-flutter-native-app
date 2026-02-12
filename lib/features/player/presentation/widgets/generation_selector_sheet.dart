@@ -86,16 +86,16 @@ class GenerationSelectorSheet extends StatelessWidget {
               children: [
                 Text(
                   'Choisir une version',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${generations.length} versions disponibles pour "$projectTitle"',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.neutral500,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral500),
                 ),
               ],
             ),
@@ -175,12 +175,12 @@ class _GenerationTile extends StatelessWidget {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
                             const Center(
-                          child: Icon(
-                            LucideIcons.film,
-                            size: 24,
-                            color: AppColors.neutral400,
-                          ),
-                        ),
+                              child: Icon(
+                                LucideIcons.film,
+                                size: 24,
+                                color: AppColors.neutral400,
+                              ),
+                            ),
                       )
                     : const Center(
                         child: Icon(
@@ -218,10 +218,11 @@ class _GenerationTile extends StatelessWidget {
                           ),
                           child: Text(
                             'Derniere',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: AppColors.success,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ),
                       ],

@@ -91,16 +91,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'Erreur de lecture',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     errorMessage,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white70,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.white70),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -172,17 +172,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.white,
-                size: 64,
-              ),
+              const Icon(Icons.error_outline, color: Colors.white, size: 64),
               const SizedBox(height: 16),
               Text(
                 _error!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.white),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),

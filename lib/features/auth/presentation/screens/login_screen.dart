@@ -137,9 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextButton(
                       onPressed: authProvider.isLoading
                           ? null
-                          : () {
-                              // TODO: Implement forgot password
-                            },
+                          : () => context.push(AppRoutes.forgotPassword),
                       child: Text(
                         'Mot de passe oublie ?',
                         style: TextStyle(

@@ -4,6 +4,8 @@ import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/core/utils/secure_storage.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/splash_screen.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/login_screen.dart';
+import 'package:visiobook_mobile/features/auth/presentation/screens/onboarding_screen.dart';
+import 'package:visiobook_mobile/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/register_screen.dart';
 import 'package:visiobook_mobile/features/import/presentation/screens/file_import_screen.dart';
 import 'package:visiobook_mobile/features/import/presentation/screens/input_mode_screen.dart';
@@ -15,7 +17,9 @@ import 'package:visiobook_mobile/features/projects/presentation/screens/dashboar
 /// Routes de l'application
 class AppRoutes {
   static const String splash = '/';
+  static const String onboarding = '/onboarding';
   static const String login = '/login';
+  static const String forgotPassword = '/forgot-password';
   static const String register = '/register';
   static const String dashboard = '/dashboard';
   static const String projectView = '/project/:id';
@@ -46,8 +50,16 @@ class AppRouter {
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPassword,
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
       GoRoute(
         path: AppRoutes.register,
@@ -121,12 +133,14 @@ class AppRouter {
 
     final isLoggedIn = await _storage.isLoggedIn();
     final isOnSplash = state.matchedLocation == AppRoutes.splash;
+    final isOnOnboarding = state.matchedLocation == AppRoutes.onboarding;
     final isOnAuth =
         state.matchedLocation == AppRoutes.login ||
+        state.matchedLocation == AppRoutes.forgotPassword ||
         state.matchedLocation == AppRoutes.register;
 
-    // Si on est sur splash, laisser le splash gerer la redirection
-    if (isOnSplash) return null;
+    // Si on est sur splash ou onboarding, laisser l'ecran gerer la redirection
+    if (isOnSplash || isOnOnboarding) return null;
 
     // Si pas connecte et pas sur une page auth, rediriger vers login
     if (!isLoggedIn && !isOnAuth) {

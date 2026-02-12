@@ -197,6 +197,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         },
                       ),
                     ),
+                    // TODO: Activer la checkbox CGU quand les CGU seront disponibles
+                    // const SizedBox(height: 24),
+                    // Row(
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     SizedBox(
+                    //       width: 24,
+                    //       height: 24,
+                    //       child: Checkbox(
+                    //         value: _acceptedCgu,
+                    //         onChanged: authProvider.isLoading
+                    //             ? null
+                    //             : (value) {
+                    //                 setState(
+                    //                   () => _acceptedCgu = value ?? false,
+                    //                 );
+                    //               },
+                    //         activeColor: AppColors.neutral900,
+                    //       ),
+                    //     ),
+                    //     const SizedBox(width: 8),
+                    //     Expanded(
+                    //       child: GestureDetector(
+                    //         onTap: authProvider.isLoading
+                    //             ? null
+                    //             : () {
+                    //                 setState(
+                    //                   () => _acceptedCgu = !_acceptedCgu,
+                    //                 );
+                    //               },
+                    //         child: Text(
+                    //           'J\'accepte les Conditions Generales d\'Utilisation et la Politique de Confidentialite',
+                    //           style: Theme.of(context).textTheme.bodySmall
+                    //               ?.copyWith(color: AppColors.neutral500),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                     const SizedBox(height: 32),
                     AppButton(
                       text: "S'enregistrer",

@@ -11,7 +11,7 @@
 | 0 | Setup Projet | P0 | Done | 100% |
 | 1 | CI/CD | P0 | Done | 100% |
 | 2 | Core / Infrastructure | P0 | Done | 100% |
-| 3 | Authentification | P0 | In Progress | 80% |
+| 3 | Authentification | P0 | Done | 95% |
 | 4 | Dashboard | P0 | In Progress | 60% |
 | 5 | Import Contenu | P0 | In Progress | 60% |
 | 6 | Detail & Configuration | P0 | In Progress | 80% |
@@ -89,22 +89,22 @@
 
 ### Splash Screen [P0]
 - [x] Widget SplashScreen
-- [ ] Animation logo
+- [x] Animation logo (fade + scale)
 - [x] Verification token en background
 - [x] Redirection (Dashboard/Onboarding/Login)
 
 ### Onboarding [P0]
-- [ ] Slide 1: "Importez votre texte"
-- [ ] Slide 2: "L'IA cree la magie"
-- [ ] Slide 3: "Regardez et partagez"
-- [ ] Navigation swipe + dots
-- [ ] Boutons Passer / Suivant / Commencer
+- [x] Slide 1: "Importez votre texte"
+- [x] Slide 2: "L'IA cree la magie"
+- [x] Slide 3: "Regardez et partagez"
+- [x] Navigation swipe + dots
+- [x] Boutons Passer / Suivant / Commencer
 
 ### Login Screen [P0]
 - [x] Champ email avec validation
 - [x] Champ mot de passe avec toggle visibilite
 - [x] Bouton "Se connecter"
-- [ ] Lien "Mot de passe oublie"
+- [x] Lien "Mot de passe oublie" (ecran + route)
 - [x] Lien vers inscription
 - [x] Gestion etats (loading, error, success)
 
@@ -113,9 +113,9 @@
 - [x] Champ prenom + nom
 - [x] Champ email avec validation
 - [x] Champ mot de passe (8 chars, 1 maj, 1 chiffre)
-- [ ] Checkbox CGU
+- [ ] Checkbox CGU (commente, en attente des CGU)
 - [x] Bouton "Creer mon compte"
-- [ ] Ecran verification email
+- [ ] Ecran verification email (en attente API verify)
 
 ### API Endpoints [P0]
 - [x] POST /api/v1/auth/register (connecte au cluster)

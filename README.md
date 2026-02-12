@@ -47,7 +47,7 @@ lib/
 │   ├── utils/       # Validators, Secure Storage
 │   └── widgets/     # Composants reutilisables (AppButton, AppInput, BottomNavBar)
 └── features/
-    ├── auth/        # Authentification (login, register, splash)
+    ├── auth/        # Authentification (splash, onboarding, login, register, mot de passe oublie)
     ├── projects/    # Dashboard et liste des projets
     ├── project_detail/ # Configuration projet (style, langue, duree)
     ├── import/      # Import de fichiers (PDF, TXT, DOCX, EPUB)

@@ -44,6 +44,7 @@ class VisioBookApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
+        Provider<SecureStorageService>.value(value: storage),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(authService: authService),
         ),

@@ -58,3 +58,7 @@ app.*.map.json
 
 # CocoaPods
 **/Podfile.lock
+
+# Claude Code
+CLAUDE.md
+.claude/

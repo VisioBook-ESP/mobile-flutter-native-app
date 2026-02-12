@@ -43,6 +43,32 @@ class ProjectService {
     }
   }
 
+  /// Recupere les projets recents de l'utilisateur
+  Future<ProjectResult<List<Project>>> getRecentProjects() async {
+    try {
+      final response = await _apiClient.getRecentProjects();
+      final data = response.data;
+
+      if (data is List) {
+        final projects = data.map((json) => Project.fromJson(json)).toList();
+        return ProjectResult(success: true, data: projects);
+      }
+
+      if (data is Map && data['projects'] is List) {
+        final projects = (data['projects'] as List)
+            .map((json) => Project.fromJson(json))
+            .toList();
+        return ProjectResult(success: true, data: projects);
+      }
+
+      return ProjectResult(success: true, data: []);
+    } on DioException catch (e) {
+      return ProjectResult(success: false, error: _handleError(e));
+    } catch (e) {
+      return ProjectResult(success: false, error: 'Erreur inattendue: $e');
+    }
+  }
+
   /// Recupere un projet par son ID
   Future<ProjectResult<Project>> getProject(String id) async {
     try {

@@ -8,6 +8,7 @@ Application mobile Flutter pour VisioBook - transformez vos textes en videos gra
 - Dart SDK
 - Xcode (macOS/iOS) avec signing configure
 - Android Studio (Android)
+- Docker (optionnel, pour build Android sans Flutter)
 
 ## Installation
 
@@ -74,6 +75,92 @@ open macos/Runner.xcworkspace
 ```
 
 Puis dans **Signing & Capabilities** : activer **Automatically manage signing** et selectionner votre Team.
+
+## Docker - Build Android (sans Flutter)
+
+Docker permet de build l'APK Android **sans installer Flutter ni Android SDK**.
+Utile pour les devs sur PC Windows ou Linux qui veulent tester sur Android.
+
+> **Note**: Le build iOS necessite obligatoirement macOS + Xcode. Docker ne peut pas contourner cette limitation Apple.
+
+### Build Android via Docker
+
+```bash
+# Build APK release (recommande pour tester)
+make docker-apk
+
+# Build APK debug (plus rapide, pour dev)
+make docker-apk-debug
+
+# Build AAB pour le Play Store
+make docker-aab
+```
+
+Les fichiers generes se trouvent dans le dossier `build-output/`.
+
+### Tests via Docker
+
+```bash
+make docker-test
+```
+
+### Nettoyage Docker
+
+```bash
+make docker-clean
+```
+
+## Build iOS (macOS uniquement)
+
+Le build iOS necessite macOS + Xcode. Prerequis : CocoaPods (`sudo gem install cocoapods`).
+
+```bash
+# Build iOS sans signature (pour test)
+make build-ios-release
+
+# Export IPA pour TestFlight (necessite un profil de signature)
+make export-ipa
+```
+
+## Installer l'APK sur un telephone Android
+
+### Via USB (sideload)
+1. Activer le **mode developpeur** sur le telephone Android
+2. Activer **Debogage USB** dans les parametres developpeur
+3. Connecter le telephone en USB
+4. Executer :
+```bash
+adb install build-output/app-release.apk
+```
+
+### Via transfert de fichier
+1. Copier `build-output/app-release.apk` sur le telephone (email, drive, USB)
+2. Ouvrir le fichier APK sur le telephone
+3. Autoriser l'installation depuis des sources inconnues si demande
+
+## Test sur differents environnements
+
+| Plateforme | Methode | Prerequis |
+|-----------|---------|-----------|
+| Android physique | APK sideload | Docker (any OS) |
+| Android emulateur | APK + Android Studio | Android Studio |
+| macOS desktop | `make run-macos` | macOS + Flutter SDK |
+| iPhone physique | TestFlight ou Xcode | macOS + Xcode |
+| iPhone simulateur | `make run-ios` | macOS + Xcode |
+
+## Troubleshooting
+
+### Le build Docker est lent
+Le premier build telecharge le SDK Flutter (~2GB). Les builds suivants utilisent le cache Docker.
+
+### Erreur de memoire Docker
+Le build Android necessite au moins 8GB de RAM. Augmentez la memoire dans Docker Desktop > Settings > Resources.
+
+### Erreur Gradle
+```bash
+make docker-clean
+make docker-apk
+```
 
 ## Stack technique
 

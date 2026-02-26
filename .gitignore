@@ -59,6 +59,9 @@ app.*.map.json
 # CocoaPods
 **/Podfile.lock
 
+# Docker build output
+build-output/
+
 # Claude Code
 CLAUDE.md
 .claude/

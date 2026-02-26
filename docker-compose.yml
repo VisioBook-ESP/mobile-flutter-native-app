@@ -1,0 +1,37 @@
+services:
+  # Build APK release
+  build-apk-release:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: artifacts
+    volumes:
+      - ./build-output:/output
+
+  # Build APK debug (faster, for testing)
+  build-apk-debug:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: flutter build apk --debug
+    volumes:
+      - ./build-output:/app/build/app/outputs
+
+  # Build AAB (Android App Bundle for Play Store)
+  build-aab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: flutter build appbundle --release
+    volumes:
+      - ./build-output:/app/build/app/outputs
+
+  # Run tests inside container
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: sh -c "dart format --output=none --set-exit-if-changed . && flutter analyze && flutter test"

@@ -1,7 +1,9 @@
 # VisioBook Mobile - Makefile
 # Commandes utiles pour le developpement Flutter
 
-.PHONY: help install clean format analyze test build run
+.PHONY: help install clean format analyze test build run \
+	docker-apk docker-apk-debug docker-aab docker-test docker-clean \
+	build-ios-release export-ipa
 
 # Affiche l'aide
 help:
@@ -113,3 +115,41 @@ open-ios:
 # Git: commit avec format
 commit: format analyze
 	@echo "Code formate et analyse. Pret pour commit."
+
+## --- Docker Build Targets ---
+
+## Build APK release via Docker (any OS)
+docker-apk:
+	docker build --target artifacts --output build-output .
+	@echo "APK disponible dans build-output/app-release.apk"
+
+## Build APK debug via Docker
+docker-apk-debug:
+	docker compose run --rm build-apk-debug
+	@echo "APK debug disponible dans build-output/"
+
+## Build AAB via Docker (Play Store)
+docker-aab:
+	docker compose run --rm build-aab
+	@echo "AAB disponible dans build-output/"
+
+## Run tests via Docker
+docker-test:
+	docker compose run --rm test
+
+## Clean Docker build artifacts
+docker-clean:
+	rm -rf build-output/
+	docker compose down --rmi local --volumes 2>/dev/null || true
+
+## --- iOS Build (macOS only) ---
+
+## Build iOS (requires macOS + Xcode)
+build-ios-release:
+	flutter build ios --release --no-codesign
+	@echo "Build iOS disponible dans build/ios/iphoneos/"
+
+## Export IPA for TestFlight (requires signing)
+export-ipa:
+	flutter build ipa --release
+	@echo "IPA disponible dans build/ios/ipa/"

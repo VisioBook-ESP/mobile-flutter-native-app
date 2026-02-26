@@ -20,7 +20,7 @@
 | 9 | Export | P0 | Todo | 0% |
 | 10 | Historique | P1 | Todo | 0% |
 | 11 | Polish & QA | P2 | Todo | 0% |
-| 12 | Docker & Multi-platform Build | P1 | Todo | 0% |
+| 12 | Docker & Multi-platform Build | P1 | Done | 100% |
 
 ---
 
@@ -375,32 +375,33 @@
 > quel que soit leur environnement (Mac, PC, Linux)
 
 ### Dockerfile Flutter [P1]
-- [ ] Dockerfile avec Flutter SDK
-- [ ] Build Android APK/AAB dans le container
-- [ ] docker-compose.yml pour simplifier l'utilisation
-- [ ] Documentation d'utilisation (README ou DOCKER.md)
+- [x] Dockerfile avec Flutter SDK
+- [x] Build Android APK/AAB dans le container
+- [x] docker-compose.yml pour simplifier l'utilisation
+- [x] Documentation d'utilisation (DOCKER.md)
+- [x] .dockerignore pour optimiser les builds
 
 ### Build Android [P1]
-- [ ] Build APK debug (pour test rapide)
-- [ ] Build APK release (pour distribution)
-- [ ] Build AAB (Android App Bundle pour Play Store)
-- [ ] Script/Makefile pour lancer les builds facilement
+- [x] Build APK debug (pour test rapide) - `make docker-apk-debug`
+- [x] Build APK release (pour distribution) - `make docker-apk`
+- [x] Build AAB (Android App Bundle pour Play Store) - `make docker-aab`
+- [x] Script/Makefile pour lancer les builds facilement
 
 ### Build iOS [P1]
-- [ ] Documentation build iOS (necessite macOS + Xcode obligatoirement)
-- [ ] Script build iOS pour les devs sur Mac
-- [ ] Export IPA pour TestFlight
+- [x] Documentation build iOS (necessite macOS + Xcode obligatoirement)
+- [x] Script build iOS pour les devs sur Mac - `make build-ios-release`
+- [x] Export IPA pour TestFlight - `make export-ipa`
 
 ### CI/CD Multi-platform [P1]
-- [ ] GitHub Action: build APK a chaque PR
-- [ ] GitHub Action: build iOS (si runner macOS disponible)
-- [ ] Artifact upload (APK telechargeables depuis GitHub Actions)
+- [x] GitHub Action: build APK a chaque PR (existait deja)
+- [x] GitHub Action: build iOS (existait deja, macos-latest)
+- [x] Artifact upload (APK telechargeables depuis GitHub Actions, 30 jours)
 
 ### Targets de test [P1]
-- [ ] macOS (desktop Flutter)
-- [ ] Android emulateur (via APK)
-- [ ] iPhone physique (via Xcode / TestFlight)
-- [ ] Android physique (via APK sideload)
+- [x] macOS (desktop Flutter) - `make run-macos`
+- [x] Android emulateur (via APK) - `make docker-apk` + Android Studio
+- [x] iPhone physique (via Xcode / TestFlight) - `make export-ipa`
+- [x] Android physique (via APK sideload) - `make docker-apk`
 
 ---
 

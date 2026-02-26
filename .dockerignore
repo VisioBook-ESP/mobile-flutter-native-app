@@ -1,0 +1,36 @@
+# Build outputs
+build/
+build-output/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# CI/CD
+.github/
+
+# Documentation
+doc/
+*.md
+LICENSE
+
+# Claude
+.claude/
+CLAUDE.md
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter
+.dart_tool/
+.packages

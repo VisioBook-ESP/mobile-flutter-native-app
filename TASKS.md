@@ -20,6 +20,7 @@
 | 9 | Export | P0 | Todo | 0% |
 | 10 | Historique | P1 | Todo | 0% |
 | 11 | Polish & QA | P2 | Todo | 0% |
+| 12 | Docker & Multi-platform Build | P1 | Todo | 0% |
 
 ---
 
@@ -365,6 +366,41 @@
 - [ ] Messages erreur user-friendly
 - [ ] Tests unitaires
 - [ ] Tests widgets
+
+---
+
+## Phase 12: Docker & Multi-platform Build [P1]
+
+> Objectif: Permettre a tous les membres de l'equipe de build et tester l'app
+> quel que soit leur environnement (Mac, PC, Linux)
+
+### Dockerfile Flutter [P1]
+- [ ] Dockerfile avec Flutter SDK
+- [ ] Build Android APK/AAB dans le container
+- [ ] docker-compose.yml pour simplifier l'utilisation
+- [ ] Documentation d'utilisation (README ou DOCKER.md)
+
+### Build Android [P1]
+- [ ] Build APK debug (pour test rapide)
+- [ ] Build APK release (pour distribution)
+- [ ] Build AAB (Android App Bundle pour Play Store)
+- [ ] Script/Makefile pour lancer les builds facilement
+
+### Build iOS [P1]
+- [ ] Documentation build iOS (necessite macOS + Xcode obligatoirement)
+- [ ] Script build iOS pour les devs sur Mac
+- [ ] Export IPA pour TestFlight
+
+### CI/CD Multi-platform [P1]
+- [ ] GitHub Action: build APK a chaque PR
+- [ ] GitHub Action: build iOS (si runner macOS disponible)
+- [ ] Artifact upload (APK telechargeables depuis GitHub Actions)
+
+### Targets de test [P1]
+- [ ] macOS (desktop Flutter)
+- [ ] Android emulateur (via APK)
+- [ ] iPhone physique (via Xcode / TestFlight)
+- [ ] Android physique (via APK sideload)
 
 ---
 

@@ -154,7 +154,7 @@ adb install build-output/app-release.apk
 Le premier build telecharge le SDK Flutter (~2GB). Les builds suivants utilisent le cache Docker.
 
 ### Erreur de memoire Docker
-Le build Android necessite au moins 8GB de RAM. Augmentez la memoire dans Docker Desktop > Settings > Resources.
+Le build Android necessite au moins 4GB de RAM. Augmentez la memoire dans Docker Desktop > Settings > Resources.
 
 ### Erreur Gradle
 ```bash

@@ -12,7 +12,7 @@
 | 1 | CI/CD | P0 | Done | 100% |
 | 2 | Core / Infrastructure | P0 | Done | 100% |
 | 3 | Authentification | P0 | Done | 95% |
-| 4 | Dashboard | P0 | In Progress | 60% |
+| 4 | Dashboard | P0 | In Progress | 95% |
 | 5 | Import Contenu | P0 | In Progress | 60% |
 | 6 | Detail & Configuration | P0 | In Progress | 80% |
 | 7 | Generation | P0 | Todo | 0% |
@@ -136,28 +136,31 @@
 > API: Core Project Service (port 8086)
 
 ### Dashboard Screen [P0]
-- [ ] Header (menu, logo, notifications)
+- [x] Header (logo "VisioBook", notifications bell)
 - [x] Greeting "Bonjour, [Prenom] !"
-- [x] CTA "Nouveau VisioBook"
-- [x] Liste projets (horizontal scroll)
-- [ ] Section statistiques
+- [x] StatsCard (X VisioBooks | Y Textes) en haut
+- [x] Section "Mes VisioBooks" (scroll horizontal, tries par updatedAt)
+- [x] Section "En cours" (brouillons + processing)
 - [x] Empty state
+- ~~Header menu burger~~ (supprime)
+- ~~CTA "Nouveau VisioBook"~~ (supprime, le + suffit)
+- ~~Section "Projets recents"~~ (supprime, fusionne avec Mes VisioBooks)
 
 ### Bottom Tab Bar [P0]
-- [x] Tab Accueil (home)
-- [ ] Tab Scanner (camera)
-- [ ] Tab Mes Textes (file-text)
-- [ ] Tab Mes VisioBooks (play-circle)
-- [x] Bouton central Add (+)
-- [x] Tab Profil (user)
+- [x] Tab Accueil (home) -> Dashboard
+- [x] Tab Mes Textes (file-text) -> Bibliotheque textes
+- [x] Bouton central Add (+) -> Modal import/scan
+- [x] Tab Mes VisioBooks (play-circle) -> Bibliotheque VisioBooks
+- [x] Tab Profil (user) -> Profil utilisateur
+- ~~Tab Scanner (camera)~~ (supprime, remplace par Mes Textes)
 
 ### Composants [P0]
 - [x] ProjectCard (thumbnail, titre, status, date)
-- [ ] StatsCard
+- [x] StatsCard
 
 ### API Endpoints [P0]
 - [x] GET /api/v1/projects
-- [ ] GET /api/v1/projects/recent
+- [x] GET /api/v1/projects/recent
 
 ---
 

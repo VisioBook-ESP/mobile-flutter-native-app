@@ -45,6 +45,9 @@ class ApiClient {
   Future<Response> getProjects() =>
       _dio.get('${EnvironmentConfig.projectServiceUrl}/projects');
 
+  Future<Response> getRecentProjects() =>
+      _dio.get('${EnvironmentConfig.projectServiceUrl}/projects/recent');
+
   Future<Response> getProject(String id) =>
       _dio.get('${EnvironmentConfig.projectServiceUrl}/projects/$id');
 

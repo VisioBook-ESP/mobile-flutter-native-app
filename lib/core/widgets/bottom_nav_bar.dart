@@ -4,7 +4,8 @@ import 'package:visiobook_mobile/core/theme/app_theme.dart';
 
 /// Bottom navigation bar
 /// - Fond noir (neutral900)
-/// - Icones: Home, Plus (ajouter), User
+/// - 5 items: Home, Mes Textes, Add(+), Mes VisioBooks, Profil
+/// - Index mapping: 0=Home, 1=Mes Textes, 2=Add (callback), 3=Mes VisioBooks, 4=Profil
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
@@ -35,11 +36,21 @@ class BottomNavBar extends StatelessWidget {
                   isSelected: currentIndex == 0,
                   onTap: () => onTap(0),
                 ),
-                _AddButton(onTap: onAddTap),
                 _NavItem(
-                  icon: LucideIcons.user,
+                  icon: LucideIcons.fileText,
                   isSelected: currentIndex == 1,
                   onTap: () => onTap(1),
+                ),
+                _AddButton(onTap: onAddTap),
+                _NavItem(
+                  icon: LucideIcons.playCircle,
+                  isSelected: currentIndex == 3,
+                  onTap: () => onTap(3),
+                ),
+                _NavItem(
+                  icon: LucideIcons.user,
+                  isSelected: currentIndex == 4,
+                  onTap: () => onTap(4),
                 ),
               ],
             ),

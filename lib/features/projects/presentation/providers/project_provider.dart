@@ -30,6 +30,16 @@ class ProjectProvider extends ChangeNotifier {
   List<Project> get draftProjects =>
       _projects.where((p) => p.status != ProjectStatus.ready).toList();
 
+  /// Les 4 projets les plus recents (tries par updatedAt decroissant)
+  List<Project> get recentProjects {
+    final sorted = List<Project>.from(_projects)
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    return sorted.take(4).toList();
+  }
+
+  /// Nombre total de projets (pour les stats)
+  int get textsCount => _projects.length;
+
   /// Donnees mock pour tester l'UI
   static final List<Project> _mockProjects = [
     // Projets ready (VisioBooks termines)

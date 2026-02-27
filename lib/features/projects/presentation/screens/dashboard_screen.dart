@@ -9,6 +9,7 @@ import 'package:visiobook_mobile/features/auth/presentation/providers/auth_provi
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 import 'package:visiobook_mobile/features/projects/presentation/widgets/project_card.dart';
+import 'package:visiobook_mobile/features/projects/presentation/widgets/stats_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -30,12 +31,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _onNavTap(int index) {
-    setState(() {
-      _currentNavIndex = index;
-    });
-    if (index == 1) {
+    if (index == 4) {
       _showProfileModal();
+      return;
     }
+    setState(() => _currentNavIndex = index);
   }
 
   void _onAddTap() {
@@ -161,7 +161,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader(context),
+                    const SizedBox(height: 16),
+                    _buildGreeting(context),
+                    const SizedBox(height: 24),
+                    if (projectProvider.projects.isNotEmpty) ...[
+                      StatsCard(
+                        visiobooksCount: projectProvider.readyProjects.length,
+                        textsCount: projectProvider.textsCount,
+                      ),
+                      const SizedBox(height: 32),
+                    ],
                     if (projectProvider.readyProjects.isNotEmpty) ...[
                       _SectionHeader(title: 'Mes VisioBooks'),
                       _buildProjectsList(projectProvider.readyProjects),
@@ -170,6 +179,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     if (projectProvider.draftProjects.isNotEmpty) ...[
                       _SectionHeader(title: 'En cours'),
                       _buildProjectsList(projectProvider.draftProjects),
+                      const SizedBox(height: 24),
                     ],
                     if (projectProvider.projects.isEmpty) _buildEmptyState(),
                     const SizedBox(height: 100),
@@ -188,51 +198,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildGreeting(BuildContext context) {
     final userName = context.watch<AuthProvider>().userName;
     final greeting = userName != null ? 'Bonjour, $userName !' : 'Bonjour !';
 
     return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Row(
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: AppColors.neutral100,
-              borderRadius: BorderRadius.circular(32),
-            ),
-            child: const Icon(
-              LucideIcons.user,
-              size: 32,
-              color: AppColors.neutral400,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  greeting,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 2),
-                Consumer<ProjectProvider>(
-                  builder: (context, provider, _) {
-                    final count = provider.projects.length;
-                    return Text(
-                      '$count projet${count > 1 ? 's' : ''}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Text(greeting, style: Theme.of(context).textTheme.displaySmall),
     );
   }
 

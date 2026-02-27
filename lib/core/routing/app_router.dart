@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/core/utils/secure_storage.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/splash_screen.dart';
@@ -13,6 +14,7 @@ import 'package:visiobook_mobile/features/import/presentation/screens/scanner_sc
 import 'package:visiobook_mobile/features/import/presentation/screens/text_preview_screen.dart';
 import 'package:visiobook_mobile/features/project_detail/presentation/screens/project_detail_screen.dart';
 import 'package:visiobook_mobile/features/project_detail/presentation/screens/project_view_screen.dart';
+import 'package:visiobook_mobile/features/generation/presentation/screens/generation_screen.dart';
 import 'package:visiobook_mobile/features/projects/presentation/screens/dashboard_screen.dart';
 
 /// Routes de l'application
@@ -93,7 +95,7 @@ class AppRouter {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           final workflowId = state.pathParameters['workflowId']!;
-          return _PlaceholderScreen(title: 'Generation $id - $workflowId');
+          return GenerationScreen(projectId: id, workflowId: workflowId);
         },
       ),
       GoRoute(
@@ -166,7 +168,19 @@ class _PlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(LucideIcons.arrowLeft),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.dashboard);
+            }
+          },
+        ),
+        title: Text(title),
+      ),
       body: Center(
         child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
       ),

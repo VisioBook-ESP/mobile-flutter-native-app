@@ -8,6 +8,7 @@ Application mobile Flutter pour VisioBook - transformez vos textes en videos gra
 - Dart SDK
 - Xcode (macOS/iOS) avec signing configure
 - Android Studio (Android)
+- Docker (optionnel, pour build Android sans Flutter)
 
 ## Installation
 
@@ -65,7 +66,65 @@ Les URLs des microservices sont configurees dans `lib/config/environment.dart` :
 | Support Storage Service | 8089 | Upload, stockage, streaming |
 | AI Analysis Service | 8083 | Analyse IA, generation |
 
-## Configuration macOS
+## Tester sur iPhone (premiere fois)
+
+1. **Activer le mode developpeur** sur l'iPhone : Reglages > Confidentialite et securite > Mode developpeur > Activer (redemarrage requis)
+
+2. **Brancher l'iPhone en USB** au Mac. Sur l'iPhone, appuyer sur **Faire confiance** quand la popup apparait
+
+3. **Configurer le signing Xcode** (une seule fois) :
+```bash
+open ios/Runner.xcworkspace
+```
+Dans Xcode :
+   - Cliquer sur **Runner** dans le panneau de gauche
+   - Onglet **Signing & Capabilities**
+   - Cocher **Automatically manage signing**
+   - Selectionner votre **Team** (votre Apple ID personnel suffit)
+   - Le Bundle Identifier doit etre unique (ex: `com.visiobook.visiobookMobile`)
+
+4. **Faire confiance au certificat** sur l'iPhone : Reglages > General > VPN et gestion de l'appareil > votre Apple ID > Faire confiance
+
+5. **Lancer l'app** :
+```bash
+flutter run
+```
+Flutter detecte automatiquement l'iPhone connecte. Si plusieurs appareils sont branches, il demande de choisir.
+
+> **Note** : Les fichiers Xcode modifies par le signing (`project.pbxproj`, `xcworkspacedata`) sont propres a chaque developpeur. Ne pas les commit — chaque dev configure son propre signing.
+
+> **Note** : Le build iOS necessite obligatoirement **macOS + Xcode**. Pas de contournement possible (restriction Apple).
+
+## Tester sur Android (premiere fois)
+
+### Option A : Avec Flutter installe
+
+1. **Activer le mode developpeur** sur le telephone : Parametres > A propos du telephone > appuyer 7 fois sur **Numero de build**
+2. **Activer le debogage USB** : Parametres > Options pour les developpeurs > Debogage USB
+3. Brancher le telephone en USB, accepter le debogage USB sur le telephone
+4. Lancer :
+```bash
+flutter run
+```
+
+### Option B : Sans Flutter (via Docker)
+
+Pour les devs qui n'ont pas Flutter/Android SDK installe :
+1. Installer Docker Desktop
+2. Build l'APK :
+```bash
+make docker-apk
+```
+3. Installer l'APK sur le telephone (voir section "Installer l'APK" ci-dessous)
+
+### Option C : Sans `adb` (transfert de fichier)
+
+1. Build l'APK via Docker (`make docker-apk`)
+2. Envoyer `build-output/app-release.apk` sur le telephone (email, Drive, USB)
+3. Ouvrir le fichier APK sur le telephone
+4. Autoriser l'installation depuis des sources inconnues si demande
+
+## Configuration macOS (desktop)
 
 Pour le developpement macOS, ouvrir Xcode une fois pour configurer la signature :
 
@@ -74,6 +133,114 @@ open macos/Runner.xcworkspace
 ```
 
 Puis dans **Signing & Capabilities** : activer **Automatically manage signing** et selectionner votre Team.
+
+## Docker - Build Android (sans Flutter)
+
+Docker permet de build l'APK Android **sans installer Flutter ni Android SDK**.
+Utile pour les devs sur PC Windows ou Linux qui veulent tester sur Android.
+
+> **Note**: Le build iOS necessite obligatoirement macOS + Xcode. Docker ne peut pas contourner cette limitation Apple.
+
+### Build Android via Docker
+
+```bash
+# Build APK release (recommande pour tester)
+make docker-apk
+
+# Build APK debug (plus rapide, pour dev)
+make docker-apk-debug
+
+# Build AAB pour le Play Store
+make docker-aab
+```
+
+Les fichiers generes se trouvent dans le dossier `build-output/`.
+
+### Tests via Docker
+
+```bash
+make docker-test
+```
+
+### Nettoyage Docker
+
+```bash
+make docker-clean
+```
+
+## Build iOS (macOS uniquement)
+
+Le build iOS necessite macOS + Xcode. Prerequis : CocoaPods (`sudo gem install cocoapods`).
+
+```bash
+# Build iOS sans signature (pour test)
+make build-ios-release
+
+# Export IPA pour TestFlight (necessite un profil de signature)
+make export-ipa
+```
+
+## Installer l'APK sur un telephone Android
+
+### Via `adb` (USB)
+
+`adb` s'installe **sans Android Studio** :
+- **macOS** : `brew install android-platform-tools`
+- **Linux** : `sudo apt install adb`
+- **Windows** : telecharger [Platform Tools](https://developer.android.com/tools/releases/platform-tools) (zip a extraire, ajouter au PATH)
+
+Puis :
+1. Activer le **mode developpeur** et le **debogage USB** sur le telephone
+2. Connecter le telephone en USB
+3. Executer :
+```bash
+adb install build-output/app-release.apk
+```
+
+### Via transfert de fichier (sans rien installer)
+1. Copier `build-output/app-release.apk` sur le telephone (email, Drive, USB)
+2. Ouvrir le fichier APK sur le telephone
+3. Autoriser l'installation depuis des sources inconnues si demande
+
+## Test sur differents environnements
+
+| Plateforme | Methode | Prerequis |
+|-----------|---------|-----------|
+| Android physique | APK sideload | Docker (any OS) |
+| Android emulateur | APK + Android Studio | Android Studio |
+| macOS desktop | `make run-macos` | macOS + Flutter SDK |
+| iPhone physique | TestFlight ou Xcode | macOS + Xcode |
+| iPhone simulateur | `make run-ios` | macOS + Xcode |
+
+## Troubleshooting
+
+### iPhone non detecte par Flutter
+- Verifier que le **mode developpeur** est active sur l'iPhone (Reglages > Confidentialite et securite > Mode developpeur)
+- Verifier que la popup **"Faire confiance"** a ete acceptee sur l'iPhone
+- Verifier que le certificat developpeur est approuve (Reglages > General > VPN et gestion de l'appareil)
+- Essayer un autre cable USB (certains cables ne font que la charge)
+- Lancer `flutter clean && flutter pub get && flutter run`
+
+### "Dart VM Service was not discovered after 60 seconds"
+- Verifier que le Mac et l'iPhone sont sur le **meme reseau Wi-Fi**
+- Activer le **mode developpeur** sur l'iPhone
+- Relancer : `flutter clean && flutter run`
+
+### L'app se ferme immediatement sur iPhone
+- Aller dans Reglages > General > VPN et gestion de l'appareil > Faire confiance au certificat developpeur
+- Verifier le signing dans Xcode (Runner > Signing & Capabilities)
+
+### Le build Docker est lent
+Le premier build telecharge le SDK Flutter (~2GB). Les builds suivants utilisent le cache Docker.
+
+### Erreur de memoire Docker
+Le build Android necessite au moins 4GB de RAM. Augmentez la memoire dans Docker Desktop > Settings > Resources.
+
+### Erreur Gradle
+```bash
+make docker-clean
+make docker-apk
+```
 
 ## Stack technique
 

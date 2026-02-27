@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
+import 'package:visiobook_mobile/features/export/presentation/widgets/export_share_sheet.dart';
 import 'package:visiobook_mobile/features/player/domain/visiobook_reader_state.dart';
 import 'package:visiobook_mobile/features/player/presentation/providers/player_provider.dart';
 
@@ -351,6 +352,40 @@ class _VisioBookReaderScreenState extends State<VisioBookReaderScreen> {
                     provider.replay();
                     _scrollToScene(0);
                   },
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Share button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    ExportShareSheet.show(
+                      context: context,
+                      projectId: widget.projectId,
+                      projectTitle: provider.title,
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white54, width: 1.5),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                  icon: const Icon(
+                    LucideIcons.share2,
+                    size: 18,
+                    color: Colors.white70,
+                  ),
+                  label: const Text(
+                    'Partager',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),

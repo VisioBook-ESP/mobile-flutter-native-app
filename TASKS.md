@@ -16,8 +16,8 @@
 | 5 | Import Contenu | P0 | Done | 95% |
 | 6 | Detail & Configuration | P0 | In Progress | 80% |
 | 7 | Generation | P0 | Done | 85% |
-| 8 | Player | P0 | Todo | 0% |
-| 9 | Export | P0 | Todo | 0% |
+| 8 | Player | P0 | Done | 85% |
+| 9 | Export | P0 | Done | 80% |
 | 10 | Historique | P1 | Todo | 0% |
 | 11 | Polish & QA | P2 | Todo | 0% |
 | 12 | Docker & Multi-platform Build | P1 | Done | 100% |
@@ -278,26 +278,26 @@
 > Concept: Lecteur style Webtoon / BD animee - scroll vertical avec scenes
 
 ### VisioBook Reader [P0] (US 3.2 - MUST)
-- [ ] Scroll vertical type Webtoon (liste de scenes)
-- [ ] Affichage vignettes/images par scene
+- [x] Scroll vertical type Webtoon (liste de scenes)
+- [x] Affichage vignettes/images par scene
 - [ ] Videos courtes par scene (auto-play au scroll)
 - [ ] Audio par scene (declenchement a la visibilite)
-- [ ] Indicateur de progression (scene X/Y)
+- [x] Indicateur de progression (scene X/Y)
 
 ### Controles [P0] (US 3.5 - MUST)
-- [ ] Play / Pause global (audio + videos)
-- [ ] Sous-titres (toggle overlay)
-- [ ] Bouton mute/unmute
-- [ ] Barre de progression scenes (navigation rapide)
+- [x] Play / Pause global (audio + videos)
+- [x] Sous-titres (toggle overlay)
+- [x] Bouton mute/unmute
+- [x] Barre de progression scenes (navigation rapide)
 
 ### Ecran de Fin [P0]
-- [ ] Ecran fin avec stats (temps lecture, nb scenes)
-- [ ] Bouton Rejouer (retour debut)
-- [ ] Bouton Partager
-- [ ] Bouton Retour au projet
+- [x] Ecran fin avec stats (temps lecture, nb scenes)
+- [x] Bouton Rejouer (retour debut)
+- [x] Bouton Partager
+- [x] Bouton Retour au projet
 
 ### API Endpoints [P0]
-- [ ] GET /api/v1/projects/{id}/visiobook (scenes data)
+- [x] GET /api/v1/projects/{id}/visiobook (scenes data)
 
 ---
 
@@ -306,24 +306,24 @@
 > Ref: doc/04-mvp-screens.md - Ecran 8.3
 
 ### Download [P0] (US 4.1 - MUST)
-- [ ] Progress download
-- [ ] Sauvegarde device storage
-- [ ] Notification succes
+- [x] Progress download
+- [x] Sauvegarde device storage
+- [x] Notification succes
 
 ### Format export [P1] (US 4.3 - SHOULD)
-- [ ] Choix qualite (480p, 720p, 1080p)
+- [x] Choix qualite (480p, 720p, 1080p)
 - [ ] Choix format (MP4)
 
 ### Lien partage [P1] (US 4.4 - SHOULD)
-- [ ] Generation lien unique
-- [ ] Copier presse-papier
+- [x] Generation lien unique
+- [x] Copier presse-papier
 
 ### Partage reseaux sociaux [P2] (US 4.2 - COULD)
-- [ ] Share sheet natif
+- [x] Share sheet natif
 
 ### API Endpoints [P0]
-- [ ] GET /api/v1/storage/download/{videoId}
-- [ ] POST /api/v1/projects/{id}/share
+- [x] GET /api/v1/storage/download/{videoId}
+- [x] POST /api/v1/projects/{id}/share
 
 ---
 

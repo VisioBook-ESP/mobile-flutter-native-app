@@ -6,6 +6,7 @@ import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/features/player/presentation/screens/video_player_screen.dart';
 import 'package:visiobook_mobile/features/player/presentation/widgets/generation_selector_sheet.dart';
+import 'package:visiobook_mobile/features/export/presentation/providers/export_provider.dart';
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
@@ -71,15 +72,9 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
   }
 
   void _onPartager() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Partage bientot disponible')));
-  }
-
-  void _onTelecharger() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Telechargement bientot disponible')),
-    );
+    if (_project == null) return;
+    final provider = context.read<ExportProvider>();
+    provider.shareNative(_project!.id, _project!.title);
   }
 
   Future<void> _onVisionner() async {
@@ -314,14 +309,6 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
             icon: LucideIcons.share2,
             label: 'Partager',
             onTap: _onPartager,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _ActionButton(
-            icon: LucideIcons.download,
-            label: 'Telecharger',
-            onTap: _onTelecharger,
           ),
         ),
       ],

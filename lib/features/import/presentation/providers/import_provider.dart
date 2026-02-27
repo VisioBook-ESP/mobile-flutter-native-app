@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:visiobook_mobile/config/environment.dart';
@@ -174,6 +176,84 @@ Chaque matin, il arrosait sa rose avec soin et la protegeait du vent avec un par
 Un jour, le petit prince decida de partir explorer d'autres planetes. Il visita plusieurs asteroides, chacun habite par un adulte etrange: un roi sans sujets, un vaniteux qui voulait etre admire, un buveur qui buvait pour oublier qu'il avait honte de boire, un businessman qui comptait les etoiles, un allumeur de reverbereset un geographe qui ne connaissait pas sa propre planete.
 
 Finalement, le petit prince arriva sur Terre, ou il rencontra un renard qui lui enseigna le secret de l'amitie: "On ne voit bien qu'avec le coeur. L'essentiel est invisible pour les yeux."''';
+  }
+
+  /// Upload des images scannees (via camera)
+  Future<bool> uploadScannedImages(List<String> imagePaths) async {
+    if (imagePaths.isEmpty) {
+      _error = 'Aucune image capturee';
+      _state = ImportState.error;
+      notifyListeners();
+      return false;
+    }
+
+    _state = ImportState.uploading;
+    _uploadProgress = 0;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final file = File(imagePaths.first);
+      final fileName = 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final fileSize = await file.length();
+
+      _selectedFile = ImportFile(
+        name: fileName,
+        path: imagePaths.first,
+        type: ImportFileType.unknown,
+        sizeBytes: fileSize,
+        selectedAt: DateTime.now(),
+      );
+
+      // Mode mock: simuler l'upload
+      if (EnvironmentConfig.useMockData) {
+        await _mockUpload();
+        return true;
+      }
+
+      final result = await _storageService.uploadFile(
+        _selectedFile!,
+        onProgress: (progress) {
+          _uploadProgress = progress;
+          notifyListeners();
+        },
+      );
+
+      if (result.success && result.data != null) {
+        _uploadResult = result.data;
+        _uploadProgress = 1.0;
+        _state = ImportState.uploaded;
+        notifyListeners();
+        return true;
+      }
+
+      _error = result.error;
+      _state = ImportState.error;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = 'Erreur lors du traitement du scan: $e';
+      _state = ImportState.error;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Met a jour le texte extrait manuellement
+  void updateExtractedText(String newText) {
+    if (_uploadResult != null) {
+      _uploadResult = UploadResult(
+        fileId: _uploadResult!.fileId,
+        fileUrl: _uploadResult!.fileUrl,
+        extractedText: newText,
+        wordCount: newText
+            .split(RegExp(r'\s+'))
+            .where((w) => w.isNotEmpty)
+            .length,
+        success: _uploadResult!.success,
+      );
+      notifyListeners();
+    }
   }
 
   /// Reset l'etat pour un nouvel import

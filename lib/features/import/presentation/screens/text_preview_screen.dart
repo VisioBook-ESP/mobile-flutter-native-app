@@ -9,8 +9,142 @@ import 'package:visiobook_mobile/features/import/presentation/providers/import_p
 import 'package:visiobook_mobile/features/project_detail/presentation/providers/project_detail_provider.dart';
 
 /// Ecran de previsualisation du texte extrait
-class TextPreviewScreen extends StatelessWidget {
+class TextPreviewScreen extends StatefulWidget {
   const TextPreviewScreen({super.key});
+
+  @override
+  State<TextPreviewScreen> createState() => _TextPreviewScreenState();
+}
+
+class _TextPreviewScreenState extends State<TextPreviewScreen> {
+  bool _isEditing = false;
+  late TextEditingController _textController;
+  int _liveWordCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController();
+    // Initialize with current text after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<ImportProvider>();
+      final text = provider.uploadResult?.extractedText ?? '';
+      _textController.text = text;
+      setState(() {
+        _liveWordCount = _countWords(text);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  int _countWords(String text) {
+    return text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+  }
+
+  void _toggleEditing() {
+    if (_isEditing) {
+      // Switching from edit to view: save the text
+      final provider = context.read<ImportProvider>();
+      provider.updateExtractedText(_textController.text);
+    } else {
+      // Switching from view to edit: load current text into controller
+      final provider = context.read<ImportProvider>();
+      final text = provider.uploadResult?.extractedText ?? '';
+      _textController.text = text;
+      _liveWordCount = _countWords(text);
+    }
+    setState(() {
+      _isEditing = !_isEditing;
+    });
+  }
+
+  /// Genere un resume en extrayant les 2-3 premieres phrases du texte.
+  /// Retourne null si le texte fait moins de 100 caracteres.
+  String? _generateSummary(String text) {
+    if (text.length < 100) {
+      return null;
+    }
+
+    // Separer le texte en phrases par les terminaisons . ! ?
+    final sentencePattern = RegExp(r'[^.!?]+[.!?]+');
+    final matches = sentencePattern.allMatches(text).toList();
+
+    if (matches.isEmpty) {
+      // Pas de phrases detectees, tronquer a 200 caracteres
+      if (text.length <= 200) {
+        return '$text...';
+      }
+      return '${text.substring(0, 200).trimRight()}...';
+    }
+
+    final buffer = StringBuffer();
+    int sentenceCount = 0;
+
+    for (final match in matches) {
+      final sentence = match.group(0)!;
+      if (sentenceCount >= 3) {
+        break;
+      }
+      if (buffer.length + sentence.length > 200 && sentenceCount > 0) {
+        break;
+      }
+      buffer.write(sentence);
+      sentenceCount++;
+    }
+
+    return '${buffer.toString().trim()}...';
+  }
+
+  /// Construit la carte de resume affichee au-dessus du texte complet.
+  Widget _buildSummaryCard(BuildContext context, String summary) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.neutral50,
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+          border: Border.all(color: AppColors.neutral200),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.sparkles,
+                  size: 16,
+                  color: AppColors.neutral600,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Resume',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.neutral600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              summary,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.neutral700,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,18 +152,24 @@ class TextPreviewScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (_isEditing) {
+              // Save before navigating back
+              final provider = context.read<ImportProvider>();
+              provider.updateExtractedText(_textController.text);
+            }
+            context.pop();
+          },
         ),
         title: const Text('Apercu du texte'),
         actions: [
-          TextButton(
-            onPressed: () {
-              // TODO: Allow text editing
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Edition bientot disponible')),
-              );
-            },
-            child: const Text('Modifier'),
+          TextButton.icon(
+            onPressed: _toggleEditing,
+            icon: Icon(
+              _isEditing ? LucideIcons.check : LucideIcons.pencil,
+              size: 16,
+            ),
+            label: Text(_isEditing ? 'Terminer' : 'Modifier'),
           ),
         ],
       ),
@@ -42,6 +182,10 @@ class TextPreviewScreen extends StatelessWidget {
             if (result == null || file == null) {
               return const Center(child: Text('Aucun texte disponible'));
             }
+
+            final displayWordCount = _isEditing
+                ? _liveWordCount
+                : (result.wordCount ?? 0);
 
             return Column(
               children: [
@@ -78,62 +222,85 @@ class TextPreviewScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '${result.wordCount ?? 0} mots',
+                              '$displayWordCount mots',
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: AppColors.neutral500),
                             ),
                           ],
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                      if (_isEditing)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.info.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                LucideIcons.pencil,
+                                color: AppColors.info,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Edition',
+                                style: Theme.of(context).textTheme.labelMedium
+                                    ?.copyWith(color: AppColors.info),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                LucideIcons.checkCircle,
+                                color: Colors.green.shade700,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Pret',
+                                style: Theme.of(context).textTheme.labelMedium
+                                    ?.copyWith(color: Colors.green.shade700),
+                              ),
+                            ],
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              LucideIcons.checkCircle,
-                              color: Colors.green.shade700,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Pret',
-                              style: Theme.of(context).textTheme.labelMedium
-                                  ?.copyWith(color: Colors.green.shade700),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
 
-                // Texte extrait
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.neutral200),
-                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                      ),
-                      child: Text(
-                        result.extractedText ?? 'Texte non disponible',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.copyWith(height: 1.6),
-                      ),
-                    ),
+                // Resume automatique (only in view mode)
+                if (!_isEditing &&
+                    result.extractedText != null &&
+                    _generateSummary(result.extractedText!) != null)
+                  _buildSummaryCard(
+                    context,
+                    _generateSummary(result.extractedText!)!,
                   ),
+
+                // Texte extrait ou editeur
+                Expanded(
+                  child: _isEditing
+                      ? _buildEditMode(context)
+                      : _buildViewMode(context, result.extractedText),
                 ),
 
                 // Boutons d'action
@@ -161,14 +328,23 @@ class TextPreviewScreen extends StatelessWidget {
                           color: Colors.white,
                         ),
                         onPressed: () {
-                          // Initialiser le ProjectDetailProvider avec les donnees de l'import
+                          // Si en mode edition, sauvegarder d'abord
+                          if (_isEditing) {
+                            provider.updateExtractedText(_textController.text);
+                            setState(() {
+                              _isEditing = false;
+                            });
+                          }
+                          final currentResult = provider.uploadResult;
+                          if (currentResult == null) return;
+                          // Initialiser le ProjectDetailProvider
                           final projectDetailProvider = context
                               .read<ProjectDetailProvider>();
                           projectDetailProvider.initFromImport(
-                            fileId: result.fileId ?? 'unknown',
+                            fileId: currentResult.fileId ?? 'unknown',
                             fileName: file.name,
-                            extractedText: result.extractedText,
-                            wordCount: result.wordCount,
+                            extractedText: currentResult.extractedText,
+                            wordCount: currentResult.wordCount,
                           );
                           // Reset l'import provider
                           provider.reset();
@@ -191,6 +367,57 @@ class TextPreviewScreen extends StatelessWidget {
                 ),
               ],
             );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildViewMode(BuildContext context, String? text) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.neutral200),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        ),
+        child: Text(
+          text ?? 'Texte non disponible',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.6),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditMode(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.neutral900, width: 2),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        ),
+        child: TextField(
+          controller: _textController,
+          maxLines: null,
+          keyboardType: TextInputType.multiline,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.6),
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            contentPadding: EdgeInsets.zero,
+            isDense: true,
+            filled: false,
+          ),
+          onChanged: (value) {
+            setState(() {
+              _liveWordCount = _countWords(value);
+            });
           },
         ),
       ),

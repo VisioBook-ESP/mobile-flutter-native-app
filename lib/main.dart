@@ -10,6 +10,8 @@ import 'package:visiobook_mobile/features/auth/presentation/providers/auth_provi
 import 'package:visiobook_mobile/features/import/data/storage_service.dart';
 import 'package:visiobook_mobile/features/import/presentation/providers/import_provider.dart';
 import 'package:visiobook_mobile/features/project_detail/presentation/providers/project_detail_provider.dart';
+import 'package:visiobook_mobile/features/generation/data/generation_service.dart';
+import 'package:visiobook_mobile/features/generation/presentation/providers/generation_provider.dart';
 import 'package:visiobook_mobile/features/projects/data/project_service.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
@@ -56,6 +58,11 @@ class VisioBookApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => ProjectDetailProvider(projectService: projectService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => GenerationProvider(
+            generationService: GenerationService(apiClient: apiClient),
+          ),
         ),
       ],
       child: MaterialApp.router(

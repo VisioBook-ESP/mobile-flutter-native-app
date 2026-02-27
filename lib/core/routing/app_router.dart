@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/core/utils/secure_storage.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/splash_screen.dart';
@@ -15,6 +14,7 @@ import 'package:visiobook_mobile/features/import/presentation/screens/text_previ
 import 'package:visiobook_mobile/features/project_detail/presentation/screens/project_detail_screen.dart';
 import 'package:visiobook_mobile/features/project_detail/presentation/screens/project_view_screen.dart';
 import 'package:visiobook_mobile/features/generation/presentation/screens/generation_screen.dart';
+import 'package:visiobook_mobile/features/player/presentation/screens/visiobook_reader_screen.dart';
 import 'package:visiobook_mobile/features/projects/presentation/screens/dashboard_screen.dart';
 
 /// Routes de l'application
@@ -102,7 +102,7 @@ class AppRouter {
         path: AppRoutes.player,
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          return _PlaceholderScreen(title: 'Player $id');
+          return VisioBookReaderScreen(projectId: id);
         },
       ),
       // Import routes
@@ -156,34 +156,5 @@ class AppRouter {
     }
 
     return null;
-  }
-}
-
-/// Ecran placeholder temporaire (sera remplace par les vrais ecrans)
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-
-  const _PlaceholderScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go(AppRoutes.dashboard);
-            }
-          },
-        ),
-        title: Text(title),
-      ),
-      body: Center(
-        child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
-      ),
-    );
   }
 }

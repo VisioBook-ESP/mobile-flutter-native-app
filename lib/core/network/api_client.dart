@@ -76,6 +76,11 @@ class ApiClient {
         data: data,
       );
 
+  // Player / VisioBook
+  Future<Response> getVisioBook(String projectId) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/visiobook',
+  );
+
   // Storage Service
   Future<Response> uploadFile(FormData formData) => _dio.post(
     '${EnvironmentConfig.storageServiceUrl}/storage/upload',

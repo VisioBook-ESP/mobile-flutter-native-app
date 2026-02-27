@@ -13,9 +13,9 @@
 | 2 | Core / Infrastructure | P0 | Done | 100% |
 | 3 | Authentification | P0 | Done | 95% |
 | 4 | Dashboard | P0 | In Progress | 95% |
-| 5 | Import Contenu | P0 | In Progress | 60% |
+| 5 | Import Contenu | P0 | Done | 95% |
 | 6 | Detail & Configuration | P0 | In Progress | 80% |
-| 7 | Generation | P0 | Todo | 0% |
+| 7 | Generation | P0 | Done | 85% |
 | 8 | Player | P0 | Todo | 0% |
 | 9 | Export | P0 | Todo | 0% |
 | 10 | Historique | P1 | Todo | 0% |
@@ -181,23 +181,23 @@
 - [x] Gestion erreurs
 
 ### Scan de texte [P1] (US 1.2 - SHOULD)
-- [ ] Permission camera
-- [ ] UI cadrage page
-- [ ] Detection automatique bords
-- [ ] Capture image
-- [ ] Preview capture
-- [ ] Support multi-page
-- [ ] Toggle flash
+- [x] Permission camera
+- [x] UI cadrage page
+- [x] Detection automatique bords
+- [x] Capture image
+- [x] Preview capture
+- [x] Support multi-page
+- [x] Toggle flash
 
 ### OCR Processing [P1]
 - [x] Affichage texte extrait
 - [x] Compteur mots
-- [ ] Option edition manuelle
+- [x] Option edition manuelle
 - [x] Bouton "Continuer"
 
 ### Previsualisation [P1] (US 1.3 - SHOULD)
 - [x] Afficher preview du texte
-- [ ] Resume automatique
+- [x] Resume automatique
 
 ### API Endpoints [P0]
 - [x] POST /api/v1/storage/upload
@@ -245,59 +245,59 @@
 > Ref: doc/04-mvp-screens.md - Ecran 7.2
 
 ### Generation [P0] (US 3.1 - MUST)
-- [ ] Lancer generation
-- [ ] Animation loading
-- [ ] Bouton "Annuler"
+- [x] Lancer generation
+- [x] Animation loading
+- [x] Bouton "Annuler"
 
 ### Suivi progression [P1] (US 3.3 - SHOULD)
-- [ ] Progress bar globale
-- [ ] Etape 1: Analyse (0-20%)
-- [ ] Etape 2: Images (20-60%)
-- [ ] Etape 3: Audio (60-80%)
-- [ ] Etape 4: Assemblage (80-100%)
-- [ ] Temps restant estime
+- [x] Progress bar globale
+- [x] Etape 1: Analyse (0-20%)
+- [x] Etape 2: Images (20-60%)
+- [x] Etape 3: Audio (60-80%)
+- [x] Etape 4: Assemblage (80-100%)
+- [x] Temps restant estime
 - [ ] Bouton "Me notifier quand c'est pret"
 
 ### Preview scenes [P1] (US 3.4 - SHOULD)
 - [ ] Thumbnails scenes intermediaires
 
 ### Gestion Erreurs [P0]
-- [ ] Ecran erreur
-- [ ] Options: Reessayer, Ajuster, Retour
+- [x] Ecran erreur
+- [x] Options: Reessayer, Ajuster, Retour
 
 ### API Endpoints [P0]
-- [ ] POST /api/v1/projects/{id}/generate
-- [ ] GET /api/v1/projects/{id}/workflows/{workflowId}
+- [x] POST /api/v1/projects/{id}/generate
+- [x] GET /api/v1/projects/{id}/workflows/{workflowId}
 
 ---
 
-## Phase 8: Player [P0]
+## Phase 8: Player (VisioBook Reader) [P0]
 
 > Ref: doc/04-mvp-screens.md - Ecran 8
 > API: Support Storage Service (port 8089)
+> Concept: Lecteur style Webtoon / BD animee - scroll vertical avec scenes
 
-### Video Player [P0] (US 3.2 - MUST)
-- [ ] Video player
-- [ ] Chargement et buffering
+### VisioBook Reader [P0] (US 3.2 - MUST)
+- [ ] Scroll vertical type Webtoon (liste de scenes)
+- [ ] Affichage vignettes/images par scene
+- [ ] Videos courtes par scene (auto-play au scroll)
+- [ ] Audio par scene (declenchement a la visibilite)
+- [ ] Indicateur de progression (scene X/Y)
 
 ### Controles [P0] (US 3.5 - MUST)
-- [ ] Play / Pause
-- [ ] Timeline draggable
-- [ ] Temps actuel / duree totale
-- [ ] Rewind (-10s)
-- [ ] Forward (+10s)
-- [ ] Fullscreen
-- [ ] Sous-titres (toggle)
-- [ ] Vitesse (0.5x, 1x, 1.5x, 2x)
+- [ ] Play / Pause global (audio + videos)
+- [ ] Sous-titres (toggle overlay)
+- [ ] Bouton mute/unmute
+- [ ] Barre de progression scenes (navigation rapide)
 
 ### Ecran de Fin [P0]
-- [ ] Bouton Rejouer
+- [ ] Ecran fin avec stats (temps lecture, nb scenes)
+- [ ] Bouton Rejouer (retour debut)
 - [ ] Bouton Partager
-- [ ] Bouton Telecharger
-- [ ] Retour au projet
+- [ ] Bouton Retour au projet
 
 ### API Endpoints [P0]
-- [ ] GET /api/v1/storage/stream/{videoId}
+- [ ] GET /api/v1/projects/{id}/visiobook (scenes data)
 
 ---
 

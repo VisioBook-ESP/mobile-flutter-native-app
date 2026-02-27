@@ -9,6 +9,7 @@ import 'package:visiobook_mobile/features/auth/presentation/screens/forgot_passw
 import 'package:visiobook_mobile/features/auth/presentation/screens/register_screen.dart';
 import 'package:visiobook_mobile/features/import/presentation/screens/file_import_screen.dart';
 import 'package:visiobook_mobile/features/import/presentation/screens/input_mode_screen.dart';
+import 'package:visiobook_mobile/features/import/presentation/screens/scanner_screen.dart';
 import 'package:visiobook_mobile/features/import/presentation/screens/text_preview_screen.dart';
 import 'package:visiobook_mobile/features/project_detail/presentation/screens/project_detail_screen.dart';
 import 'package:visiobook_mobile/features/project_detail/presentation/screens/project_view_screen.dart';
@@ -113,7 +114,7 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.scan,
-        builder: (context, state) => const _PlaceholderScreen(title: 'Scanner'),
+        builder: (context, state) => const ScannerScreen(),
       ),
       GoRoute(
         path: AppRoutes.textPreview,

@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>VisioBook a besoin de la camera pour scanner vos documents</string>
 </dict>
 </plist>

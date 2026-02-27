@@ -50,8 +50,6 @@ class InputModeScreen extends StatelessWidget {
                 subtitle: 'Appareil photo',
                 description: 'Prenez une photo de votre texte',
                 onTap: () => context.push(AppRoutes.scan),
-                isDisabled: true,
-                disabledMessage: 'Bientot disponible',
               ),
             ],
           ),
@@ -67,8 +65,6 @@ class _InputModeCard extends StatelessWidget {
   final String subtitle;
   final String description;
   final VoidCallback onTap;
-  final bool isDisabled;
-  final String? disabledMessage;
 
   const _InputModeCard({
     required this.icon,
@@ -76,104 +72,57 @@ class _InputModeCard extends StatelessWidget {
     required this.subtitle,
     required this.description,
     required this.onTap,
-    this.isDisabled = false,
-    this.disabledMessage,
   });
 
   @override
   Widget build(BuildContext context) {
-    final opacity = isDisabled ? 0.5 : 1.0;
-
-    return Opacity(
-      opacity: opacity,
-      child: InkWell(
-        onTap: isDisabled ? null : onTap,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: isDisabled
-                  ? AppColors.neutral200
-                  : Theme.of(context).colorScheme.outline,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).colorScheme.outline),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.neutral900,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: Colors.white, size: 28),
             ),
-            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: isDisabled
-                      ? AppColors.neutral100
-                      : AppColors.neutral900,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  icon,
-                  color: isDisabled ? AppColors.neutral400 : Colors.white,
-                  size: 28,
-                ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.neutral500,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.neutral400,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                        ),
-                        if (disabledMessage != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.neutral100,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              disabledMessage!,
-                              style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(color: AppColors.neutral500),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.neutral500,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.neutral400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (!isDisabled) ...[
-                const SizedBox(width: 8),
-                const Icon(
-                  LucideIcons.chevronRight,
-                  color: AppColors.neutral400,
-                ),
-              ],
-            ],
-          ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(LucideIcons.chevronRight, color: AppColors.neutral400),
+          ],
         ),
       ),
     );

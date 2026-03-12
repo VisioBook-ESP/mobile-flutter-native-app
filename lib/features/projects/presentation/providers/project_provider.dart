@@ -296,6 +296,29 @@ class ProjectProvider extends ChangeNotifier {
     return null;
   }
 
+  /// Duplique un projet existant
+  Future<Project?> duplicateProject(String id) async {
+    final original = _projects.firstWhere(
+      (p) => p.id == id,
+      orElse: () => throw Exception('Projet introuvable'),
+    );
+
+    final result = await _projectService.createProject(
+      title: '${original.title} (copie)',
+      description: original.description,
+    );
+
+    if (result.success && result.data != null) {
+      _projects.insert(0, result.data!);
+      notifyListeners();
+      return result.data;
+    }
+
+    _error = result.error;
+    notifyListeners();
+    return null;
+  }
+
   /// Reset l'erreur
   void clearError() {
     _error = null;

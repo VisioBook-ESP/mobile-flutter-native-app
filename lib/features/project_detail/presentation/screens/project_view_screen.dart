@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/features/player/presentation/screens/video_player_screen.dart';
 import 'package:visiobook_mobile/features/player/presentation/widgets/generation_selector_sheet.dart';
@@ -143,7 +142,7 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.go(AppRoutes.dashboard),
+          onPressed: () => context.pop(),
         ),
         title: const Text('Details de la BD'),
         centerTitle: true,

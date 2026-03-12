@@ -31,6 +31,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _onNavTap(int index) {
+    if (index == 1) {
+      context.push(AppRoutes.textsHistory);
+      return;
+    }
+    if (index == 3) {
+      context.push(AppRoutes.visiobooksHistory);
+      return;
+    }
     if (index == 4) {
       _showProfileModal();
       return;

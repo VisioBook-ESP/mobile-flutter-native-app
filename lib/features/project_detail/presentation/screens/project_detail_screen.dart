@@ -54,7 +54,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () {
             context.read<ProjectDetailProvider>().reset();
-            context.go(AppRoutes.dashboard);
+            context.pop();
           },
         ),
         title: const Text('Configuration'),

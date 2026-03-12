@@ -2,3 +2,4 @@
 export 'app_button.dart';
 export 'app_input.dart';
 export 'bottom_nav_bar.dart';
+export 'skeleton_loader.dart';

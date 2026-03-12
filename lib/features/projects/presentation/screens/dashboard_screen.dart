@@ -155,7 +155,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Consumer<ProjectProvider>(
           builder: (context, projectProvider, _) {
             if (projectProvider.isLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const SkeletonDashboard();
             }
 
             if (projectProvider.state == ProjectsState.error) {

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
+import 'package:visiobook_mobile/core/widgets/skeleton_loader.dart';
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
@@ -176,30 +177,50 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
             Expanded(
               child: Consumer<ProjectProvider>(
                 builder: (context, provider, _) {
+                  if (provider.isLoading) {
+                    return GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 0.65,
+                          ),
+                      itemCount: 4,
+                      itemBuilder: (_, _) => const SkeletonProjectCard(),
+                    );
+                  }
+
                   final projects = _filterProjects(provider);
 
                   if (projects.isEmpty) {
                     return _buildEmptyState(context);
                   }
 
-                  return GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 0.65,
-                        ),
-                    itemCount: projects.length,
-                    itemBuilder: (context, index) {
-                      final project = projects[index];
-                      return _VisioBookCard(
-                        project: project,
-                        onTap: () => context.push('/project/${project.id}'),
-                        onLongPress: () => _showContextMenu(context, project),
-                      );
-                    },
+                  return RefreshIndicator(
+                    onRefresh: () => provider.loadProjects(),
+                    child: GridView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 0.65,
+                          ),
+                      itemCount: projects.length,
+                      itemBuilder: (context, index) {
+                        final project = projects[index];
+                        return _VisioBookCard(
+                          project: project,
+                          onTap: () => context.push('/project/${project.id}'),
+                          onLongPress: () => _showContextMenu(context, project),
+                        );
+                      },
+                    ),
                   );
                 },
               ),

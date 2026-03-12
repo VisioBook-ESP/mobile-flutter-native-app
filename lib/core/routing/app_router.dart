@@ -15,6 +15,8 @@ import 'package:visiobook_mobile/features/project_detail/presentation/screens/pr
 import 'package:visiobook_mobile/features/project_detail/presentation/screens/project_view_screen.dart';
 import 'package:visiobook_mobile/features/generation/presentation/screens/generation_screen.dart';
 import 'package:visiobook_mobile/features/player/presentation/screens/visiobook_reader_screen.dart';
+import 'package:visiobook_mobile/features/history/presentation/screens/texts_history_screen.dart';
+import 'package:visiobook_mobile/features/history/presentation/screens/visiobooks_history_screen.dart';
 import 'package:visiobook_mobile/features/projects/presentation/screens/dashboard_screen.dart';
 
 /// Routes de l'application
@@ -35,6 +37,9 @@ class AppRoutes {
   static const String fileImport = '/import/file';
   static const String scan = '/import/scan';
   static const String textPreview = '/import/preview';
+  // History routes
+  static const String textsHistory = '/history/texts';
+  static const String visiobooksHistory = '/history/visiobooks';
 }
 
 /// Configuration du router
@@ -121,6 +126,15 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.textPreview,
         builder: (context, state) => const TextPreviewScreen(),
+      ),
+      // History routes
+      GoRoute(
+        path: AppRoutes.textsHistory,
+        builder: (context, state) => const TextsHistoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.visiobooksHistory,
+        builder: (context, state) => const VisiobooksHistoryScreen(),
       ),
     ],
   );

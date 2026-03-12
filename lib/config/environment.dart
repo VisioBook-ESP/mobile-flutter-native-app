@@ -2,10 +2,10 @@
 enum Environment { dev, prod }
 
 class EnvironmentConfig {
-  static Environment _current = Environment.prod;
+  static Environment _current = Environment.dev;
 
   /// Mode mock pour tester l'UI sans backend
-  static bool useMockData = false;
+  static bool useMockData = true;
 
   static Environment get current => _current;
 

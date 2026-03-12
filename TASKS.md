@@ -18,7 +18,7 @@
 | 7 | Generation | P0 | Done | 85% |
 | 8 | Player | P0 | Done | 85% |
 | 9 | Export | P0 | Done | 80% |
-| 10 | Historique | P1 | Todo | 0% |
+| 10 | Historique | P1 | Done | 100% |
 | 11 | Polish & QA | P2 | Todo | 0% |
 | 12 | Docker & Multi-platform Build | P1 | Done | 100% |
 
@@ -332,31 +332,31 @@
 > Ref: doc/04-mvp-screens.md - Ecrans 5 & 6
 
 ### Historique Inputs [P1] (US 5.1 - SHOULD)
-- [ ] Liste scrollable des textes
-- [ ] InputItem (icon type, titre, mots, date)
-- [ ] Filtres (Tous, Recents, Utilises)
-- [ ] Barre de recherche
-- [ ] Empty state
+- [x] Liste scrollable des textes
+- [x] InputItem (icon type, titre, mots, date)
+- [x] Filtres (Tous, Recents, Utilises)
+- [x] Barre de recherche
+- [x] Empty state
 
 ### Historique VisioBooks [P1] (US 5.1 - SHOULD)
-- [ ] Grille 2 colonnes
-- [ ] VisioBookCard (thumbnail, duree, titre, date, status)
-- [ ] Filtres
-- [ ] Empty state
+- [x] Grille 2 colonnes
+- [x] VisioBookCard (thumbnail, duree, titre, date, status)
+- [x] Filtres
+- [x] Empty state
 
 ### Supprimer projet [P1] (US 5.5 - SHOULD)
-- [ ] Swipe to delete
-- [ ] Confirmation suppression
+- [x] Swipe to delete
+- [x] Confirmation suppression
 
 ### Modifier projet [P2] (US 5.2 - COULD)
-- [ ] Edition titre/texte
+- [x] Edition titre/texte
 
 ### Dupliquer projet [P2] (US 5.3 - COULD)
-- [ ] Creer copie du projet
+- [x] Creer copie du projet
 
 ### API Endpoints [P1]
-- [ ] GET /api/v1/projects
-- [ ] DELETE /api/v1/projects/{id}
+- [x] GET /api/v1/projects
+- [x] DELETE /api/v1/projects/{id}
 
 ---
 

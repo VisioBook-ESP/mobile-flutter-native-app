@@ -119,7 +119,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _error = 'Impossible de charger la video: $e';
+          _error = 'Impossible de charger la vidéo : $e';
         });
       }
     }
@@ -190,7 +190,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   });
                   _initializePlayer();
                 },
-                child: const Text('Reessayer'),
+                child: const Text('Réessayer'),
               ),
             ],
           ),

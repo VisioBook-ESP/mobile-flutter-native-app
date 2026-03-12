@@ -116,7 +116,7 @@ class _ExportShareSheetState extends State<ExportShareSheet> {
               Icon(LucideIcons.download, size: 22, color: AppColors.neutral900),
               const SizedBox(width: 12),
               const Text(
-                'Telecharger la video',
+                'Télécharger la vidéo',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -155,7 +155,7 @@ class _ExportShareSheetState extends State<ExportShareSheet> {
                   ),
                 ),
                 child: const Text(
-                  'Telecharger',
+                  'Télécharger',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
@@ -196,7 +196,7 @@ class _ExportShareSheetState extends State<ExportShareSheet> {
                 ),
                 const SizedBox(width: 8),
                 const Text(
-                  'Telecharge !',
+                  'Téléchargé !',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -213,7 +213,7 @@ class _ExportShareSheetState extends State<ExportShareSheet> {
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
-                    provider.downloadError ?? 'Erreur de telechargement',
+                    provider.downloadError ?? 'Erreur de téléchargement',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -284,7 +284,7 @@ class _ExportShareSheetState extends State<ExportShareSheet> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                _linkCopied ? 'Lien copie !' : 'Copier le lien de partage',
+                _linkCopied ? 'Lien copié !' : 'Copier le lien de partage',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,

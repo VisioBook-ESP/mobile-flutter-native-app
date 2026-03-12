@@ -39,17 +39,17 @@ class GenerationSelectorSheet extends StatelessWidget {
   String _formatDate(DateTime date) {
     final months = [
       'Jan',
-      'Fev',
+      'Fév',
       'Mar',
       'Avr',
       'Mai',
       'Juin',
       'Juil',
-      'Aout',
+      'Août',
       'Sep',
       'Oct',
       'Nov',
-      'Dec',
+      'Déc',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
@@ -217,7 +217,7 @@ class _GenerationTile extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            'Derniere',
+                            'Dernière',
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: AppColors.success,

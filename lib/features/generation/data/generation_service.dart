@@ -21,6 +21,11 @@ class GenerationService {
 
   GenerationService({required ApiClient apiClient}) : _apiClient = apiClient;
 
+  /// Remet le timer mock a zero pour permettre une nouvelle generation
+  void resetMockTimer() {
+    _mockStartTime = null;
+  }
+
   /// Lance la generation d'un projet et retourne le workflowId
   Future<GenerationResult<String>> startGeneration(String projectId) async {
     // Mode mock
@@ -39,7 +44,7 @@ class GenerationService {
       if (workflowId == null) {
         return GenerationResult(
           success: false,
-          error: 'Aucun workflowId retourne par le serveur',
+          error: 'Aucun workflowId retourné par le serveur',
         );
       }
       return GenerationResult(success: true, data: workflowId);
@@ -140,11 +145,11 @@ class GenerationService {
 
       switch (statusCode) {
         case 404:
-          return 'Projet ou workflow non trouve';
+          return 'Projet ou workflow non trouvé';
         case 403:
-          return 'Acces refuse';
+          return 'Accès refusé';
         case 409:
-          return 'Une generation est deja en cours';
+          return 'Une génération est déjà en cours';
         default:
           return message;
       }
@@ -154,6 +159,6 @@ class GenerationService {
       return 'Pas de connexion internet';
     }
 
-    return 'Erreur reseau';
+    return 'Erreur réseau';
   }
 }

@@ -30,7 +30,7 @@ class InputModeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Choisissez une methode pour ajouter du contenu',
+                'Choisissez une méthode pour ajouter du contenu',
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral500),
@@ -40,7 +40,7 @@ class InputModeScreen extends StatelessWidget {
                 icon: LucideIcons.upload,
                 title: 'Importer un fichier',
                 subtitle: 'PDF, TXT, DOCX, EPUB',
-                description: 'Selectionnez un fichier depuis votre appareil',
+                description: 'Sélectionnez un fichier depuis votre appareil',
                 onTap: () => context.push(AppRoutes.fileImport),
               ),
               const SizedBox(height: 16),

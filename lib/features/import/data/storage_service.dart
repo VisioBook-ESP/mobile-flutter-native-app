@@ -92,11 +92,11 @@ class StorageService {
 
       switch (statusCode) {
         case 400:
-          return 'Format de fichier non supporte';
+          return 'Format de fichier non supporté';
         case 413:
           return 'Fichier trop volumineux (max 50MB)';
         case 415:
-          return 'Type de fichier non supporte';
+          return 'Type de fichier non supporté';
         default:
           return message;
       }
@@ -107,9 +107,9 @@ class StorageService {
     }
 
     if (e.type == DioExceptionType.sendTimeout) {
-      return 'Upload trop lent, veuillez reessayer';
+      return 'Upload trop lent, veuillez réessayer';
     }
 
-    return 'Erreur reseau';
+    return 'Erreur réseau';
   }
 }

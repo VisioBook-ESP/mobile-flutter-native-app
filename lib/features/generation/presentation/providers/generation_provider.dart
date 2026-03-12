@@ -96,6 +96,9 @@ class GenerationProvider extends ChangeNotifier {
     _workflowId = workflowId;
     _isCancelled = false;
 
+    // Remettre a zero le timer mock pour que la progression reparte de 0
+    _generationService.resetMockTimer();
+
     // Annuler un eventuel polling en cours
     _pollingTimer?.cancel();
 

@@ -162,7 +162,7 @@ class _VisioBookReaderScreenState extends State<VisioBookReaderScreen> {
               ),
               const SizedBox(height: 24),
               AppButton(
-                text: 'Reessayer',
+                text: 'Réessayer',
                 size: AppButtonSize.lg,
                 onPressed: () => provider.loadVisioBook(widget.projectId),
               ),

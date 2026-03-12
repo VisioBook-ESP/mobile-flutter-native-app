@@ -46,7 +46,7 @@ class AuthService {
         return AuthResult(success: true, userId: userId);
       }
 
-      return AuthResult(success: false, error: 'Reponse invalide du serveur');
+      return AuthResult(success: false, error: 'Réponse invalide du serveur');
     } on DioException catch (e) {
       return _handleDioError(e);
     } catch (e) {
@@ -166,10 +166,10 @@ class AuthService {
         case 409:
           return AuthResult(
             success: false,
-            error: 'Cet email ou nom d\'utilisateur est deja utilise',
+            error: 'Cet email ou nom d\'utilisateur est déjà utilisé',
           );
         case 422:
-          return AuthResult(success: false, error: 'Donnees invalides');
+          return AuthResult(success: false, error: 'Données invalides');
         default:
           return AuthResult(success: false, error: message);
       }
@@ -187,6 +187,6 @@ class AuthService {
       return AuthResult(success: false, error: 'Pas de connexion internet');
     }
 
-    return AuthResult(success: false, error: 'Erreur reseau');
+    return AuthResult(success: false, error: 'Erreur réseau');
   }
 }

@@ -396,7 +396,7 @@ class _GenerationScreenState extends State<GenerationScreen>
               const SizedBox(height: 32),
 
               const Text(
-                'Votre VisioBook est pret !',
+                'Votre VisioBook est prêt !',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
@@ -407,7 +407,7 @@ class _GenerationScreenState extends State<GenerationScreen>
               const SizedBox(height: 12),
 
               Text(
-                'Votre video a ete generee avec succes.',
+                'Votre vidéo a été générée avec succès.',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.6),
@@ -418,7 +418,7 @@ class _GenerationScreenState extends State<GenerationScreen>
 
               // Bouton voir le resultat
               AppButton(
-                text: 'Voir le resultat',
+                text: 'Voir le résultat',
                 fullWidth: true,
                 size: AppButtonSize.lg,
                 icon: const Icon(
@@ -499,7 +499,7 @@ class _GenerationScreenState extends State<GenerationScreen>
               const SizedBox(height: 32),
 
               const Text(
-                'Echec de la generation',
+                'Échec de la génération',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
@@ -522,7 +522,7 @@ class _GenerationScreenState extends State<GenerationScreen>
 
               // Bouton reessayer
               AppButton(
-                text: 'Reessayer',
+                text: 'Réessayer',
                 fullWidth: true,
                 size: AppButtonSize.lg,
                 icon: const Icon(
@@ -538,7 +538,7 @@ class _GenerationScreenState extends State<GenerationScreen>
 
               // Bouton ajuster les parametres
               AppButton(
-                text: 'Ajuster les parametres',
+                text: 'Ajuster les paramètres',
                 variant: AppButtonVariant.outline,
                 fullWidth: true,
                 onPressed: () {
@@ -605,7 +605,7 @@ class _GenerationScreenState extends State<GenerationScreen>
               const SizedBox(height: 32),
 
               const Text(
-                'Generation annulee',
+                'Génération annulée',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
@@ -616,7 +616,7 @@ class _GenerationScreenState extends State<GenerationScreen>
               const SizedBox(height: 12),
 
               Text(
-                'La generation de votre VisioBook a ete annulee.',
+                'La génération de votre VisioBook a été annulée.',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.6),
@@ -656,12 +656,12 @@ class _GenerationScreenState extends State<GenerationScreen>
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         ),
         title: const Text(
-          'Annuler la generation ?',
+          'Annuler la génération ?',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         content: Text(
           'La progression actuelle sera perdue. '
-          'Vous devrez relancer la generation.',
+          'Vous devrez relancer la génération.',
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.6),
             height: 1.5,
@@ -681,7 +681,7 @@ class _GenerationScreenState extends State<GenerationScreen>
               provider.cancelGeneration();
             },
             child: const Text(
-              'Annuler la generation',
+              'Annuler la génération',
               style: TextStyle(color: AppColors.error),
             ),
           ),

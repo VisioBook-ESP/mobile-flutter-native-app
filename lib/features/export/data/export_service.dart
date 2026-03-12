@@ -73,7 +73,7 @@ class ExportService {
       if (link == null) {
         return ExportResult(
           success: false,
-          error: 'Aucun lien de partage retourne',
+          error: 'Aucun lien de partage retourné',
         );
       }
       return ExportResult(success: true, data: link);
@@ -97,9 +97,9 @@ class ExportService {
 
       switch (statusCode) {
         case 404:
-          return 'Projet non trouve';
+          return 'Projet non trouvé';
         case 403:
-          return 'Acces refuse';
+          return 'Accès refusé';
         default:
           return message;
       }
@@ -109,6 +109,6 @@ class ExportService {
       return 'Pas de connexion internet';
     }
 
-    return 'Erreur reseau';
+    return 'Erreur réseau';
   }
 }

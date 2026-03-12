@@ -14,7 +14,7 @@
 | 3 | Authentification | P0 | Done | 95% |
 | 4 | Dashboard | P0 | In Progress | 95% |
 | 5 | Import Contenu | P0 | Done | 95% |
-| 6 | Detail & Configuration | P0 | In Progress | 80% |
+| 6 | Detail & Configuration | P0 | In Progress | 85% |
 | 7 | Generation | P0 | Done | 85% |
 | 8 | Player | P0 | Done | 85% |
 | 9 | Export | P0 | Done | 80% |

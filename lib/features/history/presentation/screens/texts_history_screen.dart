@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
+import 'package:visiobook_mobile/core/widgets/skeleton_loader.dart';
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
@@ -317,6 +318,18 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
             Expanded(
               child: Consumer<ProjectProvider>(
                 builder: (context, provider, _) {
+                  if (provider.isLoading) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: List.generate(
+                          6,
+                          (_) => const SkeletonListItem(),
+                        ),
+                      ),
+                    );
+                  }
+
                   final filtered = _getFilteredProjects(provider.projects);
 
                   if (provider.projects.isEmpty) {
@@ -327,15 +340,19 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
                     return _buildNoResultsState();
                   }
 
-                  return ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    itemCount: filtered.length,
-                    separatorBuilder: (_, _) =>
-                        const Divider(height: 1, color: AppColors.neutral200),
-                    itemBuilder: (context, index) {
-                      final project = filtered[index];
-                      return _buildInputItem(context, project, provider);
-                    },
+                  return RefreshIndicator(
+                    onRefresh: () => provider.loadProjects(),
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, _) =>
+                          const Divider(height: 1, color: AppColors.neutral200),
+                      itemBuilder: (context, index) {
+                        final project = filtered[index];
+                        return _buildInputItem(context, project, provider);
+                      },
+                    ),
                   );
                 },
               ),

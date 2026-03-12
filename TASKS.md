@@ -19,7 +19,7 @@
 | 8 | Player | P0 | Done | 85% |
 | 9 | Export | P0 | Done | 80% |
 | 10 | Historique | P1 | Done | 100% |
-| 11 | Polish & QA | P2 | Todo | 0% |
+| 11 | Polish & QA | P2 | Done | 100% |
 | 12 | Docker & Multi-platform Build | P1 | Done | 100% |
 
 ---
@@ -360,15 +360,15 @@
 
 ---
 
-## Phase 11: Polish & QA [P2]
+## Phase 11: Polish & QA [P2] ✅
 
-- [ ] Animations transitions
-- [ ] Skeleton loaders
-- [ ] Pull to refresh
-- [ ] Empty states tous ecrans
-- [ ] Messages erreur user-friendly
-- [ ] Tests unitaires
-- [ ] Tests widgets
+- [x] Animations transitions
+- [x] Skeleton loaders
+- [x] Pull to refresh
+- [x] Empty states tous ecrans
+- [x] Messages erreur user-friendly
+- [x] Tests unitaires
+- [x] Tests widgets
 
 ---
 

@@ -32,11 +32,11 @@ enum GenerationStep {
       case GenerationStep.analysis:
         return 'Analyse du document en cours...';
       case GenerationStep.images:
-        return 'Generation des illustrations...';
+        return 'Génération des illustrations...';
       case GenerationStep.audio:
-        return 'Creation de la narration audio...';
+        return 'Création de la narration audio...';
       case GenerationStep.assembly:
-        return 'Assemblage de la video finale...';
+        return 'Assemblage de la vidéo finale...';
     }
   }
 

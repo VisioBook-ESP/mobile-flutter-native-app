@@ -53,12 +53,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         children: [
           const SizedBox(height: 48),
           Text(
-            'Mot de passe oublie',
+            'Mot de passe oublié',
             style: Theme.of(context).textTheme.displaySmall,
           ),
           const SizedBox(height: 16),
           Text(
-            'Entrez votre adresse email et nous vous enverrons un lien pour reinitialiser votre mot de passe.',
+            'Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.',
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
@@ -103,10 +103,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ),
         const SizedBox(height: 32),
-        Text('Email envoye', style: Theme.of(context).textTheme.displaySmall),
+        Text('Email envoyé', style: Theme.of(context).textTheme.displaySmall),
         const SizedBox(height: 16),
         Text(
-          'Si un compte existe avec l\'adresse ${_emailController.text.trim()}, vous recevrez un email avec les instructions pour reinitialiser votre mot de passe.',
+          'Si un compte existe avec l\'adresse ${_emailController.text.trim()}, vous recevrez un email avec les instructions pour réinitialiser votre mot de passe.',
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
@@ -114,7 +114,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 48),
         AppButton(
-          text: 'Retour a la connexion',
+          text: 'Retour à la connexion',
           fullWidth: true,
           size: AppButtonSize.lg,
           onPressed: () => context.pop(),

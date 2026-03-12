@@ -22,15 +22,8 @@ class AuthProvider extends ChangeNotifier {
   String? get userName => _userName;
 
   /// Verifie l'etat de connexion au demarrage
+  /// Toujours passer par login/register, meme en mode mock
   Future<void> checkAuthStatus() async {
-    // Mode mock: auto-login
-    if (EnvironmentConfig.useMockData) {
-      _state = AuthState.authenticated;
-      _userName = 'Marine';
-      notifyListeners();
-      return;
-    }
-
     _state = AuthState.loading;
     notifyListeners();
 
@@ -45,6 +38,14 @@ class AuthProvider extends ChangeNotifier {
     _state = AuthState.loading;
     _error = null;
     notifyListeners();
+
+    if (EnvironmentConfig.useMockData) {
+      // Mode demo : pas d'appel API, succes immediat
+      _state = AuthState.authenticated;
+      _userName = email.split('@').first;
+      notifyListeners();
+      return true;
+    }
 
     final result = await _authService.login(email: email, password: password);
 
@@ -71,6 +72,14 @@ class AuthProvider extends ChangeNotifier {
     _state = AuthState.loading;
     _error = null;
     notifyListeners();
+
+    if (EnvironmentConfig.useMockData) {
+      // Mode demo : pas d'appel API, succes immediat
+      _state = AuthState.authenticated;
+      _userName = firstName;
+      notifyListeners();
+      return true;
+    }
 
     final result = await _authService.register(
       username: username,

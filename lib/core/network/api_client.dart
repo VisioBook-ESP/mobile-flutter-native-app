@@ -7,6 +7,8 @@ class ApiClient {
   late final Dio _dio;
   final SecureStorageService _storage;
 
+  Dio get dio => _dio;
+
   ApiClient({required SecureStorageService storage}) : _storage = storage {
     _dio = Dio(
       BaseOptions(

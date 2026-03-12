@@ -82,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen>
                 child: ScaleTransition(
                   scale: _scaleAnimation,
                   child: Text(
-                    'Prets a\ntransformer\nla lecture ?',
+                    'Prêts à\ntransformer\nla lecture ?',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.displayLarge,
                   ),

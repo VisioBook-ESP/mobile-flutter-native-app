@@ -24,7 +24,7 @@ class Validators {
     }
 
     if (value.length < 8) {
-      return 'Minimum 8 caracteres';
+      return 'Minimum 8 caractères';
     }
 
     if (!value.contains(RegExp(r'[A-Z]'))) {
@@ -51,18 +51,18 @@ class Validators {
     return null;
   }
 
-  /// Valide un prenom
+  /// Valide un prénom
   static String? firstName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Prenom requis';
+      return 'Prénom requis';
     }
 
     if (value.length < 2) {
-      return 'Minimum 2 caracteres';
+      return 'Minimum 2 caractères';
     }
 
     if (value.length > 50) {
-      return 'Maximum 50 caracteres';
+      return 'Maximum 50 caractères';
     }
 
     return null;
@@ -75,11 +75,11 @@ class Validators {
     }
 
     if (value.length < 2) {
-      return 'Minimum 2 caracteres';
+      return 'Minimum 2 caractères';
     }
 
     if (value.length > 50) {
-      return 'Maximum 50 caracteres';
+      return 'Maximum 50 caractères';
     }
 
     return null;
@@ -92,11 +92,11 @@ class Validators {
     }
 
     if (value.length < 3) {
-      return 'Minimum 3 caracteres';
+      return 'Minimum 3 caractères';
     }
 
     if (value.length > 30) {
-      return 'Maximum 30 caracteres';
+      return 'Maximum 30 caractères';
     }
 
     if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
@@ -130,7 +130,7 @@ class Validators {
   }) {
     final extension = fileName.split('.').last.toLowerCase();
     if (!allowedExtensions.contains(extension)) {
-      return 'Format non supporte (${allowedExtensions.join(', ')})';
+      return 'Format non supporté (${allowedExtensions.join(', ')})';
     }
     return null;
   }

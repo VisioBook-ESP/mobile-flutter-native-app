@@ -27,9 +27,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
     _SlideData(
       icon: LucideIcons.sparkles,
-      title: 'L\'IA cree la magie',
+      title: 'L\'IA crée la magie',
       description:
-          'Choisissez un style visuel et laissez l\'IA transformer votre texte en video.',
+          'Choisissez un style visuel et laissez l\'IA transformer votre texte en vidéo.',
     ),
     _SlideData(
       icon: LucideIcons.play,

@@ -139,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? null
                           : () => context.push(AppRoutes.forgotPassword),
                       child: Text(
-                        'Mot de passe oublie ?',
+                        'Mot de passe oublié ?',
                         style: TextStyle(
                           color: AppColors.neutral500,
                           fontSize: 14,

@@ -75,7 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     const SizedBox(height: 48),
                     Text(
-                      'Creer un compte',
+                      'Créer un compte',
                       style: Theme.of(context).textTheme.displaySmall,
                     ),
                     const SizedBox(height: 48),
@@ -121,8 +121,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         Expanded(
                           child: AppInput(
-                            label: 'Prenom',
-                            placeholder: 'Votre prenom',
+                            label: 'Prénom',
+                            placeholder: 'Votre prénom',
                             controller: _firstNameController,
                             keyboardType: TextInputType.name,
                             validator: Validators.firstName,
@@ -154,7 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 20),
                     AppInput(
                       label: 'Mot de passe',
-                      placeholder: 'Minimum 8 caracteres',
+                      placeholder: 'Minimum 8 caractères',
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       validator: Validators.password,

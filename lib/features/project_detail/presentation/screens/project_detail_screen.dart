@@ -77,7 +77,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   await provider.saveProject();
                   if (context.mounted && provider.error == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Projet sauvegarde')),
+                      const SnackBar(content: Text('Projet sauvegardé')),
                     );
                   }
                 },
@@ -147,8 +147,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
 
                       // Duree
                       OptionSelector<VideoDuration>(
-                        title: 'Duree',
-                        subtitle: 'Ajustez la longueur de votre video',
+                        title: 'Durée',
+                        subtitle: 'Ajustez la longueur de votre vidéo',
                         icon: LucideIcons.clock,
                         selectedValue: provider.config.duration,
                         options: VideoDuration.values
@@ -288,7 +288,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       child: SafeArea(
         top: false,
         child: AppButton(
-          text: 'Generer le VisioBook',
+          text: 'Générer le VisioBook',
           fullWidth: true,
           size: AppButtonSize.lg,
           isLoading: provider.isGenerating,
@@ -337,7 +337,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             ),
             const SizedBox(height: 24),
             AppButton(
-              text: 'Reessayer',
+              text: 'Réessayer',
               onPressed: () {
                 if (widget.projectId != null) {
                   provider.loadProject(widget.projectId!);

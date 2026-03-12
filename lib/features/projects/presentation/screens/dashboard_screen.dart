@@ -82,7 +82,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _ModalOption(
               icon: LucideIcons.camera,
               title: 'Scanner un document',
-              subtitle: 'Utilisez votre camera',
+              subtitle: 'Utilisez votre caméra',
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.scan);
@@ -120,7 +120,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text('Profil', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 24),
             AppButton(
-              text: 'Se deconnecter',
+              text: 'Se déconnecter',
               variant: AppButtonVariant.outline,
               fullWidth: true,
               onPressed: () {
@@ -249,7 +249,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Appuyez sur + pour creer votre premier VisioBook',
+              'Appuyez sur + pour créer votre premier VisioBook',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral400),
@@ -277,7 +277,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 24),
             AppButton(
-              text: 'Reessayer',
+              text: 'Réessayer',
               onPressed: () {
                 context.read<ProjectProvider>().loadProjects();
               },

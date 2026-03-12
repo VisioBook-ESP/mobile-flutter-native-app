@@ -124,7 +124,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Resume',
+                  'Résumé',
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.neutral600,
@@ -161,7 +161,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
             context.pop();
           },
         ),
-        title: const Text('Apercu du texte'),
+        title: const Text('Aperçu du texte'),
         actions: [
           TextButton.icon(
             onPressed: _toggleEditing,
@@ -276,7 +276,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'Pret',
+                                'Prêt',
                                 style: Theme.of(context).textTheme.labelMedium
                                     ?.copyWith(color: Colors.green.shade700),
                               ),

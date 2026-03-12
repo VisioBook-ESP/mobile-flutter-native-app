@@ -2,10 +2,10 @@
 enum Environment { dev, prod }
 
 class EnvironmentConfig {
-  static Environment _current = Environment.dev;
+  static Environment _current = Environment.prod;
 
   /// Mode mock pour tester l'UI sans backend
-  static bool useMockData = true;
+  static bool useMockData = false;
 
   static Environment get current => _current;
 
@@ -19,19 +19,19 @@ class EnvironmentConfig {
       case Environment.dev:
         return 'http://51.178.52.51';
       case Environment.prod:
-        return 'https://api.visiobook.com';
+        return 'https://visiobook.cloud';
     }
   }
 
-  /// Core User Service (port 9999)
-  static String get userServiceUrl => '$apiBaseUrl:9999/api/v1';
+  /// Core User Service
+  static String get userServiceUrl => '$apiBaseUrl/api/v1';
 
   /// Core Project Service (port 8086)
-  static String get projectServiceUrl => '$apiBaseUrl:8086/api/v1';
+  static String get projectServiceUrl => '$apiBaseUrl/api/v1';
 
   /// Support Storage Service (port 8089)
-  static String get storageServiceUrl => '$apiBaseUrl:8089/api/v1';
+  static String get storageServiceUrl => '$apiBaseUrl/api/v1';
 
   /// AI Analysis Service (port 8083)
-  static String get aiServiceUrl => '$apiBaseUrl:8083/api/v1';
+  static String get aiServiceUrl => '$apiBaseUrl/api/v1';
 }

@@ -34,12 +34,12 @@ class FileImportScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Selectionnez un fichier',
+                    'Sélectionnez un fichier',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Formats supportes: PDF, TXT, DOCX, EPUB\nTaille max: 50 MB',
+                    'Formats supportés: PDF, TXT, DOCX, EPUB\nTaille max: 50 MB',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.neutral500,
                     ),
@@ -159,12 +159,12 @@ class _FilePickerZone extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Appuyez pour selectionner',
+              'Appuyez pour sélectionner',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 4),
             Text(
-              'ou glissez-deposez un fichier',
+              'ou glissez-déposez un fichier',
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: AppColors.neutral500),

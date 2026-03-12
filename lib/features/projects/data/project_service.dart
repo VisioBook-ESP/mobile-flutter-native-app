@@ -138,9 +138,9 @@ class ProjectService {
 
       switch (statusCode) {
         case 404:
-          return 'Projet non trouve';
+          return 'Projet non trouvé';
         case 403:
-          return 'Acces refuse';
+          return 'Accès refusé';
         default:
           return message;
       }
@@ -150,6 +150,6 @@ class ProjectService {
       return 'Pas de connexion internet';
     }
 
-    return 'Erreur reseau';
+    return 'Erreur réseau';
   }
 }

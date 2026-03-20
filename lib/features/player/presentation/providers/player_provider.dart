@@ -2,17 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:visiobook_mobile/features/player/data/player_service.dart';
 import 'package:visiobook_mobile/features/player/domain/visiobook_reader_state.dart';
 
-/// Provider pour le lecteur VisioBook style Webtoon
+/// Provider pour le lecteur VisioBook (PageView snap vertical)
 class PlayerProvider extends ChangeNotifier {
   final PlayerService _playerService;
 
-  VisioBookData? _visioBook;
+  VisiobookData? _visioBook;
   bool _isLoading = false;
   String? _error;
-  int _currentSceneIndex = 0;
-  bool _showSubtitles = true;
-  bool _isMuted = false;
-  bool _isPaused = false;
+  int _currentPanelIndex = 0;
   bool _hasReachedEnd = false;
   DateTime? _readingStartTime;
 
@@ -20,28 +17,28 @@ class PlayerProvider extends ChangeNotifier {
     : _playerService = playerService;
 
   // Getters
-  VisioBookData? get visioBook => _visioBook;
+  VisiobookData? get visioBook => _visioBook;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  int get currentSceneIndex => _currentSceneIndex;
-  bool get showSubtitles => _showSubtitles;
-  bool get isMuted => _isMuted;
-  bool get isPaused => _isPaused;
+  int get currentPanelIndex => _currentPanelIndex;
   bool get hasReachedEnd => _hasReachedEnd;
 
-  int get totalScenes => _visioBook?.sceneCount ?? 0;
+  int get totalPanels => _visioBook?.totalPanels ?? 0;
   String get title => _visioBook?.title ?? '';
 
-  /// Progression de 0.0 a 1.0 basee sur la scene courante
-  double get progress {
-    if (totalScenes <= 1) return _hasReachedEnd ? 1.0 : 0.0;
-    return (_currentSceneIndex + 1) / totalScenes;
+  List<VisiobookPanel> get allPanels => _visioBook?.allPanels ?? [];
+
+  /// Panel actuellement visible
+  VisiobookPanel? get currentPanel {
+    final panels = allPanels;
+    if (_currentPanelIndex >= panels.length) return null;
+    return panels[_currentPanelIndex];
   }
 
-  /// Scene courante
-  VisioBookScene? get currentScene {
-    if (_visioBook == null || _currentSceneIndex >= totalScenes) return null;
-    return _visioBook!.scenes[_currentSceneIndex];
+  /// Progression de 0.0 a 1.0
+  double get progress {
+    if (totalPanels <= 1) return _hasReachedEnd ? 1.0 : 0.0;
+    return (_currentPanelIndex + 1) / totalPanels;
   }
 
   /// Temps de lecture ecoule
@@ -50,12 +47,12 @@ class PlayerProvider extends ChangeNotifier {
     return DateTime.now().difference(_readingStartTime!);
   }
 
-  /// Charge les scenes du VisioBook
+  /// Charge le VisioBook
   Future<void> loadVisioBook(String projectId) async {
     _isLoading = true;
     _error = null;
     _hasReachedEnd = false;
-    _currentSceneIndex = 0;
+    _currentPanelIndex = 0;
     notifyListeners();
 
     final result = await _playerService.getVisioBook(projectId);
@@ -71,51 +68,22 @@ class PlayerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Met a jour la scene visible (appelee par le scroll)
-  void updateCurrentScene(int index) {
-    if (index == _currentSceneIndex) return;
-    if (index < 0 || index >= totalScenes) return;
-    _currentSceneIndex = index;
+  /// Appele par PageView.onPageChanged
+  void onPageChanged(int index) {
+    if (index == _currentPanelIndex) return;
+    _currentPanelIndex = index;
 
-    // Detecter la fin
-    if (index == totalScenes - 1) {
+    if (index == totalPanels - 1) {
       _hasReachedEnd = true;
     }
 
     notifyListeners();
   }
 
-  /// Toggle sous-titres
-  void toggleSubtitles() {
-    _showSubtitles = !_showSubtitles;
-    notifyListeners();
-  }
-
-  /// Toggle mute
-  void toggleMute() {
-    _isMuted = !_isMuted;
-    notifyListeners();
-  }
-
-  /// Toggle pause (arrete audio/video)
-  void togglePause() {
-    _isPaused = !_isPaused;
-    notifyListeners();
-  }
-
-  /// Aller a une scene specifique
-  void goToScene(int index) {
-    if (index < 0 || index >= totalScenes) return;
-    _currentSceneIndex = index;
-    _hasReachedEnd = index == totalScenes - 1;
-    notifyListeners();
-  }
-
   /// Rejouer depuis le debut
   void replay() {
-    _currentSceneIndex = 0;
+    _currentPanelIndex = 0;
     _hasReachedEnd = false;
-    _isPaused = false;
     _readingStartTime = DateTime.now();
     notifyListeners();
   }
@@ -125,10 +93,7 @@ class PlayerProvider extends ChangeNotifier {
     _visioBook = null;
     _isLoading = false;
     _error = null;
-    _currentSceneIndex = 0;
-    _showSubtitles = true;
-    _isMuted = false;
-    _isPaused = false;
+    _currentPanelIndex = 0;
     _hasReachedEnd = false;
     _readingStartTime = null;
     notifyListeners();

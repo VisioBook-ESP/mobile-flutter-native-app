@@ -18,6 +18,7 @@ import 'package:visiobook_mobile/features/player/presentation/screens/visiobook_
 import 'package:visiobook_mobile/features/history/presentation/screens/texts_history_screen.dart';
 import 'package:visiobook_mobile/features/history/presentation/screens/visiobooks_history_screen.dart';
 import 'package:visiobook_mobile/features/projects/presentation/screens/dashboard_screen.dart';
+import 'package:visiobook_mobile/features/visiobook_grid/presentation/screens/visiobook_grid_screen.dart';
 
 /// Routes de l'application
 class AppRoutes {
@@ -40,6 +41,8 @@ class AppRoutes {
   // History routes
   static const String textsHistory = '/history/texts';
   static const String visiobooksHistory = '/history/visiobooks';
+  // Mock grid preview
+  static const String visiobookGrid = '/mock/visiobook-grid';
 }
 
 /// Configuration du router
@@ -135,6 +138,11 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.visiobooksHistory,
         builder: (context, state) => const VisiobooksHistoryScreen(),
+      ),
+      // Mock grid preview
+      GoRoute(
+        path: AppRoutes.visiobookGrid,
+        builder: (context, state) => const VisiobookGridScreen(),
       ),
     ],
   );

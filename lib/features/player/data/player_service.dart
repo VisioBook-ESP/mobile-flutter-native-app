@@ -16,8 +16,8 @@ class PlayerService {
 
   PlayerService({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  /// Fetch VisioBook scenes for a project
-  Future<PlayerResult<VisioBookData>> getVisioBook(String projectId) async {
+  /// Fetch VisioBook data for a project
+  Future<PlayerResult<VisiobookData>> getVisioBook(String projectId) async {
     if (EnvironmentConfig.useMockData) {
       await Future.delayed(const Duration(milliseconds: 800));
       return PlayerResult(
@@ -28,7 +28,7 @@ class PlayerService {
 
     try {
       final response = await _apiClient.getVisioBook(projectId);
-      final data = VisioBookData.fromJson(
+      final data = VisiobookData.fromJson(
         response.data as Map<String, dynamic>,
       );
       return PlayerResult(success: true, data: data);
@@ -39,80 +39,126 @@ class PlayerService {
     }
   }
 
-  VisioBookData _generateMockVisioBook(String projectId) {
-    // Generate 8 mock scenes simulating a story about space exploration
-    final scenes = <VisioBookScene>[
-      const VisioBookScene(
-        id: 'scene_1',
-        order: 0,
-        imageUrl: 'https://picsum.photos/seed/vb1/800/600',
-        subtitleText:
-            'Il etait une fois, dans une galaxie lointaine, un explorateur nomme Atlas.',
-        audioDuration: Duration(seconds: 4),
-      ),
-      const VisioBookScene(
-        id: 'scene_2',
-        order: 1,
-        imageUrl: 'https://picsum.photos/seed/vb2/800/600',
-        subtitleText:
-            'Atlas revait de decouvrir de nouveaux mondes au-dela des etoiles.',
-        audioDuration: Duration(seconds: 4),
-      ),
-      const VisioBookScene(
-        id: 'scene_3',
-        order: 2,
-        imageUrl: 'https://picsum.photos/seed/vb3/800/600',
-        subtitleText:
-            'Un jour, il trouva une carte ancienne menant a une planete inconnue.',
-        audioDuration: Duration(seconds: 4),
-      ),
-      const VisioBookScene(
-        id: 'scene_4',
-        order: 3,
-        imageUrl: 'https://picsum.photos/seed/vb4/800/600',
-        subtitleText:
-            'Il prepara son vaisseau et quitta la Terre sans regarder en arriere.',
-        audioDuration: Duration(seconds: 4),
-      ),
-      const VisioBookScene(
-        id: 'scene_5',
-        order: 4,
-        imageUrl: 'https://picsum.photos/seed/vb5/800/600',
-        subtitleText:
-            'Apres des semaines de voyage, il arriva devant un monde magnifique.',
-        audioDuration: Duration(seconds: 4),
-      ),
-      const VisioBookScene(
-        id: 'scene_6',
-        order: 5,
-        imageUrl: 'https://picsum.photos/seed/vb6/800/600',
-        subtitleText:
-            "Des forets cristallines s'etendaient a perte de vue sous un ciel violet.",
-        audioDuration: Duration(seconds: 5),
-      ),
-      const VisioBookScene(
-        id: 'scene_7',
-        order: 6,
-        imageUrl: 'https://picsum.photos/seed/vb7/800/600',
-        subtitleText:
-            "Atlas rencontra des creatures bienveillantes qui l'accueillirent comme un ami.",
-        audioDuration: Duration(seconds: 5),
-      ),
-      const VisioBookScene(
-        id: 'scene_8',
-        order: 7,
-        imageUrl: 'https://picsum.photos/seed/vb8/800/600',
-        subtitleText:
-            "Il comprit que l'univers etait rempli de merveilles qui attendaient d'etre decouvertes.",
-        audioDuration: Duration(seconds: 5),
-      ),
-    ];
-
-    return VisioBookData(
+  VisiobookData _generateMockVisioBook(String projectId) {
+    return VisiobookData(
       projectId: projectId,
       title: "L'Explorateur des Etoiles",
-      scenes: scenes,
+      coverUrl: 'https://picsum.photos/seed/cover/400/560',
+      totalPages: 3,
+      style: 'realistic',
+      language: 'fr',
       createdAt: DateTime.now(),
+      pages: [
+        VisiobookPage(
+          pageNumber: 1,
+          panels: [
+            VisiobookPanel(
+              id: 'panel_001',
+              order: 0,
+              videoUrl: 'https://storage.example.com/panels/panel_001.mp4',
+              thumbnailUrl: 'https://picsum.photos/seed/p1/1080/1350',
+              narratorText:
+                  'Dans une galaxie lointaine, un explorateur nomme Atlas preparait son voyage.',
+              videoDurationMs: 10000,
+            ),
+            VisiobookPanel(
+              id: 'panel_002',
+              order: 1,
+              videoUrl: 'https://storage.example.com/panels/panel_002.mp4',
+              thumbnailUrl: 'https://picsum.photos/seed/p2/1080/1350',
+              dialogueText: 'Atlas : Les etoiles m\'appellent...',
+              videoDurationMs: 8000,
+            ),
+            VisiobookPanel(
+              id: 'panel_003',
+              order: 2,
+              videoUrl: 'https://storage.example.com/panels/panel_003.mp4',
+              thumbnailUrl: 'https://picsum.photos/seed/p3/1080/1350',
+              dialogueText: 'Luna : Tu ne peux pas partir seul !',
+              videoDurationMs: 7000,
+            ),
+            VisiobookPanel(
+              id: 'panel_004',
+              order: 3,
+              videoUrl: 'https://storage.example.com/panels/panel_004.mp4',
+              thumbnailUrl: 'https://picsum.photos/seed/p4/1080/1350',
+              narratorText:
+                  'Mais rien ne pouvait arreter Atlas. Il embarqua a bord du Nebula.',
+              videoDurationMs: 12000,
+            ),
+          ],
+        ),
+        VisiobookPage(
+          pageNumber: 2,
+          panels: [
+            VisiobookPanel(
+              id: 'panel_005',
+              order: 0,
+              videoUrl: 'https://storage.example.com/panels/panel_005.mp4',
+              thumbnailUrl: 'https://picsum.photos/seed/p5/1080/1350',
+              narratorText:
+                  "L'espace s'etendait devant lui, infini et silencieux.",
+              videoDurationMs: 10000,
+            ),
+            VisiobookPanel(
+              id: 'panel_006',
+              order: 1,
+              videoUrl: 'https://storage.example.com/panels/panel_006.mp4',
+              thumbnailUrl: 'https://picsum.photos/seed/p6/1080/1350',
+              dialogueText: "Atlas : C'est... magnifique.",
+              videoDurationMs: 8000,
+            ),
+            VisiobookPanel(
+              id: 'panel_007',
+              order: 2,
+              videoUrl: 'https://storage.example.com/panels/panel_007.mp4',
+              thumbnailUrl: 'https://picsum.photos/seed/p7/1080/1350',
+              narratorText:
+                  'Des forets cristallines brillaient sous un ciel violet.',
+              videoDurationMs: 9000,
+            ),
+          ],
+        ),
+        VisiobookPage(
+          pageNumber: 3,
+          panels: [
+            VisiobookPanel(
+              id: 'panel_008',
+              order: 0,
+              videoUrl: 'https://storage.example.com/panels/panel_008.mp4',
+              thumbnailUrl: 'https://picsum.photos/seed/p8/1080/1350',
+              dialogueText: 'Luna : Atlas, tu me recois ?',
+              videoDurationMs: 7000,
+            ),
+            VisiobookPanel(
+              id: 'panel_009',
+              order: 1,
+              videoUrl: 'https://storage.example.com/panels/panel_009.mp4',
+              thumbnailUrl: 'https://picsum.photos/seed/p9/1080/1350',
+              dialogueText: 'Atlas : Fort et clair !',
+              videoDurationMs: 6000,
+            ),
+            VisiobookPanel(
+              id: 'panel_010',
+              order: 2,
+              videoUrl: 'https://storage.example.com/panels/panel_010.mp4',
+              thumbnailUrl: 'https://picsum.photos/seed/p10/1080/1350',
+              narratorText: 'La transmission se coupa brusquement.',
+              videoDurationMs: 8000,
+            ),
+            VisiobookPanel(
+              id: 'panel_011',
+              order: 3,
+              videoUrl: 'https://storage.example.com/panels/panel_011.mp4',
+              thumbnailUrl: 'https://picsum.photos/seed/p11/1080/1350',
+              narratorText:
+                  "Il comprit que l'univers etait rempli de merveilles qui attendaient d'etre decouvertes.",
+              dialogueText: "Atlas : L'aventure ne fait que commencer.",
+              videoDurationMs: 12000,
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -128,9 +174,9 @@ class PlayerService {
 
       switch (statusCode) {
         case 404:
-          return 'VisioBook non trouvé';
+          return 'VisioBook non trouve';
         case 403:
-          return 'Accès refusé';
+          return 'Acces refuse';
         default:
           return message;
       }
@@ -140,6 +186,6 @@ class PlayerService {
       return 'Pas de connexion internet';
     }
 
-    return 'Erreur réseau';
+    return 'Erreur reseau';
   }
 }

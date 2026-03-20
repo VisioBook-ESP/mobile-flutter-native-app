@@ -29,6 +29,10 @@ class AuthProvider extends ChangeNotifier {
 
     final isLoggedIn = await _authService.isLoggedIn();
 
+    if (isLoggedIn) {
+      _userName = await _authService.getSavedUserName();
+    }
+
     _state = isLoggedIn ? AuthState.authenticated : AuthState.unauthenticated;
     notifyListeners();
   }
@@ -51,6 +55,7 @@ class AuthProvider extends ChangeNotifier {
 
     if (result.success) {
       _state = AuthState.authenticated;
+      _userName = result.userName ?? email.split('@').first;
       notifyListeners();
       return true;
     } else {

@@ -17,6 +17,7 @@ import 'package:visiobook_mobile/features/generation/presentation/screens/genera
 import 'package:visiobook_mobile/features/player/presentation/screens/visiobook_reader_screen.dart';
 import 'package:visiobook_mobile/features/history/presentation/screens/texts_history_screen.dart';
 import 'package:visiobook_mobile/features/history/presentation/screens/visiobooks_history_screen.dart';
+import 'package:visiobook_mobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:visiobook_mobile/features/projects/presentation/screens/dashboard_screen.dart';
 import 'package:visiobook_mobile/features/visiobook_grid/presentation/screens/visiobook_grid_screen.dart';
 
@@ -43,6 +44,8 @@ class AppRoutes {
   static const String visiobooksHistory = '/history/visiobooks';
   // Mock grid preview
   static const String visiobookGrid = '/mock/visiobook-grid';
+  // Profile
+  static const String profile = '/profile';
 }
 
 /// Configuration du router
@@ -143,6 +146,11 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.visiobookGrid,
         builder: (context, state) => const VisiobookGridScreen(),
+      ),
+      // Profile
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => const ProfileScreen(),
       ),
     ],
   );

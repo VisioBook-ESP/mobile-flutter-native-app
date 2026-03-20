@@ -86,12 +86,48 @@ class ProjectService {
   Future<ProjectResult<Project>> createProject({
     required String title,
     String? description,
+    String? fileId,
+    String? style,
+    String? language,
+    String? duration,
   }) async {
     try {
       final response = await _apiClient.createProject({
         'title': title,
         if (description != null) 'description': description,
+        if (fileId != null) 'fileId': fileId,
+        if (style != null) 'style': style,
+        if (language != null) 'language': language,
+        if (duration != null) 'duration': duration,
       });
+      final project = Project.fromJson(response.data);
+      return ProjectResult(success: true, data: project);
+    } on DioException catch (e) {
+      return ProjectResult(success: false, error: _handleError(e));
+    } catch (e) {
+      return ProjectResult(success: false, error: 'Erreur inattendue: $e');
+    }
+  }
+
+  Future<ProjectResult<Project>> updateProject({
+    required String id,
+    String? title,
+    String? description,
+    String? fileId,
+    String? style,
+    String? language,
+    String? duration,
+  }) async {
+    try {
+      final data = <String, dynamic>{
+        if (title != null) 'title': title,
+        if (description != null) 'description': description,
+        if (fileId != null) 'fileId': fileId,
+        if (style != null) 'style': style,
+        if (language != null) 'language': language,
+        if (duration != null) 'duration': duration,
+      };
+      final response = await _apiClient.updateProject(id, data);
       final project = Project.fromJson(response.data);
       return ProjectResult(success: true, data: project);
     } on DioException catch (e) {
@@ -114,9 +150,12 @@ class ProjectService {
   }
 
   /// Lance la generation d'un projet
-  Future<ProjectResult<String>> generateProject(String id) async {
+  Future<ProjectResult<String>> generateProject(
+    String id, {
+    Map<String, dynamic>? config,
+  }) async {
     try {
-      final response = await _apiClient.generateProject(id);
+      final response = await _apiClient.generateProject(id, data: config);
       final workflowId = response.data['workflowId'] as String?;
       return ProjectResult(success: true, data: workflowId);
     } on DioException catch (e) {

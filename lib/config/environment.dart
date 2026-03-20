@@ -32,6 +32,9 @@ class EnvironmentConfig {
   /// Support Storage Service (port 8089)
   static String get storageServiceUrl => '$apiBaseUrl/api/v1';
 
+  /// Content Ingestion Service
+  static String get ingestionServiceUrl => '$apiBaseUrl/api/v1';
+
   /// AI Analysis Service (port 8083)
   static String get aiServiceUrl => '$apiBaseUrl/api/v1';
 }

@@ -269,8 +269,11 @@ class ProjectProvider extends ChangeNotifier {
   }
 
   /// Lance la generation d'un projet
-  Future<String?> generateProject(String id) async {
-    final result = await _projectService.generateProject(id);
+  Future<String?> generateProject(
+    String id, {
+    Map<String, dynamic>? config,
+  }) async {
+    final result = await _projectService.generateProject(id, config: config);
 
     if (result.success) {
       // Met a jour le statut localement

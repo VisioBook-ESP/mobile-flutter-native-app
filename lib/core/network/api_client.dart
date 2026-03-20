@@ -62,8 +62,11 @@ class ApiClient {
   Future<Response> deleteProject(String id) =>
       _dio.delete('${EnvironmentConfig.projectServiceUrl}/projects/$id');
 
-  Future<Response> generateProject(String id) =>
-      _dio.post('${EnvironmentConfig.projectServiceUrl}/projects/$id/generate');
+  Future<Response> generateProject(String id, {Map<String, dynamic>? data}) =>
+      _dio.post(
+        '${EnvironmentConfig.projectServiceUrl}/projects/$id/generate',
+        data: data,
+      );
 
   Future<Response> getWorkflowStatus(
     String projectId,
@@ -83,18 +86,38 @@ class ApiClient {
     '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/visiobook',
   );
 
-  // Storage Service
+  // Content Ingestion Service
+  Future<Response> createFolder() =>
+      _dio.post('${EnvironmentConfig.ingestionServiceUrl}/folders/');
+
+  Future<Response> getFilesByToken() =>
+      _dio.get('${EnvironmentConfig.ingestionServiceUrl}/folders/files');
+
   Future<Response> uploadFile(FormData formData) => _dio.post(
-    '${EnvironmentConfig.storageServiceUrl}/storage/upload',
+    '${EnvironmentConfig.ingestionServiceUrl}/upload/',
     data: formData,
     options: Options(contentType: 'multipart/form-data'),
   );
 
-  Future<Response> transformFile(Map<String, dynamic> data) => _dio.post(
-    '${EnvironmentConfig.storageServiceUrl}/storage/transform',
-    data: data,
+  Future<Response> startIngestion(Map<String, dynamic> data) =>
+      _dio.post('${EnvironmentConfig.ingestionServiceUrl}/ingest/', data: data);
+
+  Future<Response> getIngestionStatus(String jobId) =>
+      _dio.get('${EnvironmentConfig.ingestionServiceUrl}/ingest/status/$jobId');
+
+  Future<Response> extractText(FormData formData) => _dio.post(
+    '${EnvironmentConfig.ingestionServiceUrl}/extract/text',
+    data: formData,
+    options: Options(contentType: 'multipart/form-data'),
   );
 
+  Future<Response> extractMetadata(FormData formData) => _dio.post(
+    '${EnvironmentConfig.ingestionServiceUrl}/extract/metadata',
+    data: formData,
+    options: Options(contentType: 'multipart/form-data'),
+  );
+
+  // Storage Service (download/stream - separate service)
   Future<Response> getStreamUrl(String videoId) => _dio.get(
     '${EnvironmentConfig.storageServiceUrl}/storage/stream/$videoId',
   );
@@ -102,6 +125,24 @@ class ApiClient {
   Future<Response> getDownloadUrl(String videoId) => _dio.get(
     '${EnvironmentConfig.storageServiceUrl}/storage/download/$videoId',
   );
+
+  // Profile / User
+  Future<Response> getProfile() =>
+      _dio.get('${EnvironmentConfig.userServiceUrl}/users/me');
+
+  Future<Response> updateProfile(Map<String, dynamic> data) =>
+      _dio.put('${EnvironmentConfig.userServiceUrl}/users/me', data: data);
+
+  Future<Response> changePassword(Map<String, dynamic> data) => _dio.put(
+    '${EnvironmentConfig.userServiceUrl}/users/me/password',
+    data: data,
+  );
+
+  Future<Response> deleteAccount() =>
+      _dio.delete('${EnvironmentConfig.userServiceUrl}/users/me');
+
+  Future<Response> getCredits() =>
+      _dio.get('${EnvironmentConfig.userServiceUrl}/users/me/credits');
 }
 
 /// Intercepteur pour ajouter le token et gérer le refresh

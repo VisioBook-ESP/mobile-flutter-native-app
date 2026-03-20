@@ -17,6 +17,7 @@ class ProjectDetailProvider extends ChangeNotifier {
   String? _error;
   String? _extractedText;
   int? _wordCount;
+  String? _fileId;
 
   ProjectDetailProvider({required ProjectService projectService})
     : _projectService = projectService;
@@ -28,6 +29,7 @@ class ProjectDetailProvider extends ChangeNotifier {
   String? get error => _error;
   String? get extractedText => _extractedText;
   int? get wordCount => _wordCount;
+  String? get fileId => _fileId;
   bool get isLoading => _state == ProjectDetailState.loading;
   bool get isSaving => _state == ProjectDetailState.saving;
   bool get isGenerating => _state == ProjectDetailState.generating;
@@ -40,6 +42,7 @@ class ProjectDetailProvider extends ChangeNotifier {
     String? extractedText,
     int? wordCount,
   }) {
+    _fileId = fileId;
     _extractedText = extractedText;
     _wordCount = wordCount;
 
@@ -165,6 +168,10 @@ class ProjectDetailProvider extends ChangeNotifier {
       final result = await _projectService.createProject(
         title: _project!.title,
         description: _project!.description,
+        fileId: _fileId,
+        style: _config.style.name,
+        language: _config.language.code,
+        duration: _config.duration.name,
       );
 
       if (result.success && result.data != null) {
@@ -180,9 +187,28 @@ class ProjectDetailProvider extends ChangeNotifier {
       }
     }
 
-    _state = ProjectDetailState.loaded;
-    notifyListeners();
-    return _project!.id;
+    // Mise a jour d'un projet existant
+    final result = await _projectService.updateProject(
+      id: _project!.id,
+      title: _project!.title,
+      description: _project!.description,
+      fileId: _fileId,
+      style: _config.style.name,
+      language: _config.language.code,
+      duration: _config.duration.name,
+    );
+
+    if (result.success && result.data != null) {
+      _project = result.data;
+      _state = ProjectDetailState.loaded;
+      notifyListeners();
+      return result.data!.id;
+    } else {
+      _error = result.error;
+      _state = ProjectDetailState.error;
+      notifyListeners();
+      return null;
+    }
   }
 
   /// Lance la generation du projet
@@ -202,7 +228,10 @@ class ProjectDetailProvider extends ChangeNotifier {
       return 'workflow_${DateTime.now().millisecondsSinceEpoch}';
     }
 
-    final result = await _projectService.generateProject(projectId);
+    final result = await _projectService.generateProject(
+      projectId,
+      config: _config.toJson(),
+    );
 
     if (result.success) {
       _state = ProjectDetailState.loaded;
@@ -220,6 +249,7 @@ class ProjectDetailProvider extends ChangeNotifier {
   void reset() {
     _state = ProjectDetailState.initial;
     _project = null;
+    _fileId = null;
     _config = const ProjectConfig();
     _error = null;
     _extractedText = null;

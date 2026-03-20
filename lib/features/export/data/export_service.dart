@@ -36,8 +36,18 @@ class ExportService {
     }
 
     try {
+      final urlResponse = await _apiClient.getDownloadUrl(projectId);
+      final downloadUrl =
+          urlResponse.data['url'] as String? ??
+          urlResponse.data['downloadUrl'] as String?;
+      if (downloadUrl == null) {
+        return ExportResult(
+          success: false,
+          error: 'URL de telechargement non disponible',
+        );
+      }
       await _apiClient.dio.download(
-        '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/video',
+        downloadUrl,
         savePath,
         queryParameters: {'quality': quality.name},
         onReceiveProgress: (received, total) {
@@ -66,9 +76,7 @@ class ExportService {
     }
 
     try {
-      final response = await _apiClient.dio.post(
-        '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/share',
-      );
+      final response = await _apiClient.shareProject(projectId, {});
       final link = response.data['shareLink'] as String?;
       if (link == null) {
         return ExportResult(

@@ -12,8 +12,8 @@ void main() {
       expect(EnvironmentConfig.current, Environment.dev);
     });
 
-    test('useMockData is true by default', () {
-      expect(EnvironmentConfig.useMockData, isTrue);
+    test('useMockData is false by default', () {
+      expect(EnvironmentConfig.useMockData, isFalse);
     });
 
     test('setEnvironment changes current environment', () {

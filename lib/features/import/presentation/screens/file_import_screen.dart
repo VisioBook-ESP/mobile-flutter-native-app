@@ -7,6 +7,7 @@ import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
 import 'package:visiobook_mobile/features/import/domain/import_file.dart';
 import 'package:visiobook_mobile/features/import/presentation/providers/import_provider.dart';
+import 'package:visiobook_mobile/features/project_detail/presentation/providers/project_detail_provider.dart';
 
 /// Ecran d'import de fichier
 class FileImportScreen extends StatelessWidget {
@@ -75,7 +76,20 @@ class FileImportScreen extends StatelessWidget {
                       onPressed: () async {
                         final success = await provider.uploadFile();
                         if (success && context.mounted) {
-                          context.push(AppRoutes.textPreview);
+                          final result = provider.uploadResult;
+                          final file = provider.selectedFile;
+                          if (result != null && file != null) {
+                            context
+                                .read<ProjectDetailProvider>()
+                                .initFromImport(
+                                  fileId: result.fileId ?? 'unknown',
+                                  fileName: file.name,
+                                  extractedText: result.extractedText,
+                                  wordCount: result.wordCount,
+                                );
+                            provider.reset();
+                            context.push(AppRoutes.projectConfig);
+                          }
                         }
                       },
                     ),

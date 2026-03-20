@@ -12,9 +12,9 @@
 | 1 | CI/CD | P0 | Done | 100% |
 | 2 | Core / Infrastructure | P0 | Done | 100% |
 | 3 | Authentification | P0 | Done | 95% |
-| 4 | Dashboard | P0 | In Progress | 95% |
-| 5 | Import Contenu | P0 | Done | 95% |
-| 6 | Detail & Configuration | P0 | In Progress | 85% |
+| 4 | Dashboard | P0 | Done | 95% |
+| 5 | Import Contenu | P0 | Done | 100% |
+| 6 | Detail & Configuration | P0 | Done | 95% |
 | 7 | Generation | P0 | Done | 85% |
 | 8 | Player | P0 | Done | 85% |
 | 9 | Export | P0 | Done | 80% |
@@ -28,8 +28,11 @@
 
 ## Note importante
 
-> **AUTH CONNECTEE** : L'authentification est connectee au Core User Service (51.178.52.51:9999).
-> `useMockData = false` dans `lib/config/environment.dart`. Les autres services ne sont pas encore disponibles.
+> **Services connectes** :
+> - Auth : Core User Service (51.178.52.51:9999) — login, register, refresh
+> - Import : Content Ingestion Service — upload, extraction texte, ingestion
+> - `useMockData = false` dans `lib/config/environment.dart`
+> - Les autres services (Project, Storage, AI) ne sont pas encore disponibles.
 
 ---
 
@@ -198,12 +201,13 @@
 - [x] Bouton "Continuer"
 
 ### Previsualisation [P1] (US 1.3 - SHOULD)
-- [x] Afficher preview du texte
-- [x] Resume automatique
+- ~~Afficher preview du texte~~ (supprime, on va direct a la config)
+- ~~Resume automatique~~ (supprime)
 
 ### API Endpoints [P0]
-- [x] POST /api/v1/storage/upload
-- [x] POST /api/v1/storage/transform
+- [x] POST /api/v1/upload/ (content-ingestion-service)
+- [x] POST /api/v1/extract/text (content-ingestion-service)
+- [x] POST /api/v1/ingest/ (content-ingestion-service)
 
 ---
 
@@ -213,11 +217,11 @@
 > API: Core Project Service (port 8086)
 
 ### Detail Projet Screen [P0]
-- [ ] Preview image/video
 - [x] Titre et date
 - [x] Resume du texte
 - [x] Section configuration
 - [x] Bouton "Generer VisioBook"
+- [x] Bouton "Sauvegarder pour plus tard"
 
 ### Style graphique [P0] (US 2.1 - MUST)
 - [x] Selecteur style (Realiste, Cartoon, Manga, Aquarelle)
@@ -512,17 +516,14 @@
 - [x] DELETE /api/v1/users/me
 - [x] GET /api/v1/users/me/credits (quand disponible)
 
-### 13.9 - Documentation API [P1] ✅
-- [x] Recuperer les specs API depuis docs-architecture
-- [x] Sauvegarder dans `docs/api/` (reference previsionnelle, pas verite absolue)
-
 ---
 
 ## Microservices Reference
 
-| Service | Port | Role |
-|---------|------|------|
-| Core User Service | 9999 | Auth, profils, sessions |
-| Core Project Service | 8086 | Projets, workflows |
-| Support Storage Service | 8089 | Upload, stockage, streaming |
-| AI Analysis Service | 8083 | Analyse IA, generation |
+| Service | Port | Role | Statut |
+|---------|------|------|--------|
+| Core User Service | 9999 | Auth, profils, sessions | En prod |
+| Content Ingestion Service | 8000 | Upload, OCR, extraction texte, chunking | En prod |
+| Core Project Service | 8086 | Projets, workflows | Pas deploye |
+| Support Storage Service | 8089 | Stockage, streaming | Pas deploye |
+| AI Analysis Service | 8083 | Analyse IA, generation | Pas deploye |

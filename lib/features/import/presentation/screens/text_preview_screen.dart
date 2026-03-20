@@ -287,20 +287,29 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
                   ),
                 ),
 
-                // Resume automatique (only in view mode)
-                if (!_isEditing &&
-                    result.extractedText != null &&
-                    _generateSummary(result.extractedText!) != null)
-                  _buildSummaryCard(
-                    context,
-                    _generateSummary(result.extractedText!)!,
-                  ),
-
-                // Texte extrait ou editeur
+                // Resume + texte dans un Expanded scrollable
                 Expanded(
                   child: _isEditing
                       ? _buildEditMode(context)
-                      : _buildViewMode(context, result.extractedText),
+                      : SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              // Resume automatique (only in view mode)
+                              if (result.extractedText != null &&
+                                  _generateSummary(result.extractedText!) !=
+                                      null)
+                                _buildSummaryCard(
+                                  context,
+                                  _generateSummary(result.extractedText!)!,
+                                ),
+                              // Texte extrait
+                              _buildViewModeContent(
+                                context,
+                                result.extractedText,
+                              ),
+                            ],
+                          ),
+                        ),
                 ),
 
                 // Boutons d'action
@@ -373,8 +382,8 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
     );
   }
 
-  Widget _buildViewMode(BuildContext context, String? text) {
-    return SingleChildScrollView(
+  Widget _buildViewModeContent(BuildContext context, String? text) {
+    return Padding(
       padding: const EdgeInsets.all(24),
       child: Container(
         width: double.infinity,

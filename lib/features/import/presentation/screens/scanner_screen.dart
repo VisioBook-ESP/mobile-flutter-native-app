@@ -10,6 +10,7 @@ import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
 import 'package:visiobook_mobile/features/import/presentation/providers/import_provider.dart';
+import 'package:visiobook_mobile/features/project_detail/presentation/providers/project_detail_provider.dart';
 
 /// Ecran de scan de document via la camera
 class ScannerScreen extends StatefulWidget {
@@ -201,7 +202,18 @@ class _ScannerScreenState extends State<ScannerScreen>
       if (!mounted) return;
 
       if (provider.state == ImportState.uploaded) {
-        context.push(AppRoutes.textPreview);
+        final result = provider.uploadResult;
+        final file = provider.selectedFile;
+        if (result != null && file != null) {
+          context.read<ProjectDetailProvider>().initFromImport(
+            fileId: result.fileId ?? 'unknown',
+            fileName: file.name,
+            extractedText: result.extractedText,
+            wordCount: result.wordCount,
+          );
+          provider.reset();
+          context.push(AppRoutes.projectConfig);
+        }
       } else if (provider.state == ImportState.error) {
         setState(() {
           _isUploading = false;

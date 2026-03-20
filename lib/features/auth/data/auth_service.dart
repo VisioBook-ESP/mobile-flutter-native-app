@@ -77,7 +77,6 @@ class AuthService {
         'password': password,
         'first_name': firstName,
         'last_name': lastName,
-        'role': 'user',
       });
 
       final data = response.data;

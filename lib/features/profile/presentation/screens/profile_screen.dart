@@ -54,24 +54,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return profile.username;
   }
 
-  String _formatDate(DateTime date) {
-    final months = [
-      'janvier',
-      'février',
-      'mars',
-      'avril',
-      'mai',
-      'juin',
-      'juillet',
-      'août',
-      'septembre',
-      'octobre',
-      'novembre',
-      'décembre',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
-  }
-
   @override
   Widget build(BuildContext context) {
     final profileProvider = context.watch<ProfileProvider>();
@@ -199,7 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Membre depuis le ${_formatDate(profile.createdAt)}',
+            '@${profile.username}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -791,7 +773,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     BuildContext context,
     ProfileProvider provider,
   ) {
-    final oldPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -840,14 +821,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         AppInput(
-                          label: 'Mot de passe actuel',
-                          controller: oldPasswordController,
-                          obscureText: true,
-                          validator: (value) =>
-                              Validators.required(value, 'Mot de passe actuel'),
-                        ),
-                        const SizedBox(height: 16),
-                        AppInput(
                           label: 'Nouveau mot de passe',
                           controller: newPasswordController,
                           obscureText: true,
@@ -885,7 +858,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onPressed: () async {
                             if (formKey.currentState?.validate() ?? false) {
                               final success = await provider.changePassword(
-                                oldPassword: oldPasswordController.text,
                                 newPassword: newPasswordController.text,
                               );
                               if (sheetContext.mounted) {

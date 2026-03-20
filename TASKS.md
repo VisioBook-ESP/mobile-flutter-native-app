@@ -21,6 +21,7 @@
 | 10 | Historique | P1 | Done | 100% |
 | 11 | Polish & QA | P2 | Done | 100% |
 | 12 | Docker & Multi-platform Build | P1 | Done | 100% |
+| 13 | Integration API - Donnees utilisateur | P0 | Todo | 0% |
 
 ---
 
@@ -405,6 +406,74 @@
 - [x] Android emulateur (via APK) - `make docker-apk` + Android Studio
 - [x] iPhone physique (via Xcode / TestFlight) - `make export-ipa`
 - [x] Android physique (via APK sideload) - `make docker-apk`
+
+---
+
+## Phase 13: Integration API - Pret pour le live [P0]
+
+> Objectif: S'assurer que TOUTES les donnees echangees avec les microservices sont correctement
+> implementees pour fonctionner quand on passe `useMockData = false`.
+>
+> **Audit des problemes identifies :**
+> - La config (style/langue/duree) n'est jamais envoyee au backend
+> - Le `fileId` de l'import n'est pas lie au projet cote API
+> - `createProject()` n'envoie que title/description, pas la config ni le fileId
+> - `saveProject()` ne fait jamais de `PUT /projects/{id}` pour les projets existants
+> - `generateProject()` fait un POST sans body (pas de config)
+> - `uploadFile()` dans StorageService ne transmet pas la progression au callback `onProgress`
+> - `uploadScannedImages()` n'envoie que la 1ere image, ignore les multi-pages
+> - `Project.fromJson/toJson` ne gere pas `fileId`, `language`, `duration` (champs config)
+> - Le download video utilise un endpoint invente (`/projects/{id}/video`) pas dans l'ApiClient
+> - `ExportService.generateShareLink()` utilise `_apiClient.dio.post` au lieu de `_apiClient.shareProject()`
+
+### 13.1 - Creer/Sauvegarder un projet avec toutes les donnees [P0]
+- [ ] `createProject()` doit envoyer : title, description, fileId, config (style, language, duration)
+- [ ] `ProjectService.createProject()` : ajouter params `fileId`, `config`
+- [ ] `saveProject()` doit faire un `PUT /projects/{id}` pour les projets existants (actuellement no-op)
+- [ ] `ProjectService` : ajouter methode `updateProject()` qui appelle `ApiClient.updateProject()`
+- [ ] `Project.fromJson()` : parser les champs `fileId`, `language`, `duration`, `config`
+- [ ] `Project.toJson()` : serialiser ces memes champs
+- [ ] `Project` model : ajouter champ `fileId` pour stocker la reference au fichier uploade
+
+### 13.2 - Lier le contenu importe au projet [P0]
+- [ ] `initFromImport()` : stocker le `fileId` dans le provider (pas seulement dans l'id temporaire)
+- [ ] Passer le `fileId` a `createProject()` lors de la sauvegarde
+- [ ] `StorageService.uploadFile()` : brancher le callback `onProgress` sur Dio `onSendProgress`
+- [ ] `uploadScannedImages()` : envoyer TOUTES les images (pas juste `imagePaths.first`)
+- [ ] Apres upload multi-images : appeler `transformFile()` pour OCR et recuperer le texte
+
+### 13.3 - Envoyer la config a la generation [P0]
+- [ ] `ApiClient.generateProject()` : accepter un body `Map<String, dynamic>` optionnel
+- [ ] `ProjectService.generateProject()` : accepter et passer un `ProjectConfig`
+- [ ] `GenerationService.startGeneration()` : accepter et passer un `ProjectConfig`
+- [ ] `ProjectDetailProvider.generateProject()` : passer `_config` au service
+- [ ] `ProjectProvider.generateProject()` : accepter et passer un `ProjectConfig`
+
+### 13.4 - Export & Partage [P0]
+- [ ] `ExportService.downloadVideo()` : utiliser `ApiClient.getDownloadUrl()` puis download (pas un endpoint invente)
+- [ ] `ExportService.generateShareLink()` : utiliser `_apiClient.shareProject()` au lieu de `_apiClient.dio.post()`
+- [ ] Verifier que le `videoId` pour le download vient bien des donnees du projet/workflow
+
+### 13.5 - Auth : champs manquants [P1]
+- [ ] Login : stocker le `refresh_token` retourne (actuellement seul `access_token` est sauvegarde)
+- [ ] Stocker et exposer `firstName`/`userName` depuis la reponse login (pas juste register)
+- [ ] `AuthProvider.checkAuthStatus()` : recharger les infos user (nom, etc.) depuis le storage ou un `GET /users/me`
+
+### 13.6 - VisioBook Reader : deserialisation [P0]
+- [ ] Verifier que `VisiobookData.fromJson()` correspond au format reel de `GET /projects/{id}/visiobook`
+- [ ] Gerer le cas ou le backend retourne un wrapper (ex: `{ "visiobook": { ... } }`)
+- [ ] `VisiobookPanel.fromJson()` : gerer les types numeriques flexibles (int vs double pour `videoDurationMs`)
+
+### 13.7 - Environment & Routing [P1]
+- [ ] `EnvironmentConfig` : les URLs des services pointent toutes vers le meme path `/api/v1` — verifier si un API Gateway unifie ou si les ports doivent etre distincts
+- [ ] Verifier que tous les endpoints utilisent le bon service URL (project vs storage vs user)
+
+### 13.8 - Tests [P0]
+- [ ] Tests unitaires : `ProjectConfig.toJson()` serialise correctement
+- [ ] Tests unitaires : `Project.fromJson()` parse les nouveaux champs (fileId, config)
+- [ ] Tests unitaires : `WorkflowState.fromJson()` gere tous les cas (types flexibles, champs null)
+- [ ] Tests unitaires : `VisiobookData.fromJson()` avec le JSON de la spec
+- [ ] Test d'integration : flux complet import -> config -> save -> generate avec les bons payloads
 
 ---
 

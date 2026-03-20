@@ -40,7 +40,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return;
     }
     if (index == 4) {
-      _showProfileModal();
+      context.push(AppRoutes.profile);
       return;
     }
     setState(() => _currentNavIndex = index);
@@ -94,50 +94,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.scan);
-              },
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showProfileModal() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.neutral300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text('Profil', style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 24),
-            AppButton(
-              text: 'Se déconnecter',
-              variant: AppButtonVariant.outline,
-              fullWidth: true,
-              onPressed: () {
-                final authProvider = context.read<AuthProvider>();
-                final navigator = GoRouter.of(context);
-                Navigator.pop(context);
-                authProvider.logout().then((_) {
-                  navigator.go(AppRoutes.splash);
-                });
               },
             ),
             const SizedBox(height: 24),

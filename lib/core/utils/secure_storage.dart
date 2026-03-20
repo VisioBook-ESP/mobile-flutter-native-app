@@ -7,6 +7,7 @@ class SecureStorageService {
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _userIdKey = 'user_id';
+  static const String _userNameKey = 'user_name';
   static const String _onboardingCompleteKey = 'onboarding_complete';
 
   SecureStorageService()
@@ -42,6 +43,15 @@ class SecureStorageService {
     return _storage.read(key: _userIdKey);
   }
 
+  // User Name
+  Future<void> saveUserName(String name) async {
+    await _storage.write(key: _userNameKey, value: name);
+  }
+
+  Future<String?> getUserName() async {
+    return _storage.read(key: _userNameKey);
+  }
+
   // Onboarding
   Future<void> setOnboardingComplete(bool complete) async {
     await _storage.write(
@@ -60,6 +70,7 @@ class SecureStorageService {
     await _storage.delete(key: _accessTokenKey);
     await _storage.delete(key: _refreshTokenKey);
     await _storage.delete(key: _userIdKey);
+    await _storage.delete(key: _userNameKey);
   }
 
   // Clear all

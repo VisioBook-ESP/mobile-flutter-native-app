@@ -21,7 +21,8 @@
 | 10 | Historique | P1 | Done | 100% |
 | 11 | Polish & QA | P2 | Done | 100% |
 | 12 | Docker & Multi-platform Build | P1 | Done | 100% |
-| 13 | Integration API - Donnees utilisateur | P0 | Todo | 0% |
+| 13 | Integration API - Donnees utilisateur | P0 | In Progress | 75% |
+| 14 | Profil Utilisateur | P1 | In Progress | 80% |
 
 ---
 
@@ -413,67 +414,107 @@
 
 > Objectif: S'assurer que TOUTES les donnees echangees avec les microservices sont correctement
 > implementees pour fonctionner quand on passe `useMockData = false`.
->
-> **Audit des problemes identifies :**
-> - La config (style/langue/duree) n'est jamais envoyee au backend
-> - Le `fileId` de l'import n'est pas lie au projet cote API
-> - `createProject()` n'envoie que title/description, pas la config ni le fileId
-> - `saveProject()` ne fait jamais de `PUT /projects/{id}` pour les projets existants
-> - `generateProject()` fait un POST sans body (pas de config)
-> - `uploadFile()` dans StorageService ne transmet pas la progression au callback `onProgress`
-> - `uploadScannedImages()` n'envoie que la 1ere image, ignore les multi-pages
-> - `Project.fromJson/toJson` ne gere pas `fileId`, `language`, `duration` (champs config)
-> - Le download video utilise un endpoint invente (`/projects/{id}/video`) pas dans l'ApiClient
-> - `ExportService.generateShareLink()` utilise `_apiClient.dio.post` au lieu de `_apiClient.shareProject()`
 
-### 13.1 - Creer/Sauvegarder un projet avec toutes les donnees [P0]
-- [ ] `createProject()` doit envoyer : title, description, fileId, config (style, language, duration)
-- [ ] `ProjectService.createProject()` : ajouter params `fileId`, `config`
-- [ ] `saveProject()` doit faire un `PUT /projects/{id}` pour les projets existants (actuellement no-op)
-- [ ] `ProjectService` : ajouter methode `updateProject()` qui appelle `ApiClient.updateProject()`
-- [ ] `Project.fromJson()` : parser les champs `fileId`, `language`, `duration`, `config`
-- [ ] `Project.toJson()` : serialiser ces memes champs
-- [ ] `Project` model : ajouter champ `fileId` pour stocker la reference au fichier uploade
+### 13.1 - Creer/Sauvegarder un projet avec toutes les donnees [P0] ✅
+- [x] `createProject()` doit envoyer : title, description, fileId, config (style, language, duration)
+- [x] `ProjectService.createProject()` : ajouter params `fileId`, `config`
+- [x] `saveProject()` doit faire un `PUT /projects/{id}` pour les projets existants (actuellement no-op)
+- [x] `ProjectService` : ajouter methode `updateProject()` qui appelle `ApiClient.updateProject()`
+- [x] `Project.fromJson()` : parser les champs `fileId`, `language`, `duration`, `config`
+- [x] `Project.toJson()` : serialiser ces memes champs
+- [x] `Project` model : ajouter champ `fileId` pour stocker la reference au fichier uploade
 
-### 13.2 - Lier le contenu importe au projet [P0]
-- [ ] `initFromImport()` : stocker le `fileId` dans le provider (pas seulement dans l'id temporaire)
-- [ ] Passer le `fileId` a `createProject()` lors de la sauvegarde
-- [ ] `StorageService.uploadFile()` : brancher le callback `onProgress` sur Dio `onSendProgress`
-- [ ] `uploadScannedImages()` : envoyer TOUTES les images (pas juste `imagePaths.first`)
-- [ ] Apres upload multi-images : appeler `transformFile()` pour OCR et recuperer le texte
+### 13.2 - Lier le contenu importe au projet [P0] ✅
+- [x] `initFromImport()` : stocker le `fileId` dans le provider (pas seulement dans l'id temporaire)
+- [x] Passer le `fileId` a `createProject()` lors de la sauvegarde
+- [x] `StorageService.uploadFile()` : brancher le callback `onProgress` sur Dio `onSendProgress`
+- [x] `uploadScannedImages()` : envoyer TOUTES les images (pas juste `imagePaths.first`)
+- [x] Integrer le content-ingestion-service (upload + extract text en 2 etapes)
 
-### 13.3 - Envoyer la config a la generation [P0]
-- [ ] `ApiClient.generateProject()` : accepter un body `Map<String, dynamic>` optionnel
-- [ ] `ProjectService.generateProject()` : accepter et passer un `ProjectConfig`
-- [ ] `GenerationService.startGeneration()` : accepter et passer un `ProjectConfig`
-- [ ] `ProjectDetailProvider.generateProject()` : passer `_config` au service
-- [ ] `ProjectProvider.generateProject()` : accepter et passer un `ProjectConfig`
+### 13.3 - Envoyer la config a la generation [P0] ✅
+- [x] `ApiClient.generateProject()` : accepter un body `Map<String, dynamic>` optionnel
+- [x] `ProjectService.generateProject()` : accepter et passer un `ProjectConfig`
+- [x] `GenerationService.startGeneration()` : accepter et passer un `ProjectConfig`
+- [x] `ProjectDetailProvider.generateProject()` : passer `_config` au service
+- [x] `ProjectProvider.generateProject()` : accepter et passer un `ProjectConfig`
 
-### 13.4 - Export & Partage [P0]
-- [ ] `ExportService.downloadVideo()` : utiliser `ApiClient.getDownloadUrl()` puis download (pas un endpoint invente)
-- [ ] `ExportService.generateShareLink()` : utiliser `_apiClient.shareProject()` au lieu de `_apiClient.dio.post()`
+### 13.4 - Export & Partage [P0] ✅
+- [x] `ExportService.downloadVideo()` : utiliser `ApiClient.getDownloadUrl()` puis download
+- [x] `ExportService.generateShareLink()` : utiliser `_apiClient.shareProject()`
 - [ ] Verifier que le `videoId` pour le download vient bien des donnees du projet/workflow
 
-### 13.5 - Auth : champs manquants [P1]
-- [ ] Login : stocker le `refresh_token` retourne (actuellement seul `access_token` est sauvegarde)
-- [ ] Stocker et exposer `firstName`/`userName` depuis la reponse login (pas juste register)
-- [ ] `AuthProvider.checkAuthStatus()` : recharger les infos user (nom, etc.) depuis le storage ou un `GET /users/me`
+### 13.5 - Auth : champs manquants [P1] ✅
+- [x] Login : stocker le `refresh_token` retourne
+- [x] Stocker et exposer `firstName`/`userName` depuis la reponse login
+- [x] `AuthProvider.checkAuthStatus()` : recharger le nom user depuis le storage
 
 ### 13.6 - VisioBook Reader : deserialisation [P0]
-- [ ] Verifier que `VisiobookData.fromJson()` correspond au format reel de `GET /projects/{id}/visiobook`
-- [ ] Gerer le cas ou le backend retourne un wrapper (ex: `{ "visiobook": { ... } }`)
-- [ ] `VisiobookPanel.fromJson()` : gerer les types numeriques flexibles (int vs double pour `videoDurationMs`)
+- [ ] Verifier que `VisiobookData.fromJson()` correspond au format reel
+- [ ] Gerer le cas ou le backend retourne un wrapper
+- [ ] `VisiobookPanel.fromJson()` : gerer les types numeriques flexibles
 
 ### 13.7 - Environment & Routing [P1]
-- [ ] `EnvironmentConfig` : les URLs des services pointent toutes vers le meme path `/api/v1` — verifier si un API Gateway unifie ou si les ports doivent etre distincts
-- [ ] Verifier que tous les endpoints utilisent le bon service URL (project vs storage vs user)
+- [x] Ajouter `ingestionServiceUrl` dans `EnvironmentConfig`
+- [ ] Verifier les URLs/ports quand les services seront deployes
 
 ### 13.8 - Tests [P0]
-- [ ] Tests unitaires : `ProjectConfig.toJson()` serialise correctement
-- [ ] Tests unitaires : `Project.fromJson()` parse les nouveaux champs (fileId, config)
-- [ ] Tests unitaires : `WorkflowState.fromJson()` gere tous les cas (types flexibles, champs null)
-- [ ] Tests unitaires : `VisiobookData.fromJson()` avec le JSON de la spec
-- [ ] Test d'integration : flux complet import -> config -> save -> generate avec les bons payloads
+- [ ] Tests unitaires pour les nouveaux champs
+- [ ] Test d'integration du flux complet
+
+### 13.9 - Documentation API [P1] ✅
+- [x] Recuperer les specs API depuis docs-architecture
+- [x] Sauvegarder dans `docs/api/`
+
+---
+
+## Phase 14: Profil Utilisateur [P1]
+
+> Ref: Core User Service (port 9999)
+> Un microservice de paiement arrivera plus tard
+
+### Ecran Profil [P1]
+- [x] Header profil (avatar, nom, email)
+- [x] Section "Informations personnelles"
+- [x] Modifier nom / prenom / username
+- [ ] Modifier email (avec re-verification)
+- [x] Modifier mot de passe (ancien + nouveau)
+- [ ] Upload / modifier avatar
+
+### Section Credits & Tokens [P1]
+- [x] Affichage solde credits/tokens
+- [ ] Historique d'utilisation des credits
+- [x] Jauge visuelle (credits restants / total)
+
+### Section Paiement [P1] (preparation, en attente du microservice)
+- [x] UI "Mes moyens de paiement" (liste vide + placeholder)
+- [ ] UI "Ajouter un moyen de paiement" (maquette, non connecte)
+- [ ] UI "Acheter des credits" (grille de packs, non connecte)
+
+### Parametres [P2]
+- [ ] Langue de l'app (FR/EN)
+- [ ] Notifications (toggle on/off)
+- [ ] Theme (clair/sombre) - preparation
+
+### Compte [P1]
+- [x] Bouton "Se deconnecter"
+- [x] Bouton "Supprimer mon compte" (avec confirmation)
+- [x] Mentions legales / CGU
+- [x] Version de l'app
+
+### Navigation [P1]
+- [x] Route /profile
+- [x] Acces depuis le tab Profil de la bottom nav bar (remplacer le modal actuel)
+
+### API Endpoints [P1]
+- [x] GET /api/v1/users/me
+- [x] PUT /api/v1/users/me
+- [x] PUT /api/v1/users/me/password
+- [x] DELETE /api/v1/users/me
+- [x] GET /api/v1/users/me/credits (quand disponible)
+
+### 13.9 - Documentation API [P1] ✅
+- [x] Recuperer les specs API depuis docs-architecture
+- [x] Sauvegarder dans `docs/api/` (reference previsionnelle, pas verite absolue)
 
 ---
 

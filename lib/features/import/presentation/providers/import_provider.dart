@@ -124,26 +124,43 @@ class ImportProvider extends ChangeNotifier {
       return true;
     }
 
-    final result = await _storageService.uploadFile(
+    final uploadResult = await _storageService.uploadFile(
       _selectedFile!,
       onProgress: (progress) {
-        _uploadProgress = progress;
+        _uploadProgress = progress * 0.5;
         notifyListeners();
       },
     );
 
-    if (result.success && result.data != null) {
-      _uploadResult = result.data;
-      _uploadProgress = 1.0;
-      _state = ImportState.uploaded;
+    if (!uploadResult.success || uploadResult.data == null) {
+      _error = uploadResult.error;
+      _state = ImportState.error;
       notifyListeners();
-      return true;
+      return false;
     }
 
-    _error = result.error;
-    _state = ImportState.error;
+    final extractResult = await _storageService.extractTextFromFile(
+      _selectedFile!,
+      onProgress: (progress) {
+        _uploadProgress = 0.5 + progress * 0.5;
+        notifyListeners();
+      },
+    );
+
+    final fileId = uploadResult.data!.fileId;
+    final extractedText = extractResult.data?.extractedText;
+    final wordCount = extractResult.data?.wordCount;
+
+    _uploadResult = UploadResult.success(
+      fileId: fileId ?? '',
+      fileUrl: '',
+      extractedText: extractedText,
+      wordCount: wordCount,
+    );
+    _uploadProgress = 1.0;
+    _state = ImportState.uploaded;
     notifyListeners();
-    return false;
+    return true;
   }
 
   /// Simulation d'upload pour le mode mock
@@ -193,41 +210,54 @@ Finalement, le petit prince arriva sur Terre, ou il rencontra un renard qui lui 
     notifyListeners();
 
     try {
-      final file = File(imagePaths.first);
-      final fileName = 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final fileSize = await file.length();
+      final totalImages = imagePaths.length;
+      StorageResult<UploadResult>? lastResult;
 
-      _selectedFile = ImportFile(
-        name: fileName,
-        path: imagePaths.first,
-        type: ImportFileType.unknown,
-        sizeBytes: fileSize,
-        selectedAt: DateTime.now(),
-      );
+      for (int i = 0; i < totalImages; i++) {
+        final file = File(imagePaths[i]);
+        final fileName =
+            'scan_${DateTime.now().millisecondsSinceEpoch}_${i + 1}.jpg';
+        final fileSize = await file.length();
 
-      // Mode mock: simuler l'upload
-      if (EnvironmentConfig.useMockData) {
-        await _mockUpload();
-        return true;
+        _selectedFile = ImportFile(
+          name: fileName,
+          path: imagePaths[i],
+          type: ImportFileType.unknown,
+          sizeBytes: fileSize,
+          selectedAt: DateTime.now(),
+        );
+
+        // Mode mock: simuler l'upload
+        if (EnvironmentConfig.useMockData) {
+          await _mockUpload();
+          return true;
+        }
+
+        lastResult = await _storageService.uploadFile(
+          _selectedFile!,
+          onProgress: (progress) {
+            _uploadProgress = (i + progress) / totalImages;
+            notifyListeners();
+          },
+        );
+
+        if (!lastResult.success) {
+          _error = lastResult.error;
+          _state = ImportState.error;
+          notifyListeners();
+          return false;
+        }
       }
 
-      final result = await _storageService.uploadFile(
-        _selectedFile!,
-        onProgress: (progress) {
-          _uploadProgress = progress;
-          notifyListeners();
-        },
-      );
-
-      if (result.success && result.data != null) {
-        _uploadResult = result.data;
+      if (lastResult != null && lastResult.success && lastResult.data != null) {
+        _uploadResult = lastResult.data;
         _uploadProgress = 1.0;
         _state = ImportState.uploaded;
         notifyListeners();
         return true;
       }
 
-      _error = result.error;
+      _error = lastResult?.error ?? 'Erreur inconnue';
       _state = ImportState.error;
       notifyListeners();
       return false;

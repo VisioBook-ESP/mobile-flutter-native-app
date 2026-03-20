@@ -7,8 +7,9 @@ class AuthResult {
   final bool success;
   final String? error;
   final String? userId;
+  final String? userName;
 
-  AuthResult({required this.success, this.error, this.userId});
+  AuthResult({required this.success, this.error, this.userId, this.userName});
 }
 
 /// Service d'authentification
@@ -35,15 +36,22 @@ class AuthService {
 
       final data = response.data;
       final accessToken = data['access_token'] as String?;
+      final refreshToken = data['refresh_token'] as String?;
 
       if (accessToken != null) {
         await _storage.saveAccessToken(accessToken);
-        // Extraire le userId du JWT si present
+        if (refreshToken != null) {
+          await _storage.saveRefreshToken(refreshToken);
+        }
         final userId = _extractUserIdFromJwt(accessToken);
         if (userId != null) {
           await _storage.saveUserId(userId);
         }
-        return AuthResult(success: true, userId: userId);
+        final userName = _extractUserName(data);
+        if (userName != null) {
+          await _storage.saveUserName(userName);
+        }
+        return AuthResult(success: true, userId: userId, userName: userName);
       }
 
       return AuthResult(success: false, error: 'Réponse invalide du serveur');
@@ -81,7 +89,8 @@ class AuthService {
         if (userId != null) {
           await _storage.saveUserId(userId);
         }
-        return AuthResult(success: true, userId: userId);
+        await _storage.saveUserName(firstName);
+        return AuthResult(success: true, userId: userId, userName: firstName);
       }
 
       // Si pas de token dans la reponse register, login automatique
@@ -101,6 +110,29 @@ class AuthService {
   /// Verifie si l'utilisateur est connecte
   Future<bool> isLoggedIn() async {
     return _storage.isLoggedIn();
+  }
+
+  /// Recupere le nom stocke localement
+  Future<String?> getSavedUserName() async {
+    return _storage.getUserName();
+  }
+
+  /// Extrait le nom d'utilisateur depuis la reponse API
+  String? _extractUserName(dynamic data) {
+    if (data is Map) {
+      // Format: { user: { first_name, username, ... } }
+      if (data['user'] is Map) {
+        final user = data['user'] as Map;
+        return user['first_name'] as String? ??
+            user['username'] as String? ??
+            user['email'] as String?;
+      }
+      // Format plat: { first_name, username, ... }
+      return data['first_name'] as String? ??
+          data['username'] as String? ??
+          data['email'] as String?;
+    }
+    return null;
   }
 
   /// Extrait le sub (userId) du JWT sans verification de signature

@@ -27,7 +27,10 @@ class GenerationService {
   }
 
   /// Lance la generation d'un projet et retourne le workflowId
-  Future<GenerationResult<String>> startGeneration(String projectId) async {
+  Future<GenerationResult<String>> startGeneration(
+    String projectId, {
+    Map<String, dynamic>? config,
+  }) async {
     // Mode mock
     if (EnvironmentConfig.useMockData) {
       await Future.delayed(const Duration(milliseconds: 500));
@@ -39,7 +42,10 @@ class GenerationService {
     }
 
     try {
-      final response = await _apiClient.generateProject(projectId);
+      final response = await _apiClient.generateProject(
+        projectId,
+        data: config,
+      );
       final workflowId = response.data['workflowId'] as String?;
       if (workflowId == null) {
         return GenerationResult(

@@ -306,12 +306,16 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   ? null
                   : () async {
                       provider.setTitle(_titleController.text);
-                      final workflowId = await provider.generateProject();
-                      if (workflowId != null && context.mounted) {
+                      final result = await provider.generateProject();
+                      if (result != null && context.mounted) {
                         context.push(
                           AppRoutes.generation
                               .replaceAll(':id', provider.project!.id)
-                              .replaceAll(':workflowId', workflowId),
+                              .replaceAll(':versionId', result['versionId']!)
+                              .replaceAll(
+                                ':executionId',
+                                result['executionId']!,
+                              ),
                         );
                       } else if (provider.error != null && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(

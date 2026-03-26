@@ -32,7 +32,8 @@ class AppRoutes {
   static const String projectView = '/project/:id';
   static const String projectConfig = '/project/config';
   static const String projectEditConfig = '/project/:id/config';
-  static const String generation = '/project/:id/generate/:workflowId';
+  static const String generation =
+      '/project/:id/generate/:versionId/:executionId';
   static const String player = '/player/:id';
   // Import routes
   static const String inputMode = '/import';
@@ -105,8 +106,13 @@ class AppRouter {
         path: AppRoutes.generation,
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          final workflowId = state.pathParameters['workflowId']!;
-          return GenerationScreen(projectId: id, workflowId: workflowId);
+          final versionId = state.pathParameters['versionId']!;
+          final executionId = state.pathParameters['executionId']!;
+          return GenerationScreen(
+            projectId: id,
+            versionId: versionId,
+            executionId: executionId,
+          );
         },
       ),
       GoRoute(

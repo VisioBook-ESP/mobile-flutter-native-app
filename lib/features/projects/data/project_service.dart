@@ -149,15 +149,30 @@ class ProjectService {
     }
   }
 
-  /// Lance la generation d'un projet
-  Future<ProjectResult<String>> generateProject(
-    String id, {
-    Map<String, dynamic>? config,
-  }) async {
+  /// Lance la generation d'un projet : cree une version puis demarre le workflow
+  Future<ProjectResult<Map<String, String>>> generateProject(String id) async {
     try {
-      final response = await _apiClient.generateProject(id, data: config);
-      final workflowId = response.data['workflowId'] as String?;
-      return ProjectResult(success: true, data: workflowId);
+      // Step 1: Create a version
+      final versionResponse = await _apiClient.createVersion(id);
+      final versionId = versionResponse.data['id'] as String?;
+      if (versionId == null) {
+        return ProjectResult(success: false, error: 'Aucun versionId retourné');
+      }
+
+      // Step 2: Start workflow on that version
+      final workflowResponse = await _apiClient.startWorkflow(id, versionId);
+      final executionId = workflowResponse.data['id'] as String?;
+      if (executionId == null) {
+        return ProjectResult(
+          success: false,
+          error: 'Aucun executionId retourné',
+        );
+      }
+
+      return ProjectResult(
+        success: true,
+        data: {'versionId': versionId, 'executionId': executionId},
+      );
     } on DioException catch (e) {
       return ProjectResult(success: false, error: _handleError(e));
     } catch (e) {

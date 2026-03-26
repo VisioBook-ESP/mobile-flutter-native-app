@@ -269,13 +269,11 @@ class ProjectProvider extends ChangeNotifier {
   }
 
   /// Lance la generation d'un projet
-  Future<String?> generateProject(
-    String id, {
-    Map<String, dynamic>? config,
-  }) async {
-    final result = await _projectService.generateProject(id, config: config);
+  /// Retourne une map {versionId, executionId} ou null en cas d'erreur
+  Future<Map<String, String>?> generateProject(String id) async {
+    final result = await _projectService.generateProject(id);
 
-    if (result.success) {
+    if (result.success && result.data != null) {
       // Met a jour le statut localement
       final index = _projects.indexWhere((p) => p.id == id);
       if (index != -1) {

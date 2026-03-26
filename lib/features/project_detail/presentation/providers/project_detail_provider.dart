@@ -212,7 +212,8 @@ class ProjectDetailProvider extends ChangeNotifier {
   }
 
   /// Lance la generation du projet
-  Future<String?> generateProject() async {
+  /// Retourne une map {projectId, versionId, executionId} ou null en cas d'erreur
+  Future<Map<String, String>?> generateProject() async {
     final projectId = await saveProject();
     if (projectId == null) return null;
 
@@ -225,18 +226,20 @@ class ProjectDetailProvider extends ChangeNotifier {
       await Future.delayed(const Duration(milliseconds: 300));
       _state = ProjectDetailState.loaded;
       notifyListeners();
-      return 'workflow_${DateTime.now().millisecondsSinceEpoch}';
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      return {
+        'projectId': projectId,
+        'versionId': 'mock_version_$ts',
+        'executionId': 'mock_execution_$ts',
+      };
     }
 
-    final result = await _projectService.generateProject(
-      projectId,
-      config: _config.toJson(),
-    );
+    final result = await _projectService.generateProject(projectId);
 
-    if (result.success) {
+    if (result.success && result.data != null) {
       _state = ProjectDetailState.loaded;
       notifyListeners();
-      return result.data;
+      return {'projectId': projectId, ...result.data!};
     }
 
     _error = result.error;

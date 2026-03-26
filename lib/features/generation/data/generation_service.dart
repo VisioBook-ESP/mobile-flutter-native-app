@@ -12,6 +12,14 @@ class GenerationResult<T> {
   GenerationResult({required this.success, this.data, this.error});
 }
 
+/// Resultat du demarrage de generation (versionId + executionId)
+class StartGenerationData {
+  final String versionId;
+  final String executionId;
+
+  StartGenerationData({required this.versionId, required this.executionId});
+}
+
 /// Service pour les operations de generation video
 class GenerationService {
   final ApiClient _apiClient;
@@ -26,8 +34,8 @@ class GenerationService {
     _mockStartTime = null;
   }
 
-  /// Lance la generation d'un projet et retourne le workflowId
-  Future<GenerationResult<String>> startGeneration(
+  /// Lance la generation d'un projet : cree une version puis demarre le workflow
+  Future<GenerationResult<StartGenerationData>> startGeneration(
     String projectId, {
     Map<String, dynamic>? config,
   }) async {
@@ -35,25 +43,47 @@ class GenerationService {
     if (EnvironmentConfig.useMockData) {
       await Future.delayed(const Duration(milliseconds: 500));
       _mockStartTime = DateTime.now();
+      final ts = DateTime.now().millisecondsSinceEpoch;
       return GenerationResult(
         success: true,
-        data: 'mock_workflow_${DateTime.now().millisecondsSinceEpoch}',
+        data: StartGenerationData(
+          versionId: 'mock_version_$ts',
+          executionId: 'mock_execution_$ts',
+        ),
       );
     }
 
     try {
-      final response = await _apiClient.generateProject(
-        projectId,
-        data: config,
-      );
-      final workflowId = response.data['workflowId'] as String?;
-      if (workflowId == null) {
+      // Step 1: Create a version
+      final versionResponse = await _apiClient.createVersion(projectId);
+      final versionId = versionResponse.data['id'] as String?;
+      if (versionId == null) {
         return GenerationResult(
           success: false,
-          error: 'Aucun workflowId retourné par le serveur',
+          error: 'Aucun versionId retourné par le serveur',
         );
       }
-      return GenerationResult(success: true, data: workflowId);
+
+      // Step 2: Start workflow on that version
+      final workflowResponse = await _apiClient.startWorkflow(
+        projectId,
+        versionId,
+      );
+      final executionId = workflowResponse.data['id'] as String?;
+      if (executionId == null) {
+        return GenerationResult(
+          success: false,
+          error: 'Aucun executionId retourné par le serveur',
+        );
+      }
+
+      return GenerationResult(
+        success: true,
+        data: StartGenerationData(
+          versionId: versionId,
+          executionId: executionId,
+        ),
+      );
     } on DioException catch (e) {
       return GenerationResult(success: false, error: _handleError(e));
     } catch (e) {
@@ -64,21 +94,23 @@ class GenerationService {
   /// Recupere le statut d'un workflow de generation
   Future<GenerationResult<WorkflowState>> getWorkflowStatus(
     String projectId,
-    String workflowId,
+    String versionId,
+    String executionId,
   ) async {
     // Mode mock : simulation de progression realiste
     if (EnvironmentConfig.useMockData) {
       // Initialiser le timer mock au premier appel
       _mockStartTime ??= DateTime.now();
       await Future.delayed(const Duration(milliseconds: 200));
-      final state = _simulateMockProgress(workflowId);
+      final state = _simulateMockProgress(executionId);
       return GenerationResult(success: true, data: state);
     }
 
     try {
       final response = await _apiClient.getWorkflowStatus(
         projectId,
-        workflowId,
+        versionId,
+        executionId,
       );
       final state = WorkflowState.fromJson(
         response.data as Map<String, dynamic>,

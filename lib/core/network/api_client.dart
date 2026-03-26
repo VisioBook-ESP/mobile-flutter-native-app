@@ -57,22 +57,30 @@ class ApiClient {
       _dio.post('${EnvironmentConfig.projectServiceUrl}/projects', data: data);
 
   Future<Response> updateProject(String id, Map<String, dynamic> data) => _dio
-      .put('${EnvironmentConfig.projectServiceUrl}/projects/$id', data: data);
+      .patch('${EnvironmentConfig.projectServiceUrl}/projects/$id', data: data);
 
   Future<Response> deleteProject(String id) =>
       _dio.delete('${EnvironmentConfig.projectServiceUrl}/projects/$id');
 
-  Future<Response> generateProject(String id, {Map<String, dynamic>? data}) =>
-      _dio.post(
-        '${EnvironmentConfig.projectServiceUrl}/projects/$id/generate',
-        data: data,
-      );
+  Future<Response> createVersion(String projectId) => _dio.post(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions',
+    data: {},
+  );
+
+  Future<Response> startWorkflow(
+    String projectId,
+    String versionId,
+  ) => _dio.post(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/workflow/start',
+    data: {},
+  );
 
   Future<Response> getWorkflowStatus(
     String projectId,
-    String workflowId,
+    String versionId,
+    String executionId,
   ) => _dio.get(
-    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/workflows/$workflowId',
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/workflow/status/$executionId',
   );
 
   Future<Response> shareProject(String id, Map<String, dynamic> data) =>

@@ -12,12 +12,14 @@ import 'package:visiobook_mobile/features/generation/presentation/providers/gene
 /// Affiche la progression pendant la generation d'un VisioBook
 class GenerationScreen extends StatefulWidget {
   final String projectId;
-  final String workflowId;
+  final String versionId;
+  final String executionId;
 
   const GenerationScreen({
     super.key,
     required this.projectId,
-    required this.workflowId,
+    required this.versionId,
+    required this.executionId,
   });
 
   @override
@@ -60,7 +62,8 @@ class _GenerationScreenState extends State<GenerationScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<GenerationProvider>().startPolling(
         widget.projectId,
-        widget.workflowId,
+        widget.versionId,
+        widget.executionId,
       );
     });
   }
@@ -531,7 +534,11 @@ class _GenerationScreenState extends State<GenerationScreen>
                   color: AppColors.neutral900,
                 ),
                 onPressed: () {
-                  provider.startPolling(widget.projectId, widget.workflowId);
+                  provider.startPolling(
+                    widget.projectId,
+                    widget.versionId,
+                    widget.executionId,
+                  );
                 },
               ),
               const SizedBox(height: 12),

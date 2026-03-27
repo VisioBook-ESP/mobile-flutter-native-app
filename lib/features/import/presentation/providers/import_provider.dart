@@ -142,7 +142,7 @@ class ImportProvider extends ChangeNotifier {
     final extractResult = await _storageService.extractTextFromFile(
       _selectedFile!,
       onProgress: (progress) {
-        _uploadProgress = 0.5 + progress * 0.5;
+        _uploadProgress = 0.5 + progress * 0.4;
         notifyListeners();
       },
     );
@@ -150,6 +150,13 @@ class ImportProvider extends ChangeNotifier {
     final fileId = uploadResult.data!.fileId;
     final extractedText = extractResult.data?.extractedText;
     final wordCount = extractResult.data?.wordCount;
+
+    // Lancer l'ingestion pour rattacher le fichier au folder utilisateur
+    if (fileId != null && fileId.isNotEmpty) {
+      _uploadProgress = 0.9;
+      notifyListeners();
+      await _storageService.startIngestion(fileId: fileId, projectId: '');
+    }
 
     _uploadResult = UploadResult.success(
       fileId: fileId ?? '',

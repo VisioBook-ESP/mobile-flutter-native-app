@@ -26,11 +26,8 @@ class EnvironmentConfig {
   /// Core User Service
   static String get userServiceUrl => '$apiBaseUrl/api/v1';
 
-  /// Core Project Service (port 8086)
+  /// Core Project Service
   static String get projectServiceUrl => '$apiBaseUrl/api/v1';
-
-  /// Support Storage Service (port 8089)
-  static String get storageServiceUrl => '$apiBaseUrl/api/v1';
 
   /// Content Ingestion Service
   static String get ingestionServiceUrl => '$apiBaseUrl/api/v1';

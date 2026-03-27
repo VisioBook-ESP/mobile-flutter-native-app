@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/core/utils/secure_storage.dart';
@@ -83,11 +85,94 @@ class ApiClient {
     '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/workflow/status/$executionId',
   );
 
+  // Content
+  Future<Response> getContent(String projectId) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/content',
+  );
+
+  Future<Response> updateContent(String projectId, Map<String, dynamic> data) =>
+      _dio.patch(
+        '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/content',
+        data: data,
+      );
+
+  Future<Response> getScenes(String projectId) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/content/scenes',
+  );
+
+  Future<Response> getContentSummary(String projectId) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/content/summary',
+  );
+
+  Future<Response> updateScene(
+    String projectId,
+    String sceneId,
+    Map<String, dynamic> data,
+  ) => _dio.patch(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/content/scenes/$sceneId',
+    data: data,
+  );
+
+  Future<Response> getCharacters(String projectId) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/content/characters',
+  );
+
+  // Versions
+  Future<Response> getVersions(String projectId) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions',
+  );
+
+  Future<Response> getVersion(String projectId, String versionId) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId',
+  );
+
+  Future<Response> compareVersions(
+    String projectId,
+    String v1,
+    String v2,
+  ) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$v1/compare/$v2',
+  );
+
+  Future<Response> revertVersion(
+    String projectId,
+    String versionId,
+  ) => _dio.post(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/revert',
+    data: {},
+  );
+
+  // Workflow (extras)
+  Future<Response> cancelWorkflow(
+    String projectId,
+    String versionId,
+    String executionId,
+  ) => _dio.post(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/workflow/cancel/$executionId',
+    data: {},
+  );
+
+  Future<Response> retryWorkflow(
+    String projectId,
+    String versionId,
+    String executionId,
+  ) => _dio.post(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/workflow/retry/$executionId',
+    data: {},
+  );
+
+  // Share
   Future<Response> shareProject(String id, Map<String, dynamic> data) =>
       _dio.post(
         '${EnvironmentConfig.projectServiceUrl}/projects/$id/share',
         data: data,
       );
+
+  Future<Response> getShareLinks(String id) =>
+      _dio.get('${EnvironmentConfig.projectServiceUrl}/projects/$id/share');
+
+  Future<Response> deleteShareLinks(String id) =>
+      _dio.delete('${EnvironmentConfig.projectServiceUrl}/projects/$id/share');
 
   // Player / VisioBook
   Future<Response> getVisioBook(String projectId) => _dio.get(
@@ -95,9 +180,6 @@ class ApiClient {
   );
 
   // Content Ingestion Service
-  Future<Response> createFolder() =>
-      _dio.post('${EnvironmentConfig.ingestionServiceUrl}/folders/');
-
   Future<Response> getFilesByToken() =>
       _dio.get('${EnvironmentConfig.ingestionServiceUrl}/folders/files');
 
@@ -123,15 +205,6 @@ class ApiClient {
     '${EnvironmentConfig.ingestionServiceUrl}/extract/metadata',
     data: formData,
     options: Options(contentType: 'multipart/form-data'),
-  );
-
-  // Storage Service (download/stream - separate service)
-  Future<Response> getStreamUrl(String videoId) => _dio.get(
-    '${EnvironmentConfig.storageServiceUrl}/storage/stream/$videoId',
-  );
-
-  Future<Response> getDownloadUrl(String videoId) => _dio.get(
-    '${EnvironmentConfig.storageServiceUrl}/storage/download/$videoId',
   );
 
   // Profile / User
@@ -163,9 +236,30 @@ class _AuthInterceptor extends Interceptor {
       final token = await _storage.getAccessToken();
       if (token != null) {
         options.headers['Authorization'] = 'Bearer $token';
+        // Extraire le userId du JWT et l'ajouter en header X-User-Id
+        final userId = _extractUserIdFromJwt(token);
+        if (userId != null) {
+          options.headers['X-User-Id'] = userId;
+        }
       }
     }
     handler.next(options);
+  }
+
+  /// Décode le payload JWT et extrait le champ "sub" (userId)
+  String? _extractUserIdFromJwt(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return null;
+      final payload = parts[1];
+      // Ajouter le padding base64 manquant
+      final normalized = base64Url.normalize(payload);
+      final decoded = utf8.decode(base64Url.decode(normalized));
+      final json = jsonDecode(decoded) as Map<String, dynamic>;
+      return json['sub']?.toString();
+    } catch (_) {
+      return null;
+    }
   }
 
   @override

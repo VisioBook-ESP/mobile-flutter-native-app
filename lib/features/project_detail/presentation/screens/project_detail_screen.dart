@@ -31,9 +31,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<ProjectDetailProvider>();
       if (widget.projectId != null) {
-        provider.loadProject(widget.projectId!);
+        // Si le provider a deja ce projet charge, pas besoin de recharger
+        if (provider.project?.id != widget.projectId) {
+          provider.loadProject(widget.projectId!);
+        }
       }
-      // Si pas d'ID, on suppose que le provider a deja ete initialise depuis l'import
+      // Initialiser le titre depuis le projet charge
       if (provider.project != null) {
         _titleController.text = provider.project!.title;
       }

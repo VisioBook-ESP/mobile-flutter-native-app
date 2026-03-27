@@ -15,6 +15,7 @@ import 'package:visiobook_mobile/features/project_detail/presentation/screens/pr
 import 'package:visiobook_mobile/features/project_detail/presentation/screens/project_view_screen.dart';
 import 'package:visiobook_mobile/features/generation/presentation/screens/generation_screen.dart';
 import 'package:visiobook_mobile/features/player/presentation/screens/visiobook_reader_screen.dart';
+import 'package:visiobook_mobile/features/history/presentation/screens/text_detail_screen.dart';
 import 'package:visiobook_mobile/features/history/presentation/screens/texts_history_screen.dart';
 import 'package:visiobook_mobile/features/history/presentation/screens/visiobooks_history_screen.dart';
 import 'package:visiobook_mobile/features/profile/presentation/screens/profile_screen.dart';
@@ -42,6 +43,7 @@ class AppRoutes {
   static const String textPreview = '/import/preview';
   // History routes
   static const String textsHistory = '/history/texts';
+  static const String textDetail = '/text/:id';
   static const String visiobooksHistory = '/history/visiobooks';
   // Mock grid preview
   static const String visiobookGrid = '/mock/visiobook-grid';
@@ -85,15 +87,15 @@ class AppRouter {
         builder: (context, state) => const DashboardScreen(),
       ),
       GoRoute(
+        path: AppRoutes.projectConfig,
+        builder: (context, state) => const ProjectDetailScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.projectView,
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return ProjectViewScreen(projectId: id);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.projectConfig,
-        builder: (context, state) => const ProjectDetailScreen(),
       ),
       GoRoute(
         path: AppRoutes.projectEditConfig,
@@ -143,6 +145,13 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.textsHistory,
         builder: (context, state) => const TextsHistoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.textDetail,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return TextDetailScreen(projectId: id);
+        },
       ),
       GoRoute(
         path: AppRoutes.visiobooksHistory,

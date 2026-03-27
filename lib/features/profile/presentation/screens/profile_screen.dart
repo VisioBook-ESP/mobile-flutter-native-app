@@ -83,6 +83,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildErrorState(ProfileProvider provider) {
+    final isSessionExpired =
+        provider.error?.contains('Session expirée') ?? false;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -103,10 +105,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ).textTheme.bodyLarge?.copyWith(color: AppColors.neutral500),
             ),
             const SizedBox(height: 24),
-            AppButton(
-              text: 'Réessayer',
-              onPressed: () => provider.loadProfile(),
-            ),
+            if (isSessionExpired)
+              AppButton(
+                text: 'Se reconnecter',
+                fullWidth: true,
+                onPressed: () async {
+                  final router = GoRouter.of(context);
+                  await context.read<AuthProvider>().logout();
+                  router.go('/');
+                },
+              )
+            else
+              AppButton(
+                text: 'Réessayer',
+                onPressed: () => provider.loadProfile(),
+              ),
           ],
         ),
       ),

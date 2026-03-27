@@ -3,7 +3,6 @@ class UserProfile {
   final String username;
   final String email;
   final String? role;
-  final String? folderId;
   final String? firstName;
   final String? lastName;
   final String? avatarUrl;
@@ -14,7 +13,6 @@ class UserProfile {
     required this.username,
     required this.email,
     this.role,
-    this.folderId,
     this.firstName,
     this.lastName,
     this.avatarUrl,
@@ -27,7 +25,6 @@ class UserProfile {
       username: json['username'] as String? ?? '',
       email: json['email'] as String? ?? '',
       role: json['role'] as String?,
-      folderId: json['folderId'] as String?,
       firstName: json['first_name'] as String?,
       lastName: json['last_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
@@ -41,7 +38,6 @@ class UserProfile {
       'username': username,
       'email': email,
       'role': role,
-      'folderId': folderId,
       'first_name': firstName,
       'last_name': lastName,
     };
@@ -59,7 +55,6 @@ class UserProfile {
     String? username,
     String? email,
     String? role,
-    String? folderId,
     String? firstName,
     String? lastName,
     String? avatarUrl,
@@ -70,7 +65,6 @@ class UserProfile {
       username: username ?? this.username,
       email: email ?? this.email,
       role: role ?? this.role,
-      folderId: folderId ?? this.folderId,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       avatarUrl: avatarUrl ?? this.avatarUrl,

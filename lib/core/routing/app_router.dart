@@ -18,6 +18,8 @@ import 'package:visiobook_mobile/features/player/presentation/screens/visiobook_
 import 'package:visiobook_mobile/features/history/presentation/screens/text_detail_screen.dart';
 import 'package:visiobook_mobile/features/history/presentation/screens/texts_history_screen.dart';
 import 'package:visiobook_mobile/features/history/presentation/screens/visiobooks_history_screen.dart';
+import 'package:visiobook_mobile/features/payment/presentation/screens/plans_screen.dart';
+import 'package:visiobook_mobile/features/payment/presentation/screens/subscription_screen.dart';
 import 'package:visiobook_mobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:visiobook_mobile/features/projects/presentation/screens/dashboard_screen.dart';
 
@@ -46,6 +48,9 @@ class AppRoutes {
   static const String visiobooksHistory = '/history/visiobooks';
   // Profile
   static const String profile = '/profile';
+  // Payment
+  static const String plans = '/plans';
+  static const String subscription = '/subscription';
 }
 
 /// Configuration du router
@@ -158,6 +163,15 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.profile,
         builder: (context, state) => const ProfileScreen(),
+      ),
+      // Payment
+      GoRoute(
+        path: AppRoutes.plans,
+        builder: (context, state) => const PlansScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.subscription,
+        builder: (context, state) => const SubscriptionScreen(),
       ),
     ],
   );

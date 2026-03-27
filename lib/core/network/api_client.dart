@@ -191,6 +191,47 @@ class ApiClient {
 
   Future<Response> deleteAccount() =>
       _dio.delete('${EnvironmentConfig.userServiceUrl}/users/me');
+
+  // Payment / Subscriptions
+  Future<Response> getSubscriptionPlans() =>
+      _dio.get('${EnvironmentConfig.paymentServiceUrl}/subscriptions/plans');
+
+  Future<Response> getCurrentSubscription() =>
+      _dio.get('${EnvironmentConfig.paymentServiceUrl}/subscriptions/current');
+
+  Future<Response> createCheckoutSession(Map<String, dynamic> data) =>
+      _dio.post(
+        '${EnvironmentConfig.paymentServiceUrl}/subscriptions/checkout',
+        data: data,
+      );
+
+  Future<Response> cancelSubscription({String? reason}) => _dio.post(
+    '${EnvironmentConfig.paymentServiceUrl}/subscriptions/cancel',
+    data: reason != null ? {'reason': reason} : {},
+  );
+
+  Future<Response> upgradeSubscription(String planId) => _dio.post(
+    '${EnvironmentConfig.paymentServiceUrl}/subscriptions/upgrade',
+    data: {'planId': planId},
+  );
+
+  Future<Response> downgradeSubscription(String planId) => _dio.post(
+    '${EnvironmentConfig.paymentServiceUrl}/subscriptions/downgrade',
+    data: {'planId': planId},
+  );
+
+  Future<Response> getStripePortalUrl({String? returnUrl}) => _dio.get(
+    '${EnvironmentConfig.paymentServiceUrl}/subscriptions/portal',
+    queryParameters: returnUrl != null ? {'returnUrl': returnUrl} : null,
+  );
+
+  Future<Response> getQuota() =>
+      _dio.get('${EnvironmentConfig.paymentServiceUrl}/quotas');
+
+  Future<Response> createPaymentIntent(Map<String, dynamic> data) => _dio.post(
+    '${EnvironmentConfig.paymentServiceUrl}/subscriptions/payment-intent',
+    data: data,
+  );
 }
 
 /// Intercepteur pour ajouter le token et gérer le refresh

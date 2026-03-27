@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/utils/validators.dart';
 import 'package:visiobook_mobile/core/widgets/widgets.dart';
+import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/features/auth/presentation/providers/auth_provider.dart';
+import 'package:visiobook_mobile/features/payment/presentation/providers/payment_provider.dart';
 import 'package:visiobook_mobile/features/profile/domain/user_profile.dart';
 import 'package:visiobook_mobile/features/profile/presentation/providers/profile_provider.dart';
 
@@ -26,6 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProfileProvider>().loadProfile();
+      context.read<PaymentProvider>().loadAll();
     });
   }
 
@@ -75,6 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profileProvider = context.watch<ProfileProvider>();
+    final paymentProvider = context.watch<PaymentProvider>();
     final profile = profileProvider.profile;
 
     return Scaffold(
@@ -96,7 +100,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ? const Center(child: CircularProgressIndicator())
           : profile == null
           ? _buildErrorState(profileProvider)
-          : _buildContent(context, profile, profileProvider),
+          : _buildContent(context, profile, profileProvider, paymentProvider),
     );
   }
 
@@ -148,6 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     BuildContext context,
     UserProfile profile,
     ProfileProvider provider,
+    PaymentProvider paymentProvider,
   ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -156,13 +161,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           _buildHeaderSection(context, profile),
           const SizedBox(height: 24),
-          _buildCreditsSection(context, profile),
+          _buildQuotaSection(context, paymentProvider),
           const SizedBox(height: 24),
           _buildPersonalInfoSection(context, profile, provider),
           const SizedBox(height: 24),
           _buildSecuritySection(context, provider),
           const SizedBox(height: 24),
-          _buildPaymentSection(context),
+          _buildPaymentSection(context, paymentProvider),
           const SizedBox(height: 24),
           _buildAboutSection(context),
           const SizedBox(height: 24),
@@ -222,11 +227,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // -- Credits ---------------------------------------------------------------
+  // -- Quota ----------------------------------------------------------------
 
-  Widget _buildCreditsSection(BuildContext context, UserProfile profile) {
-    const maxCredits = 500;
-    final progress = (profile.credits / maxCredits).clamp(0.0, 1.0);
+  Widget _buildQuotaSection(
+    BuildContext context,
+    PaymentProvider paymentProvider,
+  ) {
+    final quota = paymentProvider.quota;
+    final currentPlan = paymentProvider.currentPlan;
+    final planName = currentPlan?.name ?? 'Free';
+
+    final projectsProgress = quota?.projectsUsagePercent.clamp(0.0, 1.0) ?? 0.0;
+    final videosProgress = quota?.videosUsagePercent.clamp(0.0, 1.0) ?? 0.0;
+
+    final projectsUsed = quota?.projectsUsed ?? 0;
+    final projectsLimit = quota?.projectsLimit ?? 0;
+    final videosUsed = quota?.videosUsed ?? 0;
+    final videosLimit = quota?.videosLimit ?? 0;
+
+    String limitLabel(int limit) => limit < 0 ? '\u221e' : '$limit';
 
     return _buildCard(
       child: Padding(
@@ -237,41 +256,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Row(
               children: [
                 const Icon(
-                  LucideIcons.coins,
+                  LucideIcons.barChart3,
                   size: 20,
                   color: AppColors.neutral900,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Cr\u00e9dits',
+                  'Mon forfait',
                   style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.neutral900,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    planName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Center(
-              child: Column(
-                children: [
-                  Text(
-                    '${profile.credits}',
-                    style: const TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.neutral900,
-                    ),
-                  ),
-                  Text(
-                    'cr\u00e9dits disponibles',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
+            const SizedBox(height: 20),
+            // Generations (videos) usage
+            Text(
+              'G\u00e9n\u00e9rations',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral600),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 6),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: progress,
+                value: videosProgress,
                 minHeight: 8,
                 backgroundColor: AppColors.neutral200,
                 valueColor: const AlwaysStoppedAnimation<Color>(
@@ -283,24 +310,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                '${profile.credits} / $maxCredits',
+                '$videosUsed / ${limitLabel(videosLimit)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
             const SizedBox(height: 16),
-            Center(
-              child: AppButton(
-                text: 'Acheter des cr\u00e9dits',
-                variant: AppButtonVariant.outline,
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Bient\u00f4t disponible'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
+            // Projects (storage) usage
+            Text(
+              'Projets',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral600),
+            ),
+            const SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: projectsProgress,
+                minHeight: 8,
+                backgroundColor: AppColors.neutral200,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.neutral900,
+                ),
               ),
+            ),
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '$projectsUsed / ${limitLabel(projectsLimit)}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+            const SizedBox(height: 20),
+            AppButton(
+              text: 'Changer de plan',
+              fullWidth: true,
+              onPressed: () => context.push(AppRoutes.plans),
+            ),
+            const SizedBox(height: 8),
+            AppButton(
+              text: 'G\u00e9rer mon abonnement',
+              variant: AppButtonVariant.outline,
+              fullWidth: true,
+              onPressed: () => context.push(AppRoutes.subscription),
             ),
           ],
         ),
@@ -615,7 +668,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // -- Payment ---------------------------------------------------------------
 
-  Widget _buildPaymentSection(BuildContext context) {
+  Widget _buildPaymentSection(
+    BuildContext context,
+    PaymentProvider paymentProvider,
+  ) {
+    final subscription = paymentProvider.subscription;
+    final currentPlan = paymentProvider.currentPlan;
+    final planName = currentPlan?.name ?? 'Free';
+    final isActive = subscription?.isActive ?? false;
+    final isCanceled = subscription?.isCanceled ?? false;
+
+    String statusLabel;
+    Color statusColor;
+    if (isCanceled) {
+      statusLabel = 'Annul\u00e9';
+      statusColor = AppColors.error;
+    } else if (isActive) {
+      statusLabel = 'Actif';
+      statusColor = const Color(0xFF16A34A);
+    } else {
+      statusLabel = 'Gratuit';
+      statusColor = AppColors.neutral500;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -633,29 +708,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 12),
         _buildCard(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Center(
-              child: Column(
-                children: [
-                  const Icon(
-                    LucideIcons.wallet,
-                    size: 40,
-                    color: AppColors.neutral300,
-                  ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Plan $planName',
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: statusColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                statusLabel,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: statusColor),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                if (subscription?.currentPeriodEnd != null) ...[
                   const SizedBox(height: 12),
                   Text(
-                    'Aucun moyen de paiement',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    isCanceled
+                        ? 'Acc\u00e8s jusqu\'au ${_formatDate(subscription!.currentPeriodEnd!)}'
+                        : 'Renouvellement le ${_formatDate(subscription!.currentPeriodEnd!)}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.neutral500,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Bient\u00f4t disponible',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
                 ],
-              ),
+                const SizedBox(height: 16),
+                Center(
+                  child: AppButton(
+                    text: 'G\u00e9rer mon abonnement',
+                    variant: AppButtonVariant.outline,
+                    fullWidth: true,
+                    onPressed: () => context.push(AppRoutes.subscription),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

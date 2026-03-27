@@ -812,7 +812,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     BuildContext context,
     ProfileProvider provider,
   ) {
-    final oldPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -861,14 +860,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         AppInput(
-                          label: 'Mot de passe actuel',
-                          controller: oldPasswordController,
-                          obscureText: true,
-                          validator: (value) =>
-                              Validators.required(value, 'Mot de passe actuel'),
-                        ),
-                        const SizedBox(height: 16),
-                        AppInput(
                           label: 'Nouveau mot de passe',
                           controller: newPasswordController,
                           obscureText: true,
@@ -906,7 +897,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onPressed: () async {
                             if (formKey.currentState?.validate() ?? false) {
                               final success = await provider.changePassword(
-                                oldPassword: oldPasswordController.text,
                                 newPassword: newPasswordController.text,
                               );
                               if (sheetContext.mounted) {

@@ -44,19 +44,13 @@ class ProfileService {
     return UserProfile.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// Changer le mot de passe
-  Future<void> changePassword({
-    required String oldPassword,
-    required String newPassword,
-  }) async {
+  /// Changer le mot de passe via PUT /users/me
+  Future<void> changePassword({required String newPassword}) async {
     if (EnvironmentConfig.useMockData) {
       return;
     }
 
-    await _apiClient.changePassword({
-      'old_password': oldPassword,
-      'new_password': newPassword,
-    });
+    await _apiClient.updateProfile({'password': newPassword});
   }
 
   /// Supprimer le compte
@@ -69,14 +63,9 @@ class ProfileService {
   }
 
   /// Recuperer les credits
+  /// TODO: Credits will come from payment service later
   Future<int> getCredits() async {
-    if (EnvironmentConfig.useMockData) {
-      return 150;
-    }
-
-    final response = await _apiClient.getCredits();
-    final data = response.data as Map<String, dynamic>;
-    return data['credits'] as int;
+    return 0;
   }
 
   UserProfile _mockProfile() {

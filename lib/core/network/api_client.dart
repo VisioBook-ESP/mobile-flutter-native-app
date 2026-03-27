@@ -64,9 +64,9 @@ class ApiClient {
   Future<Response> deleteProject(String id) =>
       _dio.delete('${EnvironmentConfig.projectServiceUrl}/projects/$id');
 
+  // Versions & Workflow
   Future<Response> createVersion(String projectId) => _dio.post(
     '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions',
-    data: {},
   );
 
   Future<Response> startWorkflow(
@@ -74,7 +74,6 @@ class ApiClient {
     String versionId,
   ) => _dio.post(
     '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/workflow/start',
-    data: {},
   );
 
   Future<Response> getWorkflowStatus(
@@ -83,6 +82,22 @@ class ApiClient {
     String executionId,
   ) => _dio.get(
     '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/workflow/status/$executionId',
+  );
+
+  Future<Response> cancelWorkflow(
+    String projectId,
+    String versionId,
+    String executionId,
+  ) => _dio.post(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/workflow/cancel/$executionId',
+  );
+
+  Future<Response> retryWorkflow(
+    String projectId,
+    String versionId,
+    String executionId,
+  ) => _dio.post(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/workflow/retry/$executionId',
   );
 
   // Content
@@ -115,50 +130,6 @@ class ApiClient {
 
   Future<Response> getCharacters(String projectId) => _dio.get(
     '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/content/characters',
-  );
-
-  // Versions
-  Future<Response> getVersions(String projectId) => _dio.get(
-    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions',
-  );
-
-  Future<Response> getVersion(String projectId, String versionId) => _dio.get(
-    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId',
-  );
-
-  Future<Response> compareVersions(
-    String projectId,
-    String v1,
-    String v2,
-  ) => _dio.get(
-    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$v1/compare/$v2',
-  );
-
-  Future<Response> revertVersion(
-    String projectId,
-    String versionId,
-  ) => _dio.post(
-    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/revert',
-    data: {},
-  );
-
-  // Workflow (extras)
-  Future<Response> cancelWorkflow(
-    String projectId,
-    String versionId,
-    String executionId,
-  ) => _dio.post(
-    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/workflow/cancel/$executionId',
-    data: {},
-  );
-
-  Future<Response> retryWorkflow(
-    String projectId,
-    String versionId,
-    String executionId,
-  ) => _dio.post(
-    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId/workflow/retry/$executionId',
-    data: {},
   );
 
   // Share
@@ -218,16 +189,8 @@ class ApiClient {
   Future<Response> updateProfile(Map<String, dynamic> data) =>
       _dio.put('${EnvironmentConfig.userServiceUrl}/users/me', data: data);
 
-  Future<Response> changePassword(Map<String, dynamic> data) => _dio.put(
-    '${EnvironmentConfig.userServiceUrl}/users/me/password',
-    data: data,
-  );
-
   Future<Response> deleteAccount() =>
       _dio.delete('${EnvironmentConfig.userServiceUrl}/users/me');
-
-  Future<Response> getCredits() =>
-      _dio.get('${EnvironmentConfig.userServiceUrl}/users/me/credits');
 }
 
 /// Intercepteur pour ajouter le token et gérer le refresh

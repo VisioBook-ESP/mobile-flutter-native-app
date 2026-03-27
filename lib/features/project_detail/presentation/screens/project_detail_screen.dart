@@ -313,7 +313,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       if (result != null && context.mounted) {
                         context.push(
                           AppRoutes.generation
-                              .replaceAll(':id', provider.project!.id)
+                              .replaceAll(':id', result['projectId']!)
                               .replaceAll(':versionId', result['versionId']!)
                               .replaceAll(
                                 ':executionId',
@@ -324,25 +324,6 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(provider.error!)),
                         );
-                      }
-                    },
-            ),
-            const SizedBox(height: 8),
-            AppButton(
-              text: 'Sauvegarder pour plus tard',
-              variant: AppButtonVariant.outline,
-              fullWidth: true,
-              isLoading: provider.isSaving,
-              onPressed: provider.isGenerating || provider.isSaving
-                  ? null
-                  : () async {
-                      provider.setTitle(_titleController.text);
-                      final projectId = await provider.saveProject();
-                      if (projectId != null && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Projet sauvegardé')),
-                        );
-                        context.go(AppRoutes.dashboard);
                       }
                     },
             ),

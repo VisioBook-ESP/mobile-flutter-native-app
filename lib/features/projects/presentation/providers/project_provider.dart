@@ -237,10 +237,7 @@ class ProjectProvider extends ChangeNotifier {
     required String title,
     String? description,
   }) async {
-    final result = await _projectService.createProject(
-      title: title,
-      description: description,
-    );
+    final result = await _projectService.createProject(title: title);
 
     if (result.success && result.data != null) {
       _projects.insert(0, result.data!);
@@ -269,7 +266,7 @@ class ProjectProvider extends ChangeNotifier {
   }
 
   /// Lance la generation d'un projet
-  /// Retourne une map {versionId, executionId} ou null en cas d'erreur
+  /// Retourne une Map avec versionId et executionId ou null en cas d'erreur
   Future<Map<String, String>?> generateProject(String id) async {
     final result = await _projectService.generateProject(id);
 
@@ -306,7 +303,6 @@ class ProjectProvider extends ChangeNotifier {
 
     final result = await _projectService.createProject(
       title: '${original.title} (copie)',
-      description: original.description,
     );
 
     if (result.success && result.data != null) {

@@ -207,6 +207,10 @@ class ApiClient {
     options: Options(contentType: 'multipart/form-data'),
   );
 
+  Future<Response> getDownloadUrl(String videoId) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/storage/download/$videoId',
+  );
+
   // Profile / User
   Future<Response> getProfile() =>
       _dio.get('${EnvironmentConfig.userServiceUrl}/users/me');
@@ -214,8 +218,16 @@ class ApiClient {
   Future<Response> updateProfile(Map<String, dynamic> data) =>
       _dio.put('${EnvironmentConfig.userServiceUrl}/users/me', data: data);
 
+  Future<Response> changePassword(Map<String, dynamic> data) => _dio.put(
+    '${EnvironmentConfig.userServiceUrl}/users/me/password',
+    data: data,
+  );
+
   Future<Response> deleteAccount() =>
       _dio.delete('${EnvironmentConfig.userServiceUrl}/users/me');
+
+  Future<Response> getCredits() =>
+      _dio.get('${EnvironmentConfig.userServiceUrl}/users/me/credits');
 }
 
 /// Intercepteur pour ajouter le token et gérer le refresh

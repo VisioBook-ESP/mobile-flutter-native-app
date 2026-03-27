@@ -45,12 +45,18 @@ class ProfileService {
   }
 
   /// Changer le mot de passe
-  Future<void> changePassword({required String newPassword}) async {
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
     if (EnvironmentConfig.useMockData) {
       return;
     }
 
-    await _apiClient.updateProfile({'password': newPassword});
+    await _apiClient.changePassword({
+      'old_password': oldPassword,
+      'new_password': newPassword,
+    });
   }
 
   /// Supprimer le compte
@@ -64,7 +70,13 @@ class ProfileService {
 
   /// Recuperer les credits
   Future<int> getCredits() async {
-    return 0;
+    if (EnvironmentConfig.useMockData) {
+      return 150;
+    }
+
+    final response = await _apiClient.getCredits();
+    final data = response.data as Map<String, dynamic>;
+    return data['credits'] as int;
   }
 
   UserProfile _mockProfile() {
@@ -76,6 +88,7 @@ class ProfileService {
       lastName: 'User',
       avatarUrl: null,
       credits: 150,
+      createdAt: DateTime(2024, 1, 15),
     );
   }
 }

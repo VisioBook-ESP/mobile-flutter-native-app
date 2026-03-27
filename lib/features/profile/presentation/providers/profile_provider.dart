@@ -74,13 +74,19 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   /// Changer le mot de passe
-  Future<bool> changePassword({required String newPassword}) async {
+  Future<bool> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
     _state = ProfileState.loading;
     _error = null;
     notifyListeners();
 
     try {
-      await _profileService.changePassword(newPassword: newPassword);
+      await _profileService.changePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
       _state = ProfileState.loaded;
       notifyListeners();
       return true;

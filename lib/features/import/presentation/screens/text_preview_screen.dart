@@ -327,38 +327,11 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
                   ),
                   child: Column(
                     children: [
-                      AppButton(
-                        text: 'Configurer le VisioBook',
-                        fullWidth: true,
-                        size: AppButtonSize.lg,
-                        icon: const Icon(
-                          LucideIcons.settings,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          // Si en mode edition, sauvegarder d'abord
-                          if (_isEditing) {
-                            provider.updateExtractedText(_textController.text);
-                            setState(() {
-                              _isEditing = false;
-                            });
-                          }
-                          final currentResult = provider.uploadResult;
-                          if (currentResult == null) return;
-                          // Initialiser le ProjectDetailProvider
-                          final projectDetailProvider = context
-                              .read<ProjectDetailProvider>();
-                          projectDetailProvider.initFromImport(
-                            fileId: currentResult.fileId ?? 'unknown',
-                            fileName: file.name,
-                            extractedText: currentResult.extractedText,
-                            wordCount: currentResult.wordCount,
-                          );
-                          // Reset l'import provider
-                          provider.reset();
-                          // Naviguer vers la configuration
-                          context.push(AppRoutes.projectConfig);
+                      _CreateProjectButton(
+                        isEditing: _isEditing,
+                        textController: _textController,
+                        onEditSaved: () {
+                          setState(() => _isEditing = false);
                         },
                       ),
                       const SizedBox(height: 12),
@@ -430,6 +403,83 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
           },
         ),
       ),
+    );
+  }
+}
+
+/// Bouton qui cree le projet dans le backend puis navigue vers la config
+class _CreateProjectButton extends StatefulWidget {
+  final bool isEditing;
+  final TextEditingController textController;
+  final VoidCallback onEditSaved;
+
+  const _CreateProjectButton({
+    required this.isEditing,
+    required this.textController,
+    required this.onEditSaved,
+  });
+
+  @override
+  State<_CreateProjectButton> createState() => _CreateProjectButtonState();
+}
+
+class _CreateProjectButtonState extends State<_CreateProjectButton> {
+  bool _isCreating = false;
+
+  Future<void> _createAndNavigate() async {
+    // Si en mode edition, sauvegarder d'abord
+    if (widget.isEditing) {
+      final importProvider = context.read<ImportProvider>();
+      importProvider.updateExtractedText(widget.textController.text);
+      widget.onEditSaved();
+    }
+
+    final importProvider = context.read<ImportProvider>();
+    final currentResult = importProvider.uploadResult;
+    final file = importProvider.selectedFile;
+    if (currentResult == null || file == null) return;
+
+    setState(() => _isCreating = true);
+
+    final projectDetailProvider = context.read<ProjectDetailProvider>();
+    projectDetailProvider.initFromImport(
+      fileId: currentResult.fileId ?? 'unknown',
+      fileName: file.name,
+      extractedText: currentResult.extractedText,
+      wordCount: currentResult.wordCount,
+    );
+
+    // Creer le projet dans le backend
+    final projectId = await projectDetailProvider.saveProject();
+
+    if (!mounted) return;
+
+    if (projectId != null) {
+      importProvider.reset();
+      context.push('/project/$projectId/config');
+    } else {
+      setState(() => _isCreating = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            projectDetailProvider.error ?? 'Erreur lors de la création',
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppButton(
+      text: 'Configurer le VisioBook',
+      fullWidth: true,
+      size: AppButtonSize.lg,
+      isLoading: _isCreating,
+      icon: _isCreating
+          ? null
+          : const Icon(LucideIcons.settings, size: 20, color: Colors.white),
+      onPressed: _isCreating ? null : _createAndNavigate,
     );
   }
 }

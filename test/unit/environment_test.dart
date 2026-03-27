@@ -37,13 +37,6 @@ void main() {
         );
       });
 
-      test('storageServiceUrl appends /api/v1', () {
-        expect(
-          EnvironmentConfig.storageServiceUrl,
-          'http://51.178.52.51/api/v1',
-        );
-      });
-
       test('aiServiceUrl appends /api/v1', () {
         expect(EnvironmentConfig.aiServiceUrl, 'http://51.178.52.51/api/v1');
       });
@@ -68,13 +61,6 @@ void main() {
       test('projectServiceUrl appends /api/v1', () {
         expect(
           EnvironmentConfig.projectServiceUrl,
-          'https://visiobook.cloud/api/v1',
-        );
-      });
-
-      test('storageServiceUrl appends /api/v1', () {
-        expect(
-          EnvironmentConfig.storageServiceUrl,
           'https://visiobook.cloud/api/v1',
         );
       });

@@ -127,41 +127,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     const SizedBox(height: 16),
                     _buildGreeting(context),
-                    const SizedBox(height: 12),
-                    // Bouton temporaire - mock grille VisioBook
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: OutlinedButton.icon(
-                        onPressed: () => context.push(AppRoutes.visiobookGrid),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: AppColors.info,
-                            width: 1.5,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.radiusMd,
-                            ),
-                          ),
-                        ),
-                        icon: const Icon(
-                          LucideIcons.layoutGrid,
-                          size: 18,
-                          color: AppColors.info,
-                        ),
-                        label: const Text(
-                          'Preview Grille VisioBook (mock)',
-                          style: TextStyle(
-                            color: AppColors.info,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
                     const SizedBox(height: 24),
                     if (projectProvider.projects.isNotEmpty) ...[
                       StatsCard(

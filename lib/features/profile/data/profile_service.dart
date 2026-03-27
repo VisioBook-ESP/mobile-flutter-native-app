@@ -44,7 +44,7 @@ class ProfileService {
     return UserProfile.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// Changer le mot de passe
+  /// Changer le mot de passe via PUT /users/me
   Future<void> changePassword({required String newPassword}) async {
     if (EnvironmentConfig.useMockData) {
       return;
@@ -63,6 +63,7 @@ class ProfileService {
   }
 
   /// Recuperer les credits
+  /// TODO: Credits will come from payment service later
   Future<int> getCredits() async {
     return 0;
   }
@@ -76,6 +77,7 @@ class ProfileService {
       lastName: 'User',
       avatarUrl: null,
       credits: 150,
+      createdAt: DateTime(2024, 1, 15),
     );
   }
 }

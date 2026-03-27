@@ -83,51 +83,20 @@ class ProjectService {
   }
 
   /// Cree un nouveau projet
+  /// Le backend attend: title, sourceType, content, config
   Future<ProjectResult<Project>> createProject({
     required String title,
-    String? description,
-    String? fileId,
-    String? style,
-    String? language,
-    String? duration,
+    String sourceType = 'text',
+    Map<String, dynamic>? content,
+    Map<String, dynamic>? config,
   }) async {
     try {
       final response = await _apiClient.createProject({
         'title': title,
-        if (description != null) 'description': description,
-        if (fileId != null) 'fileId': fileId,
-        if (style != null) 'style': style,
-        if (language != null) 'language': language,
-        if (duration != null) 'duration': duration,
+        'sourceType': sourceType,
+        'content': content ?? {'text': '', 'metadata': {}},
+        if (config != null) 'config': config,
       });
-      final project = Project.fromJson(response.data);
-      return ProjectResult(success: true, data: project);
-    } on DioException catch (e) {
-      return ProjectResult(success: false, error: _handleError(e));
-    } catch (e) {
-      return ProjectResult(success: false, error: 'Erreur inattendue: $e');
-    }
-  }
-
-  Future<ProjectResult<Project>> updateProject({
-    required String id,
-    String? title,
-    String? description,
-    String? fileId,
-    String? style,
-    String? language,
-    String? duration,
-  }) async {
-    try {
-      final data = <String, dynamic>{
-        if (title != null) 'title': title,
-        if (description != null) 'description': description,
-        if (fileId != null) 'fileId': fileId,
-        if (style != null) 'style': style,
-        if (language != null) 'language': language,
-        if (duration != null) 'duration': duration,
-      };
-      final response = await _apiClient.updateProject(id, data);
       final project = Project.fromJson(response.data);
       return ProjectResult(success: true, data: project);
     } on DioException catch (e) {
@@ -149,19 +118,20 @@ class ProjectService {
     }
   }
 
-  /// Lance la generation d'un projet : cree une version puis demarre le workflow
+  /// Lance la generation d'un projet via creation de version + demarrage
+  /// du workflow
   Future<ProjectResult<Map<String, String>>> generateProject(String id) async {
     try {
-      // Step 1: Create a version
+      // Step 1: create a version
       final versionResponse = await _apiClient.createVersion(id);
       final versionId = versionResponse.data['id'] as String?;
       if (versionId == null) {
         return ProjectResult(success: false, error: 'Aucun versionId retourné');
       }
 
-      // Step 2: Start workflow on that version
+      // Step 2: start the workflow
       final workflowResponse = await _apiClient.startWorkflow(id, versionId);
-      final executionId = workflowResponse.data['id'] as String?;
+      final executionId = workflowResponse.data['executionId'] as String?;
       if (executionId == null) {
         return ProjectResult(
           success: false,

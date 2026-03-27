@@ -168,15 +168,27 @@ class StorageService {
     }
   }
 
-  /// Cree un folder pour regrouper les fichiers d'un user
-  Future<StorageResult<String>> createFolder() async {
+  /// Recupere la liste des fichiers de l'utilisateur
+  Future<StorageResult<List<Map<String, dynamic>>>> getFiles() async {
     try {
-      final response = await _apiClient.createFolder();
-      final folderId = response.data['folderId'] as String?;
-      if (folderId == null) {
-        return StorageResult(success: false, error: 'Aucun folderId retourne');
+      final response = await _apiClient.getFilesByToken();
+      final data = response.data;
+
+      if (data is List) {
+        return StorageResult(
+          success: true,
+          data: data.cast<Map<String, dynamic>>(),
+        );
       }
-      return StorageResult(success: true, data: folderId);
+
+      if (data is Map && data['files'] is List) {
+        return StorageResult(
+          success: true,
+          data: (data['files'] as List).cast<Map<String, dynamic>>(),
+        );
+      }
+
+      return StorageResult(success: true, data: []);
     } on DioException catch (e) {
       return StorageResult(success: false, error: _handleError(e));
     } catch (e) {

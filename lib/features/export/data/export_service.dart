@@ -36,14 +36,16 @@ class ExportService {
     }
 
     try {
-      final urlResponse = await _apiClient.getDownloadUrl(projectId);
+      // Récupérer le VisioBook pour obtenir l'URL de la vidéo
+      final visiobookResponse = await _apiClient.getVisioBook(projectId);
       final downloadUrl =
-          urlResponse.data['url'] as String? ??
-          urlResponse.data['downloadUrl'] as String?;
+          visiobookResponse.data['videoUrl'] as String? ??
+          visiobookResponse.data['url'] as String? ??
+          visiobookResponse.data['downloadUrl'] as String?;
       if (downloadUrl == null) {
         return ExportResult(
           success: false,
-          error: 'URL de telechargement non disponible',
+          error: 'URL de téléchargement non disponible',
         );
       }
       await _apiClient.dio.download(

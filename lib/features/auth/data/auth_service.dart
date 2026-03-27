@@ -111,6 +111,18 @@ class AuthService {
     return _storage.isLoggedIn();
   }
 
+  /// Verifie que le token est encore valide en appelant /users/me
+  /// Retourne true si le serveur repond OK, false sinon
+  Future<bool> verifyToken() async {
+    try {
+      await _apiClient.getProfile();
+      return true;
+    } catch (_) {
+      await _storage.clearTokens();
+      return false;
+    }
+  }
+
   /// Recupere le nom stocke localement
   Future<String?> getSavedUserName() async {
     return _storage.getUserName();

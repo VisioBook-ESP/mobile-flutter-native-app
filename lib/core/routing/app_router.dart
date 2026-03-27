@@ -15,11 +15,11 @@ import 'package:visiobook_mobile/features/project_detail/presentation/screens/pr
 import 'package:visiobook_mobile/features/project_detail/presentation/screens/project_view_screen.dart';
 import 'package:visiobook_mobile/features/generation/presentation/screens/generation_screen.dart';
 import 'package:visiobook_mobile/features/player/presentation/screens/visiobook_reader_screen.dart';
+import 'package:visiobook_mobile/features/history/presentation/screens/text_detail_screen.dart';
 import 'package:visiobook_mobile/features/history/presentation/screens/texts_history_screen.dart';
 import 'package:visiobook_mobile/features/history/presentation/screens/visiobooks_history_screen.dart';
 import 'package:visiobook_mobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:visiobook_mobile/features/projects/presentation/screens/dashboard_screen.dart';
-import 'package:visiobook_mobile/features/visiobook_grid/presentation/screens/visiobook_grid_screen.dart';
 
 /// Routes de l'application
 class AppRoutes {
@@ -42,9 +42,8 @@ class AppRoutes {
   static const String textPreview = '/import/preview';
   // History routes
   static const String textsHistory = '/history/texts';
+  static const String textDetail = '/text/:id';
   static const String visiobooksHistory = '/history/visiobooks';
-  // Mock grid preview
-  static const String visiobookGrid = '/mock/visiobook-grid';
   // Profile
   static const String profile = '/profile';
 }
@@ -85,15 +84,15 @@ class AppRouter {
         builder: (context, state) => const DashboardScreen(),
       ),
       GoRoute(
+        path: AppRoutes.projectConfig,
+        builder: (context, state) => const ProjectDetailScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.projectView,
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return ProjectViewScreen(projectId: id);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.projectConfig,
-        builder: (context, state) => const ProjectDetailScreen(),
       ),
       GoRoute(
         path: AppRoutes.projectEditConfig,
@@ -145,13 +144,15 @@ class AppRouter {
         builder: (context, state) => const TextsHistoryScreen(),
       ),
       GoRoute(
+        path: AppRoutes.textDetail,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return TextDetailScreen(projectId: id);
+        },
+      ),
+      GoRoute(
         path: AppRoutes.visiobooksHistory,
         builder: (context, state) => const VisiobooksHistoryScreen(),
-      ),
-      // Mock grid preview
-      GoRoute(
-        path: AppRoutes.visiobookGrid,
-        builder: (context, state) => const VisiobookGridScreen(),
       ),
       // Profile
       GoRoute(

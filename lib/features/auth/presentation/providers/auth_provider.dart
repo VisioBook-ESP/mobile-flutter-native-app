@@ -22,18 +22,33 @@ class AuthProvider extends ChangeNotifier {
   String? get userName => _userName;
 
   /// Verifie l'etat de connexion au demarrage
-  /// Toujours passer par login/register, meme en mode mock
+  /// En debug : force la reconnexion a chaque build
+  /// En release : garde la session si le token est valide
   Future<void> checkAuthStatus() async {
     _state = AuthState.loading;
     notifyListeners();
 
-    final isLoggedIn = await _authService.isLoggedIn();
-
-    if (isLoggedIn) {
-      _userName = await _authService.getSavedUserName();
+    // En mode debug, toujours forcer login pour faciliter les tests
+    if (kDebugMode) {
+      await _authService.logout();
+      _state = AuthState.unauthenticated;
+      notifyListeners();
+      return;
     }
 
-    _state = isLoggedIn ? AuthState.authenticated : AuthState.unauthenticated;
+    // En release, garder la session si le token est encore valide
+    final hasToken = await _authService.isLoggedIn();
+    if (hasToken) {
+      final isValid = await _authService.verifyToken();
+      if (isValid) {
+        _userName = await _authService.getSavedUserName();
+        _state = AuthState.authenticated;
+        notifyListeners();
+        return;
+      }
+    }
+
+    _state = AuthState.unauthenticated;
     notifyListeners();
   }
 

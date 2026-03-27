@@ -31,9 +31,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<ProjectDetailProvider>();
       if (widget.projectId != null) {
-        provider.loadProject(widget.projectId!);
+        // Si le provider a deja ce projet charge, pas besoin de recharger
+        if (provider.project?.id != widget.projectId) {
+          provider.loadProject(widget.projectId!);
+        }
       }
-      // Si pas d'ID, on suppose que le provider a deja ete initialise depuis l'import
+      // Initialiser le titre depuis le projet charge
       if (provider.project != null) {
         _titleController.text = provider.project!.title;
       }
@@ -310,7 +313,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       if (result != null && context.mounted) {
                         context.push(
                           AppRoutes.generation
-                              .replaceAll(':id', provider.project!.id)
+                              .replaceAll(':id', result['projectId']!)
                               .replaceAll(':versionId', result['versionId']!)
                               .replaceAll(
                                 ':executionId',
@@ -321,25 +324,6 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(provider.error!)),
                         );
-                      }
-                    },
-            ),
-            const SizedBox(height: 8),
-            AppButton(
-              text: 'Sauvegarder pour plus tard',
-              variant: AppButtonVariant.outline,
-              fullWidth: true,
-              isLoading: provider.isSaving,
-              onPressed: provider.isGenerating || provider.isSaving
-                  ? null
-                  : () async {
-                      provider.setTitle(_titleController.text);
-                      final projectId = await provider.saveProject();
-                      if (projectId != null && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Projet sauvegardé')),
-                        );
-                        context.go(AppRoutes.dashboard);
                       }
                     },
             ),

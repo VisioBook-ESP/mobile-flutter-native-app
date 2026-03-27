@@ -72,9 +72,6 @@ class Project {
   final String? videoUrl;
   final int? videoDurationSeconds;
   final String? style;
-  final String? fileId;
-  final String? language;
-  final String? duration;
   final List<Generation> generations;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -90,9 +87,6 @@ class Project {
     this.videoUrl,
     this.videoDurationSeconds,
     this.style,
-    this.fileId,
-    this.language,
-    this.duration,
     this.generations = const [],
     required this.createdAt,
     required this.updatedAt,
@@ -118,9 +112,6 @@ class Project {
       videoUrl: json['videoUrl'] as String?,
       videoDurationSeconds: json['videoDurationSeconds'] as int?,
       style: json['style'] as String?,
-      fileId: json['fileId'] as String?,
-      language: json['language'] as String?,
-      duration: json['duration'] as String?,
       generations:
           (json['generations'] as List<dynamic>?)
               ?.map((g) => Generation.fromJson(g as Map<String, dynamic>))
@@ -147,9 +138,6 @@ class Project {
       'videoUrl': videoUrl,
       'videoDurationSeconds': videoDurationSeconds,
       'style': style,
-      'fileId': fileId,
-      'language': language,
-      'duration': duration,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };

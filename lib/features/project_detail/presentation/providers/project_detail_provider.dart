@@ -17,7 +17,6 @@ class ProjectDetailProvider extends ChangeNotifier {
   String? _error;
   String? _extractedText;
   int? _wordCount;
-  String? _fileId;
 
   ProjectDetailProvider({required ProjectService projectService})
     : _projectService = projectService;
@@ -29,7 +28,6 @@ class ProjectDetailProvider extends ChangeNotifier {
   String? get error => _error;
   String? get extractedText => _extractedText;
   int? get wordCount => _wordCount;
-  String? get fileId => _fileId;
   bool get isLoading => _state == ProjectDetailState.loading;
   bool get isSaving => _state == ProjectDetailState.saving;
   bool get isGenerating => _state == ProjectDetailState.generating;
@@ -42,7 +40,6 @@ class ProjectDetailProvider extends ChangeNotifier {
     String? extractedText,
     int? wordCount,
   }) {
-    _fileId = fileId;
     _extractedText = extractedText;
     _wordCount = wordCount;
 
@@ -161,41 +158,15 @@ class ProjectDetailProvider extends ChangeNotifier {
       return savedId;
     }
 
-    // Determiner si c'est une creation ou une mise a jour
-    final isNew = _project!.id.startsWith('temp_');
-
-    if (isNew) {
-      final result = await _projectService.createProject(
-        title: _project!.title,
-        description: _project!.description,
-        fileId: _fileId,
-        style: _config.style.name,
-        language: _config.language.code,
-        duration: _config.duration.name,
-      );
-
-      if (result.success && result.data != null) {
-        _project = result.data;
-        _state = ProjectDetailState.loaded;
-        notifyListeners();
-        return result.data!.id;
-      } else {
-        _error = result.error;
-        _state = ProjectDetailState.error;
-        notifyListeners();
-        return null;
-      }
-    }
-
-    // Mise a jour d'un projet existant
-    final result = await _projectService.updateProject(
-      id: _project!.id,
+    final result = await _projectService.createProject(
       title: _project!.title,
-      description: _project!.description,
-      fileId: _fileId,
-      style: _config.style.name,
-      language: _config.language.code,
-      duration: _config.duration.name,
+      sourceType: 'text',
+      content: {'text': _extractedText ?? '', 'metadata': {}},
+      config: {
+        'style': _config.style.name,
+        'language': _config.language.name,
+        'duration': _config.duration.name,
+      },
     );
 
     if (result.success && result.data != null) {
@@ -212,7 +183,8 @@ class ProjectDetailProvider extends ChangeNotifier {
   }
 
   /// Lance la generation du projet
-  /// Retourne une map {projectId, versionId, executionId} ou null en cas d'erreur
+  /// Retourne une Map avec projectId, versionId, executionId ou null en cas
+  /// d'erreur
   Future<Map<String, String>?> generateProject() async {
     final projectId = await saveProject();
     if (projectId == null) return null;
@@ -252,7 +224,6 @@ class ProjectDetailProvider extends ChangeNotifier {
   void reset() {
     _state = ProjectDetailState.initial;
     _project = null;
-    _fileId = null;
     _config = const ProjectConfig();
     _error = null;
     _extractedText = null;

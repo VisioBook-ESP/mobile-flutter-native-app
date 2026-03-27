@@ -66,19 +66,13 @@ class GenerationProvider extends ChangeNotifier {
   String get currentStepDescription => currentStep.description;
 
   /// Demarre la generation et lance le polling
-  Future<bool> startGeneration(
-    String projectId, {
-    Map<String, dynamic>? config,
-  }) async {
+  Future<bool> startGeneration(String projectId) async {
     _error = null;
     _isCancelled = false;
     _projectId = projectId;
     notifyListeners();
 
-    final result = await _generationService.startGeneration(
-      projectId,
-      config: config,
-    );
+    final result = await _generationService.startGeneration(projectId);
 
     if (!result.success || result.data == null) {
       _error = result.error ?? 'Impossible de lancer la generation';

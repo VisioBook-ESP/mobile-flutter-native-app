@@ -18,6 +18,7 @@ import 'package:visiobook_mobile/features/profile/data/profile_service.dart';
 import 'package:visiobook_mobile/features/profile/presentation/providers/profile_provider.dart';
 import 'package:visiobook_mobile/features/player/data/player_service.dart';
 import 'package:visiobook_mobile/features/player/presentation/providers/player_provider.dart';
+import 'package:visiobook_mobile/features/history/presentation/providers/texts_provider.dart';
 import 'package:visiobook_mobile/features/projects/data/project_service.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
@@ -61,6 +62,9 @@ class VisioBookApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => ImportProvider(storageService: storageService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TextsProvider(storageService: storageService),
         ),
         ChangeNotifierProvider(
           create: (_) => ProjectDetailProvider(projectService: projectService),

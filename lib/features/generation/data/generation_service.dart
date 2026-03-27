@@ -12,7 +12,7 @@ class GenerationResult<T> {
   GenerationResult({required this.success, this.data, this.error});
 }
 
-/// Resultat du demarrage de generation (versionId + executionId)
+/// Donnees retournees apres le demarrage d'une generation
 class StartGenerationData {
   final String versionId;
   final String executionId;
@@ -34,11 +34,11 @@ class GenerationService {
     _mockStartTime = null;
   }
 
-  /// Lance la generation d'un projet : cree une version puis demarre le workflow
+  /// Lance la generation d'un projet via la creation d'une version puis le
+  /// demarrage du workflow
   Future<GenerationResult<StartGenerationData>> startGeneration(
-    String projectId, {
-    Map<String, dynamic>? config,
-  }) async {
+    String projectId,
+  ) async {
     // Mode mock
     if (EnvironmentConfig.useMockData) {
       await Future.delayed(const Duration(milliseconds: 500));
@@ -54,7 +54,7 @@ class GenerationService {
     }
 
     try {
-      // Step 1: Create a version
+      // Step 1: create a version
       final versionResponse = await _apiClient.createVersion(projectId);
       final versionId = versionResponse.data['id'] as String?;
       if (versionId == null) {
@@ -64,12 +64,12 @@ class GenerationService {
         );
       }
 
-      // Step 2: Start workflow on that version
+      // Step 2: start the workflow
       final workflowResponse = await _apiClient.startWorkflow(
         projectId,
         versionId,
       );
-      final executionId = workflowResponse.data['id'] as String?;
+      final executionId = workflowResponse.data['executionId'] as String?;
       if (executionId == null) {
         return GenerationResult(
           success: false,

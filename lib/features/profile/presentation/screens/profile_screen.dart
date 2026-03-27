@@ -54,6 +54,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return profile.username;
   }
 
+  String _formatDate(DateTime date) {
+    final months = [
+      'janvier',
+      'f\u00e9vrier',
+      'mars',
+      'avril',
+      'mai',
+      'juin',
+      'juillet',
+      'ao\u00fbt',
+      'septembre',
+      'octobre',
+      'novembre',
+      'd\u00e9cembre',
+    ];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileProvider = context.watch<ProfileProvider>();
@@ -83,6 +101,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildErrorState(ProfileProvider provider) {
+    final isSessionExpired =
+        provider.error?.contains('Session expir\u00e9e') ?? false;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -103,10 +123,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ).textTheme.bodyLarge?.copyWith(color: AppColors.neutral500),
             ),
             const SizedBox(height: 24),
-            AppButton(
-              text: 'Réessayer',
-              onPressed: () => provider.loadProfile(),
-            ),
+            if (isSessionExpired)
+              AppButton(
+                text: 'Se reconnecter',
+                fullWidth: true,
+                onPressed: () async {
+                  final router = GoRouter.of(context);
+                  await context.read<AuthProvider>().logout();
+                  router.go('/');
+                },
+              )
+            else
+              AppButton(
+                text: 'R\u00e9essayer',
+                onPressed: () => provider.loadProfile(),
+              ),
           ],
         ),
       ),
@@ -142,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Header ──────────────────────────────────────────────────────────
+  // -- Header ----------------------------------------------------------------
 
   Widget _buildHeaderSection(BuildContext context, UserProfile profile) {
     return Center(
@@ -181,7 +212,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            '@${profile.username}',
+            profile.createdAt != null
+                ? 'Membre depuis le ${_formatDate(profile.createdAt!)}'
+                : '@${profile.username}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -189,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Credits ─────────────────────────────────────────────────────────
+  // -- Credits ---------------------------------------------------------------
 
   Widget _buildCreditsSection(BuildContext context, UserProfile profile) {
     const maxCredits = 500;
@@ -210,7 +243,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Crédits',
+                  'Cr\u00e9dits',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ],
@@ -228,7 +261,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   Text(
-                    'crédits disponibles',
+                    'cr\u00e9dits disponibles',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -257,12 +290,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 16),
             Center(
               child: AppButton(
-                text: 'Acheter des crédits',
+                text: 'Acheter des cr\u00e9dits',
                 variant: AppButtonVariant.outline,
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Bientôt disponible'),
+                      content: Text('Bient\u00f4t disponible'),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -275,7 +308,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Personal Info ───────────────────────────────────────────────────
+  // -- Personal Info ---------------------------------------------------------
 
   void _startEditing(String fieldKey, String currentValue) {
     setState(() {
@@ -305,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Profil mis à jour'),
+            content: Text('Profil mis \u00e0 jour'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -339,7 +372,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 context,
                 fieldKey: 'lastName',
                 label: 'Nom',
-                value: profile.lastName ?? 'Non renseigné',
+                value: profile.lastName ?? 'Non renseign\u00e9',
                 currentValue: profile.lastName ?? '',
                 validator: Validators.lastName,
                 onSave: (value) => provider.updateProfile(lastName: value),
@@ -348,8 +381,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildEditableRow(
                 context,
                 fieldKey: 'firstName',
-                label: 'Prénom',
-                value: profile.firstName ?? 'Non renseigné',
+                label: 'Pr\u00e9nom',
+                value: profile.firstName ?? 'Non renseign\u00e9',
                 currentValue: profile.firstName ?? '',
                 validator: Validators.firstName,
                 onSave: (value) => provider.updateProfile(firstName: value),
@@ -373,7 +406,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 currentValue: profile.email,
                 validator: Validators.email,
                 hint:
-                    'Un email de vérification sera envoyé à la nouvelle adresse.',
+                    'Un email de v\u00e9rification sera envoy\u00e9 \u00e0 la nouvelle adresse.',
                 onSave: (value) => provider.updateProfile(email: value),
               ),
             ],
@@ -529,7 +562,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Security ────────────────────────────────────────────────────────
+  // -- Security --------------------------------------------------------------
 
   Widget _buildSecuritySection(BuildContext context, ProfileProvider provider) {
     return Column(
@@ -539,7 +572,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             const Icon(LucideIcons.lock, size: 20, color: AppColors.neutral900),
             const SizedBox(width: 8),
-            Text('Sécurité', style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              'S\u00e9curit\u00e9',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
           ],
         ),
         const SizedBox(height: 12),
@@ -577,7 +613,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Payment ─────────────────────────────────────────────────────────
+  // -- Payment ---------------------------------------------------------------
 
   Widget _buildPaymentSection(BuildContext context) {
     return Column(
@@ -615,7 +651,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Bientôt disponible',
+                    'Bient\u00f4t disponible',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -627,7 +663,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── About ───────────────────────────────────────────────────────────
+  // -- About -----------------------------------------------------------------
 
   Widget _buildAboutSection(BuildContext context) {
     return Column(
@@ -637,7 +673,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             const Icon(LucideIcons.info, size: 20, color: AppColors.neutral900),
             const SizedBox(width: 8),
-            Text('À propos', style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              '\u00c0 propos',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
           ],
         ),
         const SizedBox(height: 12),
@@ -657,7 +696,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildSimpleRow(
                 context,
                 icon: LucideIcons.fileText,
-                label: 'Mentions légales',
+                label: 'Mentions l\u00e9gales',
                 trailing: const Icon(
                   LucideIcons.chevronRight,
                   size: 16,
@@ -668,7 +707,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildSimpleRow(
                 context,
                 icon: LucideIcons.scrollText,
-                label: "Conditions générales d'utilisation",
+                label: "Conditions g\u00e9n\u00e9rales d'utilisation",
                 trailing: const Icon(
                   LucideIcons.chevronRight,
                   size: 16,
@@ -703,7 +742,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Account ─────────────────────────────────────────────────────────
+  // -- Account ---------------------------------------------------------------
 
   Widget _buildAccountSection(BuildContext context, ProfileProvider provider) {
     return Column(
@@ -724,7 +763,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SizedBox(
           width: double.infinity,
           child: AppButton(
-            text: 'Se déconnecter',
+            text: 'Se d\u00e9connecter',
             variant: AppButtonVariant.outline,
             fullWidth: true,
             icon: const Icon(LucideIcons.logOut, size: 18),
@@ -753,7 +792,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Card helper ─────────────────────────────────────────────────────
+  // -- Card helper -----------------------------------------------------------
 
   Widget _buildCard({required Widget child}) {
     return Container(
@@ -767,7 +806,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Dialogs ─────────────────────────────────────────────────────────
+  // -- Dialogs ---------------------------------------------------------------
 
   void _showChangePasswordDialog(
     BuildContext context,
@@ -868,7 +907,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   SnackBar(
                                     content: Text(
                                       success
-                                          ? 'Mot de passe modifié'
+                                          ? 'Mot de passe modifi\u00e9'
                                           : 'Erreur lors du changement',
                                     ),
                                     behavior: SnackBarBehavior.floating,
@@ -915,8 +954,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
           content: const Text(
-            'Cette action est irréversible. Toutes vos données '
-            'seront définitivement supprimées.',
+            'Cette action est irr\u00e9versible. Toutes vos donn\u00e9es '
+            'seront d\u00e9finitivement supprim\u00e9es.',
           ),
           actions: [
             TextButton(

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
 import 'package:visiobook_mobile/features/history/domain/user_file.dart';
 import 'package:visiobook_mobile/features/history/presentation/providers/texts_provider.dart';
-import 'package:visiobook_mobile/features/project_detail/presentation/providers/project_detail_provider.dart';
 
 /// Ecran de detail d'un texte (depuis la bibliotheque de fichiers)
 class TextDetailScreen extends StatefulWidget {
@@ -266,7 +266,26 @@ class _TextDetailScreenState extends State<TextDetailScreen> {
                   ),
                   child: Column(
                     children: [
-                      _GenerateButton(file: file),
+                      AppButton(
+                        text: 'Créer un projet',
+                        fullWidth: true,
+                        size: AppButtonSize.lg,
+                        icon: const Icon(
+                          LucideIcons.plus,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          context.push(
+                            AppRoutes.createProject,
+                            extra: {
+                              'textId': file.id,
+                              'textName': file.name,
+                              'extractedText': file.extractedText,
+                            },
+                          );
+                        },
+                      ),
                       const SizedBox(height: 12),
                       AppButton(
                         text: 'Retour',
@@ -282,62 +301,6 @@ class _TextDetailScreenState extends State<TextDetailScreen> {
           },
         ),
       ),
-    );
-  }
-}
-
-/// Bouton qui cree le projet puis navigue vers la config
-class _GenerateButton extends StatefulWidget {
-  final UserFile file;
-
-  const _GenerateButton({required this.file});
-
-  @override
-  State<_GenerateButton> createState() => _GenerateButtonState();
-}
-
-class _GenerateButtonState extends State<_GenerateButton> {
-  bool _isCreating = false;
-
-  Future<void> _createAndNavigate() async {
-    setState(() => _isCreating = true);
-
-    final provider = context.read<ProjectDetailProvider>();
-    // Initialiser avec les donnees du fichier
-    provider.initFromImport(
-      fileId: widget.file.id,
-      fileName: widget.file.name,
-      extractedText: widget.file.extractedText,
-      wordCount: widget.file.wordCount,
-    );
-
-    // Creer le projet dans le backend
-    final projectId = await provider.saveProject();
-
-    if (!mounted) return;
-
-    if (projectId != null) {
-      // Naviguer vers la config avec le vrai ID
-      context.push('/project/$projectId/config');
-    } else {
-      setState(() => _isCreating = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(provider.error ?? 'Erreur lors de la création')),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AppButton(
-      text: 'Créer un projet',
-      fullWidth: true,
-      size: AppButtonSize.lg,
-      isLoading: _isCreating,
-      icon: _isCreating
-          ? null
-          : const Icon(LucideIcons.plus, size: 20, color: Colors.white),
-      onPressed: _isCreating ? null : _createAndNavigate,
     );
   }
 }

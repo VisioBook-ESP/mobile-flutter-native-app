@@ -148,22 +148,16 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Duree
-                      OptionSelector<VideoDuration>(
-                        title: 'Durée',
-                        subtitle: 'Ajustez la longueur de votre vidéo',
-                        icon: LucideIcons.clock,
-                        selectedValue: provider.config.duration,
-                        options: VideoDuration.values
-                            .map(
-                              (d) => OptionItem(
-                                value: d,
-                                label: d.label,
-                                description: d.description,
-                              ),
-                            )
+                      // Vibe / Ambiance
+                      OptionSelector<VideoVibe>(
+                        title: 'Ambiance',
+                        subtitle: 'Choisissez l\'ambiance de votre video',
+                        icon: LucideIcons.music,
+                        selectedValue: provider.config.vibe,
+                        options: VideoVibe.values
+                            .map((v) => OptionItem(value: v, label: v.label))
                             .toList(),
-                        onChanged: provider.setDuration,
+                        onChanged: provider.setVibe,
                       ),
                       const SizedBox(height: 100),
                     ],

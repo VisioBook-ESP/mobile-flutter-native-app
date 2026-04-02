@@ -8,12 +8,12 @@ void main() {
   }
 
   group('BottomNavBar', () {
-    testWidgets('renders 5 items (4 nav + 1 add button)', (tester) async {
+    testWidgets('renders 5 items (3 nav + 1 play + 1 add)', (tester) async {
       await tester.pumpWidget(
         wrapWithMaterial(BottomNavBar(currentIndex: 0, onTap: (_) {})),
       );
 
-      // 4 nav icons + 1 add button icon = 5 Icon widgets
+      // 3 nav icons + 1 play button icon + 1 add icon = 5 Icon widgets
       expect(find.byType(Icon), findsNWidgets(5));
     });
 
@@ -26,20 +26,41 @@ void main() {
         ),
       );
 
-      // Find all GestureDetector widgets inside the nav bar
-      // The icons are wrapped in SizedBox(48x48) inside GestureDetectors
       final icons = find.byType(Icon);
       expect(icons, findsNWidgets(5));
 
       // Tap the last icon (profile, index 4)
-      await tester.tap(icons.at(3));
+      await tester.tap(icons.at(4));
       await tester.pump();
-      expect(tappedIndex, 3);
+      expect(tappedIndex, 4);
 
       // Tap the first icon (home, index 0)
       await tester.tap(icons.at(0));
       await tester.pump();
       expect(tappedIndex, 0);
+    });
+
+    testWidgets('onPlayTap callback fires when play button tapped', (
+      tester,
+    ) async {
+      bool playTapped = false;
+
+      await tester.pumpWidget(
+        wrapWithMaterial(
+          BottomNavBar(
+            currentIndex: 0,
+            onTap: (_) {},
+            onPlayTap: () => playTapped = true,
+          ),
+        ),
+      );
+
+      // The play button is the 3rd item (middle)
+      final playButtonIcon = find.byType(Icon).at(2);
+      await tester.tap(playButtonIcon);
+      await tester.pump();
+
+      expect(playTapped, isTrue);
     });
 
     testWidgets('onAddTap callback fires when add button tapped', (
@@ -57,10 +78,8 @@ void main() {
         ),
       );
 
-      // The add button is the 3rd item (middle), which is a Container
-      // with a white background and plus icon
-      // Find it by its container size (56x56)
-      final addButtonIcon = find.byType(Icon).at(2);
+      // The add button is the 4th item
+      final addButtonIcon = find.byType(Icon).at(3);
       await tester.tap(addButtonIcon);
       await tester.pump();
 

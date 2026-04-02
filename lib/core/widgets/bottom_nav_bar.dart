@@ -4,17 +4,19 @@ import 'package:visiobook_mobile/core/theme/app_theme.dart';
 
 /// Bottom navigation bar
 /// - Fond noir (neutral900)
-/// - 5 items: Home, Mes Textes, Add(+), Mes VisioBooks, Profil
-/// - Index mapping: 0=Home, 1=Mes Textes, 2=Add (callback), 3=Mes VisioBooks, 4=Profil
+/// - 5 items: Home, Mes Textes, Play (central), Add (+), Profil
+/// - Index mapping: 0=Home, 1=Mes Textes, 2=Play (callback), 3=Add (callback), 4=Profil
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final VoidCallback? onPlayTap;
   final VoidCallback? onAddTap;
 
   const BottomNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.onPlayTap,
     this.onAddTap,
   });
 
@@ -41,11 +43,11 @@ class BottomNavBar extends StatelessWidget {
                   isSelected: currentIndex == 1,
                   onTap: () => onTap(1),
                 ),
-                _AddButton(onTap: onAddTap),
+                _PlayButton(onTap: onPlayTap),
                 _NavItem(
-                  icon: LucideIcons.playCircle,
-                  isSelected: currentIndex == 3,
-                  onTap: () => onTap(3),
+                  icon: LucideIcons.plus,
+                  isSelected: false,
+                  onTap: () => onAddTap?.call(),
                 ),
                 _NavItem(
                   icon: LucideIcons.user,
@@ -94,10 +96,10 @@ class _NavItem extends StatelessWidget {
   }
 }
 
-class _AddButton extends StatelessWidget {
+class _PlayButton extends StatelessWidget {
   final VoidCallback? onTap;
 
-  const _AddButton({this.onTap});
+  const _PlayButton({this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +113,7 @@ class _AddButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
         ),
         child: const Center(
-          child: Icon(LucideIcons.plus, color: AppColors.neutral900, size: 28),
+          child: Icon(LucideIcons.play, color: AppColors.neutral900, size: 28),
         ),
       ),
     );

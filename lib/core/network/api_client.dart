@@ -58,6 +58,11 @@ class ApiClient {
   Future<Response> createProject(Map<String, dynamic> data) =>
       _dio.post('${EnvironmentConfig.projectServiceUrl}/projects', data: data);
 
+  Future<Response> generateProject(Map<String, dynamic> data) => _dio.post(
+    '${EnvironmentConfig.projectServiceUrl}/projects/generate',
+    data: data,
+  );
+
   Future<Response> updateProject(String id, Map<String, dynamic> data) => _dio
       .patch('${EnvironmentConfig.projectServiceUrl}/projects/$id', data: data);
 

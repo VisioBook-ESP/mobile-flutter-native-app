@@ -6,10 +6,7 @@ import 'package:visiobook_mobile/core/widgets/bottom_nav_bar.dart';
 void main() {
   Widget wrapWithMaterial(Widget child) {
     return MaterialApp(
-      home: Scaffold(
-        body: const SizedBox.expand(),
-        bottomNavigationBar: child,
-      ),
+      home: Scaffold(body: const SizedBox.expand(), bottomNavigationBar: child),
     );
   }
 

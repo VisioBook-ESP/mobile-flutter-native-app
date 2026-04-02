@@ -35,15 +35,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       context.push(AppRoutes.textsHistory);
       return;
     }
+    if (index == 2) {
+      context.push(AppRoutes.visiobooksHistory);
+      return;
+    }
     if (index == 4) {
       context.push(AppRoutes.profile);
       return;
     }
     setState(() => _currentNavIndex = index);
-  }
-
-  void _onPlayTap() {
-    context.push(AppRoutes.visiobooksHistory);
   }
 
   void _showImportModal() {
@@ -153,7 +153,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentNavIndex,
         onTap: _onNavTap,
-        onPlayTap: _onPlayTap,
         onAddTap: _showImportModal,
       ),
     );

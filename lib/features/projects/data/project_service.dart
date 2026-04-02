@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:visiobook_mobile/core/network/api_client.dart';
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
 
@@ -82,21 +83,10 @@ class ProjectService {
     }
   }
 
-  /// Cree un nouveau projet
-  /// Le backend attend: title, sourceType, content, config
-  Future<ProjectResult<Project>> createProject({
-    required String title,
-    String sourceType = 'text',
-    Map<String, dynamic>? content,
-    Map<String, dynamic>? config,
-  }) async {
+  /// Cree un nouveau projet (pour duplication etc.)
+  Future<ProjectResult<Project>> createProject({required String title}) async {
     try {
-      final response = await _apiClient.createProject({
-        'title': title,
-        'sourceType': sourceType,
-        'content': content ?? {'text': '', 'metadata': {}},
-        if (config != null) 'config': config,
-      });
+      final response = await _apiClient.createProject({'title': title});
       final project = Project.fromJson(response.data);
       return ProjectResult(success: true, data: project);
     } on DioException catch (e) {
@@ -118,30 +108,38 @@ class ProjectService {
     }
   }
 
-  /// Lance la generation d'un projet via creation de version + demarrage
-  /// du workflow
-  Future<ProjectResult<Map<String, String>>> generateProject(String id) async {
+  /// Cree et lance la generation en un seul appel POST /projects/generate
+  /// Envoie { title, fileId?, config } et recoit { projectId, versionId, executionId }
+  Future<ProjectResult<Map<String, String>>> generateProject({
+    required String title,
+    String? fileId,
+    required Map<String, dynamic> config,
+  }) async {
     try {
-      // Step 1: create a version
-      final versionResponse = await _apiClient.createVersion(id);
-      final versionId = versionResponse.data['id'] as String?;
-      if (versionId == null) {
-        return ProjectResult(success: false, error: 'Aucun versionId retourné');
-      }
+      final response = await _apiClient.generateProject({
+        'title': title,
+        if (fileId != null) 'fileId': fileId,
+        'config': config,
+      });
+      final data = response.data as Map<String, dynamic>;
+      final projectId = data['projectId'] as String?;
+      final versionId = data['versionId'] as String?;
+      final executionId = data['executionId'] as String?;
 
-      // Step 2: start the workflow
-      final workflowResponse = await _apiClient.startWorkflow(id, versionId);
-      final executionId = workflowResponse.data['executionId'] as String?;
-      if (executionId == null) {
+      if (projectId == null || versionId == null || executionId == null) {
         return ProjectResult(
           success: false,
-          error: 'Aucun executionId retourné',
+          error: 'Reponse incomplete du serveur',
         );
       }
 
       return ProjectResult(
         success: true,
-        data: {'versionId': versionId, 'executionId': executionId},
+        data: {
+          'projectId': projectId,
+          'versionId': versionId,
+          'executionId': executionId,
+        },
       );
     } on DioException catch (e) {
       return ProjectResult(success: false, error: _handleError(e));
@@ -151,6 +149,12 @@ class ProjectService {
   }
 
   String _handleError(DioException e) {
+    // Debug: afficher les details de l'erreur
+    debugPrint('[ProjectService] Error: ${e.response?.statusCode}');
+    debugPrint('[ProjectService] URL: ${e.requestOptions.uri}');
+    debugPrint('[ProjectService] Body: ${e.response?.data}');
+    debugPrint('[ProjectService] Headers: ${e.requestOptions.headers}');
+
     if (e.response != null) {
       final statusCode = e.response!.statusCode;
       final data = e.response!.data;

@@ -6,7 +6,6 @@ import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
 import 'package:visiobook_mobile/features/import/presentation/providers/import_provider.dart';
-import 'package:visiobook_mobile/features/project_detail/presentation/providers/project_detail_provider.dart';
 
 /// Ecran de previsualisation du texte extrait
 class TextPreviewScreen extends StatefulWidget {
@@ -327,11 +326,28 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
                   ),
                   child: Column(
                     children: [
-                      _CreateProjectButton(
-                        isEditing: _isEditing,
-                        textController: _textController,
-                        onEditSaved: () {
-                          setState(() => _isEditing = false);
+                      AppButton(
+                        text: 'Créer un projet',
+                        fullWidth: true,
+                        size: AppButtonSize.lg,
+                        icon: const Icon(
+                          LucideIcons.plus,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          final importProvider = context.read<ImportProvider>();
+                          final result = importProvider.uploadResult;
+                          final file = importProvider.selectedFile;
+                          importProvider.reset();
+                          context.push(
+                            AppRoutes.createProject,
+                            extra: {
+                              'textId': result?.fileId,
+                              'textName': file?.name,
+                              'extractedText': result?.extractedText,
+                            },
+                          );
                         },
                       ),
                       const SizedBox(height: 12),
@@ -403,83 +419,6 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
           },
         ),
       ),
-    );
-  }
-}
-
-/// Bouton qui cree le projet dans le backend puis navigue vers la config
-class _CreateProjectButton extends StatefulWidget {
-  final bool isEditing;
-  final TextEditingController textController;
-  final VoidCallback onEditSaved;
-
-  const _CreateProjectButton({
-    required this.isEditing,
-    required this.textController,
-    required this.onEditSaved,
-  });
-
-  @override
-  State<_CreateProjectButton> createState() => _CreateProjectButtonState();
-}
-
-class _CreateProjectButtonState extends State<_CreateProjectButton> {
-  bool _isCreating = false;
-
-  Future<void> _createAndNavigate() async {
-    // Si en mode edition, sauvegarder d'abord
-    if (widget.isEditing) {
-      final importProvider = context.read<ImportProvider>();
-      importProvider.updateExtractedText(widget.textController.text);
-      widget.onEditSaved();
-    }
-
-    final importProvider = context.read<ImportProvider>();
-    final currentResult = importProvider.uploadResult;
-    final file = importProvider.selectedFile;
-    if (currentResult == null || file == null) return;
-
-    setState(() => _isCreating = true);
-
-    final projectDetailProvider = context.read<ProjectDetailProvider>();
-    projectDetailProvider.initFromImport(
-      fileId: currentResult.fileId ?? 'unknown',
-      fileName: file.name,
-      extractedText: currentResult.extractedText,
-      wordCount: currentResult.wordCount,
-    );
-
-    // Creer le projet dans le backend
-    final projectId = await projectDetailProvider.saveProject();
-
-    if (!mounted) return;
-
-    if (projectId != null) {
-      importProvider.reset();
-      context.push('/project/$projectId/config');
-    } else {
-      setState(() => _isCreating = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            projectDetailProvider.error ?? 'Erreur lors de la création',
-          ),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AppButton(
-      text: 'Configurer le VisioBook',
-      fullWidth: true,
-      size: AppButtonSize.lg,
-      isLoading: _isCreating,
-      icon: _isCreating
-          ? null
-          : const Icon(LucideIcons.settings, size: 20, color: Colors.white),
-      onPressed: _isCreating ? null : _createAndNavigate,
     );
   }
 }

@@ -35,7 +35,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       context.push(AppRoutes.textsHistory);
       return;
     }
-    if (index == 3) {
+    if (index == 2) {
       context.push(AppRoutes.visiobooksHistory);
       return;
     }
@@ -46,11 +46,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() => _currentNavIndex = index);
   }
 
-  void _onAddTap() {
-    _showAddModal();
-  }
-
-  void _showAddModal() {
+  void _showImportModal() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -73,7 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Nouveau projet',
+              'Ajouter un texte',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 24),
@@ -157,7 +153,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentNavIndex,
         onTap: _onNavTap,
-        onAddTap: _onAddTap,
+        onAddTap: _showImportModal,
       ),
     );
   }
@@ -213,7 +209,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Appuyez sur + pour créer votre premier VisioBook',
+              'Importez un texte pour créer votre premier VisioBook',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral400),

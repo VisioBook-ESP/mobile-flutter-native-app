@@ -20,6 +20,7 @@ import 'package:visiobook_mobile/features/history/presentation/screens/texts_his
 import 'package:visiobook_mobile/features/history/presentation/screens/visiobooks_history_screen.dart';
 import 'package:visiobook_mobile/features/payment/presentation/screens/plans_screen.dart';
 import 'package:visiobook_mobile/features/payment/presentation/screens/subscription_screen.dart';
+import 'package:visiobook_mobile/features/project_creation/presentation/screens/create_project_screen.dart';
 import 'package:visiobook_mobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:visiobook_mobile/features/projects/presentation/screens/dashboard_screen.dart';
 
@@ -46,6 +47,8 @@ class AppRoutes {
   static const String textsHistory = '/history/texts';
   static const String textDetail = '/text/:id';
   static const String visiobooksHistory = '/history/visiobooks';
+  // Project creation
+  static const String createProject = '/project/create';
   // Profile
   static const String profile = '/profile';
   // Payment
@@ -87,6 +90,17 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.dashboard,
         builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.createProject,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return CreateProjectScreen(
+            textId: extra?['textId'] as String?,
+            textName: extra?['textName'] as String?,
+            extractedText: extra?['extractedText'] as String?,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.projectConfig,

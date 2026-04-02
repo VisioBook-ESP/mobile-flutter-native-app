@@ -109,9 +109,9 @@ class ProjectDetailProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Met a jour la duree
-  void setDuration(VideoDuration duration) {
-    _config = _config.copyWith(duration: duration);
+  /// Met a jour la vibe
+  void setVibe(VideoVibe vibe) {
+    _config = _config.copyWith(vibe: vibe);
     notifyListeners();
   }
 
@@ -158,16 +158,7 @@ class ProjectDetailProvider extends ChangeNotifier {
       return savedId;
     }
 
-    final result = await _projectService.createProject(
-      title: _project!.title,
-      sourceType: 'text',
-      content: {'text': _extractedText ?? '', 'metadata': {}},
-      config: {
-        'style': _config.style.name,
-        'language': _config.language.name,
-        'duration': _config.duration.name,
-      },
-    );
+    final result = await _projectService.createProject(title: _project!.title);
 
     if (result.success && result.data != null) {
       _project = result.data;
@@ -206,7 +197,10 @@ class ProjectDetailProvider extends ChangeNotifier {
       };
     }
 
-    final result = await _projectService.generateProject(projectId);
+    final result = await _projectService.generateProject(
+      title: _project!.title,
+      config: _config.toJson(),
+    );
 
     if (result.success && result.data != null) {
       _state = ProjectDetailState.loaded;

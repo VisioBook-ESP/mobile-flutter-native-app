@@ -83,36 +83,56 @@ enum AudioLanguage {
   }
 }
 
-/// Duree de la video
-enum VideoDuration {
-  short,
-  medium,
-  long,
-  auto;
+/// Ambiance / vibe de la video
+enum VideoVibe {
+  dramatic,
+  calm,
+  joyful,
+  dark,
+  epic,
+  romantic,
+  mysterious;
 
   String get label {
     switch (this) {
-      case VideoDuration.short:
-        return 'Courte';
-      case VideoDuration.medium:
-        return 'Moyenne';
-      case VideoDuration.long:
-        return 'Longue';
-      case VideoDuration.auto:
-        return 'Automatique';
+      case VideoVibe.dramatic:
+        return 'Dramatique';
+      case VideoVibe.calm:
+        return 'Calme';
+      case VideoVibe.joyful:
+        return 'Joyeux';
+      case VideoVibe.dark:
+        return 'Sombre';
+      case VideoVibe.epic:
+        return 'Epique';
+      case VideoVibe.romantic:
+        return 'Romantique';
+      case VideoVibe.mysterious:
+        return 'Mysterieux';
+    }
+  }
+}
+
+/// Format video
+enum VideoFormat {
+  portrait,
+  landscape;
+
+  String get label {
+    switch (this) {
+      case VideoFormat.portrait:
+        return 'Portrait';
+      case VideoFormat.landscape:
+        return 'Paysage';
     }
   }
 
   String get description {
     switch (this) {
-      case VideoDuration.short:
-        return '1-2 minutes';
-      case VideoDuration.medium:
-        return '3-5 minutes';
-      case VideoDuration.long:
-        return '6-10 minutes';
-      case VideoDuration.auto:
-        return 'Selon le texte';
+      case VideoFormat.portrait:
+        return '9:16';
+      case VideoFormat.landscape:
+        return '16:9';
     }
   }
 }
@@ -121,23 +141,27 @@ enum VideoDuration {
 class ProjectConfig {
   final VideoStyle style;
   final AudioLanguage language;
-  final VideoDuration duration;
+  final VideoVibe vibe;
+  final VideoFormat format;
 
   const ProjectConfig({
     this.style = VideoStyle.realistic,
     this.language = AudioLanguage.french,
-    this.duration = VideoDuration.auto,
+    this.vibe = VideoVibe.calm,
+    this.format = VideoFormat.portrait,
   });
 
   ProjectConfig copyWith({
     VideoStyle? style,
     AudioLanguage? language,
-    VideoDuration? duration,
+    VideoVibe? vibe,
+    VideoFormat? format,
   }) {
     return ProjectConfig(
       style: style ?? this.style,
       language: language ?? this.language,
-      duration: duration ?? this.duration,
+      vibe: vibe ?? this.vibe,
+      format: format ?? this.format,
     );
   }
 
@@ -145,7 +169,8 @@ class ProjectConfig {
     return {
       'style': style.name,
       'language': language.code,
-      'duration': duration.name,
+      'vibe': vibe.name,
+      'format': format.name,
     };
   }
 }

@@ -232,16 +232,20 @@ class ProjectProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Cree un nouveau projet
-  Future<Project?> createProject({
+  /// Cree et lance la generation d'un projet en un seul appel
+  /// Retourne { projectId, versionId, executionId } ou null
+  Future<Map<String, String>?> generateProject({
     required String title,
-    String? description,
+    String? fileId,
+    required Map<String, dynamic> config,
   }) async {
-    final result = await _projectService.createProject(title: title);
+    final result = await _projectService.generateProject(
+      title: title,
+      fileId: fileId,
+      config: config,
+    );
 
     if (result.success && result.data != null) {
-      _projects.insert(0, result.data!);
-      notifyListeners();
       return result.data;
     }
 
@@ -263,35 +267,6 @@ class ProjectProvider extends ChangeNotifier {
     _error = result.error;
     notifyListeners();
     return false;
-  }
-
-  /// Lance la generation d'un projet
-  /// Retourne une Map avec versionId et executionId ou null en cas d'erreur
-  Future<Map<String, String>?> generateProject(String id) async {
-    final result = await _projectService.generateProject(id);
-
-    if (result.success && result.data != null) {
-      // Met a jour le statut localement
-      final index = _projects.indexWhere((p) => p.id == id);
-      if (index != -1) {
-        _projects[index] = Project(
-          id: _projects[index].id,
-          title: _projects[index].title,
-          description: _projects[index].description,
-          status: ProjectStatus.processing,
-          coverUrl: _projects[index].coverUrl,
-          videoUrl: _projects[index].videoUrl,
-          createdAt: _projects[index].createdAt,
-          updatedAt: DateTime.now(),
-        );
-        notifyListeners();
-      }
-      return result.data;
-    }
-
-    _error = result.error;
-    notifyListeners();
-    return null;
   }
 
   /// Duplique un projet existant

@@ -36,16 +36,30 @@ class AppInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final labelColor = isDark ? AppColors.neutral50 : AppColors.neutral900;
+    final textColor = isDark ? AppColors.neutral50 : AppColors.neutral900;
+    final fillColor = isDark
+        ? Colors.white.withValues(alpha: 0.06)
+        : Colors.white;
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.15)
+        : AppColors.neutral900.withValues(alpha: 0.3);
+    final focusBorderColor = isDark
+        ? Colors.white.withValues(alpha: 0.35)
+        : AppColors.neutral900.withValues(alpha: 0.5);
+    final hintColor = isDark ? AppColors.neutral400 : AppColors.neutral500;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label != null) ...[
           Text(
             label!,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: AppColors.neutral900,
+              color: labelColor,
             ),
           ),
           const SizedBox(height: 8),
@@ -58,36 +72,29 @@ class AppInput extends StatelessWidget {
           onChanged: onChanged,
           enabled: enabled,
           maxLines: maxLines,
-          style: const TextStyle(fontSize: 16, color: AppColors.neutral900),
+          style: TextStyle(fontSize: 16, color: textColor),
           decoration: InputDecoration(
             hintText: placeholder,
-            hintStyle: TextStyle(fontSize: 16, color: AppColors.neutral500),
+            hintStyle: TextStyle(fontSize: 16, color: hintColor),
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: fillColor,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 12,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: AppColors.neutral900.withValues(alpha: 0.3),
-              ),
+              borderSide: BorderSide(color: borderColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: AppColors.neutral900.withValues(alpha: 0.3),
-              ),
+              borderSide: BorderSide(color: borderColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: AppColors.neutral900.withValues(alpha: 0.5),
-                width: 2,
-              ),
+              borderSide: BorderSide(color: focusBorderColor, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -99,7 +106,9 @@ class AppInput extends StatelessWidget {
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.neutral300),
+              borderSide: BorderSide(
+                color: isDark ? AppColors.neutral700 : AppColors.neutral300,
+              ),
             ),
           ),
         ),

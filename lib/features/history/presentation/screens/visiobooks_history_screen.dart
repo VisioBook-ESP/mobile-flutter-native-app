@@ -134,12 +134,19 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
     required VoidCallback onTap,
     Color? color,
   }) {
+    final isDarkCtx = Theme.of(context).brightness == Brightness.dark;
     return ListTile(
-      leading: Icon(icon, color: color ?? AppColors.neutral700, size: 20),
+      leading: Icon(
+        icon,
+        color:
+            color ?? (isDarkCtx ? AppColors.neutral300 : AppColors.neutral700),
+        size: 20,
+      ),
       title: Text(
         label,
         style: TextStyle(
-          color: color ?? AppColors.neutral900,
+          color:
+              color ?? (isDarkCtx ? AppColors.neutral50 : AppColors.neutral900),
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -153,13 +160,11 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.neutral900),
-          onPressed: () => context.pop(),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           'Mes VisioBooks',
           style: Theme.of(context).textTheme.headlineSmall,
@@ -249,12 +254,19 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
 
   Widget _buildChip(String label, _VisioBookFilter filter) {
     final isSelected = _selectedFilter == filter;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => setState(() => _selectedFilter = filter),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.neutral900 : AppColors.neutral100,
+          color: isSelected
+              ? (isDark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : AppColors.neutral900)
+              : (isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : AppColors.neutral100),
           borderRadius: BorderRadius.circular(AppTheme.radiusXl),
         ),
         child: Text(
@@ -262,7 +274,9 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: isSelected ? Colors.white : AppColors.neutral600,
+            color: isSelected
+                ? Colors.white
+                : (isDark ? AppColors.neutral300 : AppColors.neutral600),
           ),
         ),
       ),
@@ -436,15 +450,22 @@ class _VisioBookCard extends StatelessWidget {
   }
 
   Widget _buildPlaceholder() {
-    return Container(
-      color: AppColors.neutral100,
-      child: Center(
-        child: Icon(
-          LucideIcons.playCircle,
-          size: 40,
-          color: AppColors.neutral400,
-        ),
-      ),
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Container(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : AppColors.neutral100,
+          child: Center(
+            child: Icon(
+              LucideIcons.playCircle,
+              size: 40,
+              color: AppColors.neutral400,
+            ),
+          ),
+        );
+      },
     );
   }
 }

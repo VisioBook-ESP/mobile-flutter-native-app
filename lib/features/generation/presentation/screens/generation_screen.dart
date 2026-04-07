@@ -686,6 +686,8 @@ class _GenerationScreenState extends State<GenerationScreen>
             onPressed: () {
               Navigator.of(dialogContext).pop();
               provider.cancelGeneration();
+              provider.reset();
+              context.go(AppRoutes.dashboard);
             },
             child: const Text(
               'Annuler la génération',

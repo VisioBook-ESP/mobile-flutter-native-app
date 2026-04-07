@@ -57,201 +57,211 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.pop(),
+    return AnimatedGradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              LucideIcons.arrowLeft,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () => context.pop(),
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Consumer<AuthProvider>(
-          builder: (context, authProvider, _) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    const SizedBox(height: 48),
-                    Text(
-                      'Créer un compte',
-                      style: Theme.of(context).textTheme.displaySmall,
-                    ),
-                    const SizedBox(height: 48),
-                    if (authProvider.error != null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              LucideIcons.alertCircle,
-                              color: AppColors.error,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                authProvider.error!,
-                                style: const TextStyle(
-                                  color: AppColors.error,
-                                  fontSize: 14,
+        body: SafeArea(
+          child: Consumer<AuthProvider>(
+            builder: (context, authProvider, _) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 48),
+                      Text(
+                        'Créer un compte',
+                        style: Theme.of(context).textTheme.displaySmall,
+                      ),
+                      const SizedBox(height: 48),
+                      if (authProvider.error != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                LucideIcons.alertCircle,
+                                color: AppColors.error,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  authProvider.error!,
+                                  style: const TextStyle(
+                                    color: AppColors.error,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                    AppInput(
-                      label: 'Nom d\'utilisateur',
-                      placeholder: 'Votre nom d\'utilisateur',
-                      controller: _usernameController,
-                      keyboardType: TextInputType.text,
-                      validator: Validators.username,
-                      enabled: !authProvider.isLoading,
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: AppInput(
-                            label: 'Prénom',
-                            placeholder: 'Votre prénom',
-                            controller: _firstNameController,
-                            keyboardType: TextInputType.name,
-                            validator: Validators.firstName,
-                            enabled: !authProvider.isLoading,
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: AppInput(
-                            label: 'Nom',
-                            placeholder: 'Votre nom',
-                            controller: _lastNameController,
-                            keyboardType: TextInputType.name,
-                            validator: Validators.lastName,
-                            enabled: !authProvider.isLoading,
-                          ),
-                        ),
+                        const SizedBox(height: 24),
                       ],
-                    ),
-                    const SizedBox(height: 20),
-                    AppInput(
-                      label: 'Email',
-                      placeholder: 'votre@email.com',
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: Validators.email,
-                      enabled: !authProvider.isLoading,
-                    ),
-                    const SizedBox(height: 20),
-                    AppInput(
-                      label: 'Mot de passe',
-                      placeholder: 'Minimum 8 caractères',
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      validator: Validators.password,
-                      enabled: !authProvider.isLoading,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? LucideIcons.eyeOff
-                              : LucideIcons.eye,
-                          color: AppColors.neutral500,
+                      AppInput(
+                        label: 'Nom d\'utilisateur',
+                        placeholder: 'Votre nom d\'utilisateur',
+                        controller: _usernameController,
+                        keyboardType: TextInputType.text,
+                        validator: Validators.username,
+                        enabled: !authProvider.isLoading,
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: AppInput(
+                              label: 'Prénom',
+                              placeholder: 'Votre prénom',
+                              controller: _firstNameController,
+                              keyboardType: TextInputType.name,
+                              validator: Validators.firstName,
+                              enabled: !authProvider.isLoading,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: AppInput(
+                              label: 'Nom',
+                              placeholder: 'Votre nom',
+                              controller: _lastNameController,
+                              keyboardType: TextInputType.name,
+                              validator: Validators.lastName,
+                              enabled: !authProvider.isLoading,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      AppInput(
+                        label: 'Email',
+                        placeholder: 'votre@email.com',
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: Validators.email,
+                        enabled: !authProvider.isLoading,
+                      ),
+                      const SizedBox(height: 20),
+                      AppInput(
+                        label: 'Mot de passe',
+                        placeholder: 'Minimum 8 caractères',
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        validator: Validators.password,
+                        enabled: !authProvider.isLoading,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? LucideIcons.eyeOff
+                                : LucideIcons.eye,
+                            color: AppColors.neutral500,
+                          ),
+                          onPressed: () {
+                            setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            );
+                          },
                         ),
-                        onPressed: () {
-                          setState(() => _obscurePassword = !_obscurePassword);
-                        },
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    AppInput(
-                      label: 'Confirmer le mot de passe',
-                      placeholder: 'Retapez votre mot de passe',
-                      controller: _confirmPasswordController,
-                      obscureText: _obscureConfirmPassword,
-                      validator: (value) => Validators.confirmPassword(
-                        value,
-                        _passwordController.text,
-                      ),
-                      enabled: !authProvider.isLoading,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword
-                              ? LucideIcons.eyeOff
-                              : LucideIcons.eye,
-                          color: AppColors.neutral500,
+                      const SizedBox(height: 20),
+                      AppInput(
+                        label: 'Confirmer le mot de passe',
+                        placeholder: 'Retapez votre mot de passe',
+                        controller: _confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        validator: (value) => Validators.confirmPassword(
+                          value,
+                          _passwordController.text,
                         ),
-                        onPressed: () {
-                          setState(
-                            () => _obscureConfirmPassword =
-                                !_obscureConfirmPassword,
-                          );
-                        },
+                        enabled: !authProvider.isLoading,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? LucideIcons.eyeOff
+                                : LucideIcons.eye,
+                            color: AppColors.neutral500,
+                          ),
+                          onPressed: () {
+                            setState(
+                              () => _obscureConfirmPassword =
+                                  !_obscureConfirmPassword,
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    // TODO: Activer la checkbox CGU quand les CGU seront disponibles
-                    // const SizedBox(height: 24),
-                    // Row(
-                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                    //   children: [
-                    //     SizedBox(
-                    //       width: 24,
-                    //       height: 24,
-                    //       child: Checkbox(
-                    //         value: _acceptedCgu,
-                    //         onChanged: authProvider.isLoading
-                    //             ? null
-                    //             : (value) {
-                    //                 setState(
-                    //                   () => _acceptedCgu = value ?? false,
-                    //                 );
-                    //               },
-                    //         activeColor: AppColors.neutral900,
-                    //       ),
-                    //     ),
-                    //     const SizedBox(width: 8),
-                    //     Expanded(
-                    //       child: GestureDetector(
-                    //         onTap: authProvider.isLoading
-                    //             ? null
-                    //             : () {
-                    //                 setState(
-                    //                   () => _acceptedCgu = !_acceptedCgu,
-                    //                 );
-                    //               },
-                    //         child: Text(
-                    //           'J\'accepte les Conditions Generales d\'Utilisation et la Politique de Confidentialite',
-                    //           style: Theme.of(context).textTheme.bodySmall
-                    //               ?.copyWith(color: AppColors.neutral500),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
-                    const SizedBox(height: 32),
-                    AppButton(
-                      text: "S'enregistrer",
-                      fullWidth: true,
-                      size: AppButtonSize.lg,
-                      isLoading: authProvider.isLoading,
-                      onPressed: authProvider.isLoading
-                          ? null
-                          : _handleRegister,
-                    ),
-                    const SizedBox(height: 48),
-                  ],
+                      // TODO: Activer la checkbox CGU quand les CGU seront disponibles
+                      // const SizedBox(height: 24),
+                      // Row(
+                      //   crossAxisAlignment: CrossAxisAlignment.start,
+                      //   children: [
+                      //     SizedBox(
+                      //       width: 24,
+                      //       height: 24,
+                      //       child: Checkbox(
+                      //         value: _acceptedCgu,
+                      //         onChanged: authProvider.isLoading
+                      //             ? null
+                      //             : (value) {
+                      //                 setState(
+                      //                   () => _acceptedCgu = value ?? false,
+                      //                 );
+                      //               },
+                      //         activeColor: AppColors.neutral900,
+                      //       ),
+                      //     ),
+                      //     const SizedBox(width: 8),
+                      //     Expanded(
+                      //       child: GestureDetector(
+                      //         onTap: authProvider.isLoading
+                      //             ? null
+                      //             : () {
+                      //                 setState(
+                      //                   () => _acceptedCgu = !_acceptedCgu,
+                      //                 );
+                      //               },
+                      //         child: Text(
+                      //           'J\'accepte les Conditions Generales d\'Utilisation et la Politique de Confidentialite',
+                      //           style: Theme.of(context).textTheme.bodySmall
+                      //               ?.copyWith(color: AppColors.neutral500),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                      const SizedBox(height: 32),
+                      AppButton(
+                        text: "S'enregistrer",
+                        fullWidth: true,
+                        size: AppButtonSize.lg,
+                        isLoading: authProvider.isLoading,
+                        onPressed: authProvider.isLoading
+                            ? null
+                            : _handleRegister,
+                      ),
+                      const SizedBox(height: 48),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

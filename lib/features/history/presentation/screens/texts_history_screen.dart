@@ -65,14 +65,11 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.neutral900),
-          onPressed: () => context.pop(),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           'Mes Textes',
           style: Theme.of(context).textTheme.headlineSmall,
@@ -89,52 +86,67 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
             // Barre de recherche
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (value) => setState(() => _searchQuery = value),
-                decoration: InputDecoration(
-                  hintText: 'Rechercher un texte...',
-                  hintStyle: const TextStyle(color: AppColors.neutral400),
-                  prefixIcon: const Icon(
-                    LucideIcons.search,
-                    color: AppColors.neutral400,
-                    size: 20,
-                  ),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(
-                            LucideIcons.x,
-                            color: AppColors.neutral400,
-                            size: 18,
-                          ),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: AppColors.neutral100,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                    borderSide: const BorderSide(
-                      color: AppColors.neutral900,
-                      width: 2,
+              child: Builder(
+                builder: (context) {
+                  final isDark =
+                      Theme.of(context).brightness == Brightness.dark;
+                  return TextField(
+                    controller: _searchController,
+                    onChanged: (value) => setState(() => _searchQuery = value),
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.neutral50
+                          : AppColors.neutral900,
                     ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
+                    decoration: InputDecoration(
+                      hintText: 'Rechercher un texte...',
+                      hintStyle: const TextStyle(color: AppColors.neutral400),
+                      prefixIcon: const Icon(
+                        LucideIcons.search,
+                        color: AppColors.neutral400,
+                        size: 20,
+                      ),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(
+                                LucideIcons.x,
+                                color: AppColors.neutral400,
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : AppColors.neutral100,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? AppColors.neutral50
+                              : AppColors.neutral900,
+                          width: 2,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 16),
@@ -184,8 +196,12 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       itemCount: filtered.length,
-                      separatorBuilder: (_, _) =>
-                          const Divider(height: 1, color: AppColors.neutral200),
+                      separatorBuilder: (_, _) => Divider(
+                        height: 1,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : AppColors.neutral200,
+                      ),
                       itemBuilder: (context, index) {
                         final file = filtered[index];
                         return _buildFileItem(context, file);
@@ -203,12 +219,19 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
 
   Widget _buildFilterChip(String label, _TextFilter filter) {
     final isSelected = _selectedFilter == filter;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => setState(() => _selectedFilter = filter),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.neutral900 : AppColors.neutral100,
+          color: isSelected
+              ? (isDark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : AppColors.neutral900)
+              : (isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : AppColors.neutral100),
           borderRadius: BorderRadius.circular(AppTheme.radiusSm),
         ),
         child: Text(
@@ -216,7 +239,9 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: isSelected ? Colors.white : AppColors.neutral600,
+            color: isSelected
+                ? Colors.white
+                : (isDark ? AppColors.neutral300 : AppColors.neutral600),
           ),
         ),
       ),
@@ -228,6 +253,7 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
     final formattedDate =
         '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     final wordCount = file.wordCount ?? 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8),
@@ -235,21 +261,23 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: AppColors.neutral100,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : AppColors.neutral100,
           borderRadius: BorderRadius.circular(AppTheme.radiusSm),
         ),
         child: Icon(
           _getFileIcon(file.fileType),
-          color: AppColors.neutral600,
+          color: isDark ? AppColors.neutral300 : AppColors.neutral600,
           size: 22,
         ),
       ),
       title: Text(
         file.name,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          color: AppColors.neutral900,
+          color: isDark ? AppColors.neutral50 : AppColors.neutral900,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -283,6 +311,7 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
   }
 
   Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(48),
@@ -293,7 +322,9 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.neutral100,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : AppColors.neutral100,
                 borderRadius: BorderRadius.circular(AppTheme.radiusXl),
               ),
               child: const Icon(
@@ -303,12 +334,12 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Aucun texte',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.neutral900,
+                color: isDark ? AppColors.neutral50 : AppColors.neutral900,
               ),
             ),
             const SizedBox(height: 8),
@@ -324,6 +355,7 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
   }
 
   Widget _buildNoResultsState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(48),
@@ -336,12 +368,12 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
               color: AppColors.neutral400,
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Aucun résultat',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.neutral900,
+                color: isDark ? AppColors.neutral50 : AppColors.neutral900,
               ),
             ),
             const SizedBox(height: 8),

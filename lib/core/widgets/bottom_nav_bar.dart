@@ -1,10 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 
-/// Bottom navigation bar
-/// - Fond noir (neutral900)
-/// - 5 items: Home, Mes Textes, Add (+, central, depasse), Mes VisioBooks, Profil
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
@@ -19,76 +17,151 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final glassAlpha = isDark ? 0.18 : 0.12;
+    final borderAlpha = isDark ? 0.25 : 0.3;
+    final innerGlowAlpha = isDark ? 0.08 : 0.06;
+    final edgeHighAlpha = isDark ? 0.5 : 0.8;
+    final edgeLowAlpha = isDark ? 0.2 : 0.3;
+    final iconColor = isDark ? Colors.white : AppColors.neutral900;
+
     return SizedBox(
-      height: 80 + MediaQuery.of(context).padding.bottom,
+      height: 88 + bottomPadding,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // Glass nav bar
           Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              color: AppColors.neutral900,
-              child: SafeArea(
-                top: false,
-                child: SizedBox(
-                  height: 60,
-                  child: Row(
-                    children: [
-                      _NavItem(
-                        icon: LucideIcons.home,
-                        isSelected: currentIndex == 0,
-                        onTap: () => onTap(0),
+            left: 12,
+            right: 12,
+            bottom: bottomPadding + 8,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                child: CustomPaint(
+                  painter: _NavBarGlassPainter(
+                    highAlpha: edgeHighAlpha,
+                    lowAlpha: edgeLowAlpha,
+                  ),
+                  child: Container(
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: glassAlpha),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: borderAlpha),
                       ),
-                      _NavItem(
-                        icon: LucideIcons.fileText,
-                        isSelected: currentIndex == 1,
-                        onTap: () => onTap(1),
+                      boxShadow: [
+                        // Outer shadow
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 32,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    // Inner glow overlay
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: RadialGradient(
+                          center: Alignment.center,
+                          radius: 1.2,
+                          colors: [
+                            Colors.white.withValues(alpha: innerGlowAlpha),
+                            Colors.white.withValues(alpha: 0.0),
+                          ],
+                        ),
                       ),
-                      const Expanded(child: SizedBox()),
-                      _NavItem(
-                        icon: LucideIcons.plus,
-                        isSelected: false,
-                        onTap: () => onAddTap?.call(),
+                      child: Row(
+                        children: [
+                          _NavItem(
+                            icon: LucideIcons.home,
+                            isSelected: currentIndex == 0,
+                            onTap: () => onTap(0),
+                            iconColor: iconColor,
+                            isDark: isDark,
+                          ),
+                          _NavItem(
+                            icon: LucideIcons.fileText,
+                            isSelected: currentIndex == 1,
+                            onTap: () => onTap(1),
+                            iconColor: iconColor,
+                            isDark: isDark,
+                          ),
+                          const Expanded(child: SizedBox()),
+                          _NavItem(
+                            icon: LucideIcons.plus,
+                            isSelected: false,
+                            onTap: () => onAddTap?.call(),
+                            iconColor: iconColor,
+                            isDark: isDark,
+                          ),
+                          _NavItem(
+                            icon: LucideIcons.user,
+                            isSelected: currentIndex == 4,
+                            onTap: () => onTap(4),
+                            iconColor: iconColor,
+                            isDark: isDark,
+                          ),
+                        ],
                       ),
-                      _NavItem(
-                        icon: LucideIcons.user,
-                        isSelected: currentIndex == 4,
-                        onTap: () => onTap(4),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
+          // Central play button - glass style
           Positioned(
-            top: 0,
+            bottom: bottomPadding + 28,
             left: 0,
             right: 0,
             child: Center(
               child: GestureDetector(
                 onTap: () => onTap(2),
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                child: ClipOval(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: glassAlpha),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: borderAlpha),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 32,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      LucideIcons.playCircle,
-                      color: AppColors.neutral900,
-                      size: 44,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            center: Alignment.center,
+                            radius: 0.9,
+                            colors: [
+                              Colors.white.withValues(alpha: innerGlowAlpha),
+                              Colors.white.withValues(alpha: 0.0),
+                            ],
+                          ),
+                        ),
+                        child: Icon(
+                          LucideIcons.playCircle,
+                          color: iconColor.withValues(alpha: 0.8),
+                          size: 28,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -101,32 +174,96 @@ class BottomNavBar extends StatelessWidget {
   }
 }
 
+/// Draws the top and left edge highlights (::before and ::after in CSS)
+class _NavBarGlassPainter extends CustomPainter {
+  final double highAlpha;
+  final double lowAlpha;
+
+  _NavBarGlassPainter({this.highAlpha = 0.8, this.lowAlpha = 0.3});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Top edge highlight (::before)
+    final topPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          Colors.white.withValues(alpha: 0.0),
+          Colors.white.withValues(alpha: highAlpha),
+          Colors.white.withValues(alpha: 0.0),
+        ],
+        stops: const [0.0, 0.5, 1.0],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, 1));
+    canvas.drawRect(Rect.fromLTWH(20, 0, size.width - 40, 1), topPaint);
+
+    // Left edge highlight (::after)
+    final leftPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withValues(alpha: highAlpha),
+          Colors.white.withValues(alpha: 0.0),
+          Colors.white.withValues(alpha: lowAlpha),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, 1, size.height));
+    canvas.drawRect(Rect.fromLTWH(0, 20, 1, size.height - 40), leftPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _NavBarGlassPainter oldDelegate) =>
+      oldDelegate.highAlpha != highAlpha || oldDelegate.lowAlpha != lowAlpha;
+}
+
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
+  final Color iconColor;
+  final bool isDark;
 
   const _NavItem({
     required this.icon,
     required this.isSelected,
     required this.onTap,
+    required this.iconColor,
+    required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
+    final selectedBgAlpha = isDark ? 0.12 : 0.2;
+    final selectedBorderAlpha = isDark ? 0.15 : 0.25;
+
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: SizedBox(
-          height: 60,
+          height: 64,
           child: Center(
-            child: Icon(
-              icon,
-              color: isSelected
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.6),
-              size: 24,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: isSelected
+                  ? BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: selectedBgAlpha),
+                      border: Border.all(
+                        color: Colors.white.withValues(
+                          alpha: selectedBorderAlpha,
+                        ),
+                      ),
+                    )
+                  : null,
+              child: Center(
+                child: Icon(
+                  icon,
+                  color: isSelected
+                      ? iconColor
+                      : iconColor.withValues(alpha: 0.4),
+                  size: 22,
+                ),
+              ),
             ),
           ),
         ),

@@ -6,6 +6,7 @@ import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/utils/secure_storage.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
+import 'package:visiobook_mobile/core/widgets/animated_gradient_background.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -66,61 +67,69 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final isLastPage = _currentPage == _slides.length - 1;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Skip button
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: TextButton(
-                  onPressed: _completeOnboarding,
-                  child: Text(
-                    'Passer',
-                    style: TextStyle(color: AppColors.neutral500, fontSize: 14),
+    return AnimatedGradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Skip button
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: TextButton(
+                    onPressed: _completeOnboarding,
+                    child: Text(
+                      'Passer',
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.neutral300
+                            : AppColors.neutral500,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-            // Slides
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: _slides.length,
-                onPageChanged: (index) {
-                  setState(() => _currentPage = index);
-                },
-                itemBuilder: (context, index) {
-                  final slide = _slides[index];
-                  return _SlideWidget(data: slide);
-                },
-              ),
-            ),
-            // Dots indicator
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  _slides.length,
-                  (index) => _DotIndicator(isActive: index == _currentPage),
+              // Slides
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: _slides.length,
+                  onPageChanged: (index) {
+                    setState(() => _currentPage = index);
+                  },
+                  itemBuilder: (context, index) {
+                    final slide = _slides[index];
+                    return _SlideWidget(data: slide);
+                  },
                 ),
               ),
-            ),
-            // Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: AppButton(
-                text: isLastPage ? 'Commencer' : 'Suivant',
-                fullWidth: true,
-                size: AppButtonSize.lg,
-                onPressed: _nextPage,
+              // Dots indicator
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    _slides.length,
+                    (index) => _DotIndicator(isActive: index == _currentPage),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 48),
-          ],
+              // Button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: AppButton(
+                  text: isLastPage ? 'Commencer' : 'Suivant',
+                  fullWidth: true,
+                  size: AppButtonSize.lg,
+                  onPressed: _nextPage,
+                ),
+              ),
+              const SizedBox(height: 48),
+            ],
+          ),
         ),
       ),
     );
@@ -146,6 +155,7 @@ class _SlideWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 48),
       child: Column(
@@ -155,10 +165,16 @@ class _SlideWidget extends StatelessWidget {
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: AppColors.neutral100,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : AppColors.neutral100,
               borderRadius: BorderRadius.circular(50),
             ),
-            child: Icon(data.icon, size: 48, color: AppColors.neutral900),
+            child: Icon(
+              data.icon,
+              size: 48,
+              color: isDark ? AppColors.neutral50 : AppColors.neutral900,
+            ),
           ),
           const SizedBox(height: 40),
           Text(
@@ -187,13 +203,16 @@ class _DotIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       width: isActive ? 24 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color: isActive ? AppColors.neutral900 : AppColors.neutral300,
+        color: isActive
+            ? (isDark ? AppColors.neutral50 : AppColors.neutral900)
+            : (isDark ? AppColors.neutral700 : AppColors.neutral300),
         borderRadius: BorderRadius.circular(4),
       ),
     );

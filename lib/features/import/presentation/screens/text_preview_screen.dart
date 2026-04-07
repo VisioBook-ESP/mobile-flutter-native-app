@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
+import 'package:visiobook_mobile/core/widgets/gradient_background.dart';
 import 'package:visiobook_mobile/features/import/presentation/providers/import_provider.dart';
 
 /// Ecran de previsualisation du texte extrait
@@ -101,15 +102,20 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
 
   /// Construit la carte de resume affichee au-dessus du texte complet.
   Widget _buildSummaryCard(BuildContext context, String summary) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.neutral50,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : AppColors.neutral50,
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          border: Border.all(color: AppColors.neutral200),
+          border: Border.all(
+            color: isDark ? AppColors.neutral700 : AppColors.neutral200,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,225 +153,242 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () {
-            if (_isEditing) {
-              // Save before navigating back
-              final provider = context.read<ImportProvider>();
-              provider.updateExtractedText(_textController.text);
-            }
-            context.pop();
-          },
-        ),
-        title: const Text('Aperçu du texte'),
-        actions: [
-          TextButton.icon(
-            onPressed: _toggleEditing,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
             icon: Icon(
-              _isEditing ? LucideIcons.check : LucideIcons.pencil,
-              size: 16,
+              LucideIcons.arrowLeft,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
-            label: Text(_isEditing ? 'Terminer' : 'Modifier'),
+            onPressed: () {
+              if (_isEditing) {
+                // Save before navigating back
+                final provider = context.read<ImportProvider>();
+                provider.updateExtractedText(_textController.text);
+              }
+              context.pop();
+            },
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: Consumer<ImportProvider>(
-          builder: (context, provider, _) {
-            final result = provider.uploadResult;
-            final file = provider.selectedFile;
+          title: Text(
+            'Aperçu du texte',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          actions: [
+            TextButton.icon(
+              onPressed: _toggleEditing,
+              icon: Icon(
+                _isEditing ? LucideIcons.check : LucideIcons.pencil,
+                size: 16,
+              ),
+              label: Text(_isEditing ? 'Terminer' : 'Modifier'),
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Consumer<ImportProvider>(
+            builder: (context, provider, _) {
+              final result = provider.uploadResult;
+              final file = provider.selectedFile;
 
-            if (result == null || file == null) {
-              return const Center(child: Text('Aucun texte disponible'));
-            }
+              if (result == null || file == null) {
+                return const Center(child: Text('Aucun texte disponible'));
+              }
 
-            final displayWordCount = _isEditing
-                ? _liveWordCount
-                : (result.wordCount ?? 0);
+              final displayWordCount = _isEditing
+                  ? _liveWordCount
+                  : (result.wordCount ?? 0);
 
-            return Column(
-              children: [
-                // Header avec infos fichier
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  color: AppColors.neutral50,
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.neutral900,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          LucideIcons.fileText,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              file.name,
-                              style: Theme.of(context).textTheme.titleSmall,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '$displayWordCount mots',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: AppColors.neutral500),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (_isEditing)
+              return Column(
+                children: [
+                  // Header avec infos fichier
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : AppColors.neutral50,
+                    child: Row(
+                      children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
+                          width: 40,
+                          height: 40,
                           decoration: BoxDecoration(
-                            color: AppColors.info.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(20),
+                            color: AppColors.neutral900,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                LucideIcons.pencil,
-                                color: AppColors.info,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Edition',
-                                style: Theme.of(context).textTheme.labelMedium
-                                    ?.copyWith(color: AppColors.info),
-                              ),
-                            ],
-                          ),
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                LucideIcons.checkCircle,
-                                color: Colors.green.shade700,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Prêt',
-                                style: Theme.of(context).textTheme.labelMedium
-                                    ?.copyWith(color: Colors.green.shade700),
-                              ),
-                            ],
+                          child: const Icon(
+                            LucideIcons.fileText,
+                            color: Colors.white,
+                            size: 20,
                           ),
                         ),
-                    ],
-                  ),
-                ),
-
-                // Resume + texte dans un Expanded scrollable
-                Expanded(
-                  child: _isEditing
-                      ? _buildEditMode(context)
-                      : SingleChildScrollView(
+                        const SizedBox(width: 12),
+                        Expanded(
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Resume automatique (only in view mode)
-                              if (result.extractedText != null &&
-                                  _generateSummary(result.extractedText!) !=
-                                      null)
-                                _buildSummaryCard(
-                                  context,
-                                  _generateSummary(result.extractedText!)!,
-                                ),
-                              // Texte extrait
-                              _buildViewModeContent(
-                                context,
-                                result.extractedText,
+                              Text(
+                                file.name,
+                                style: Theme.of(context).textTheme.titleSmall,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '$displayWordCount mots',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: AppColors.neutral500),
                               ),
                             ],
                           ),
                         ),
-                ),
+                        if (_isEditing)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.info.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  LucideIcons.pencil,
+                                  color: AppColors.info,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Edition',
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(color: AppColors.info),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  LucideIcons.checkCircle,
+                                  color: Colors.green.shade700,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Prêt',
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(color: Colors.green.shade700),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
 
-                // Boutons d'action
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, -4),
-                      ),
-                    ],
+                  // Resume + texte dans un Expanded scrollable
+                  Expanded(
+                    child: _isEditing
+                        ? _buildEditMode(context)
+                        : SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                // Resume automatique (only in view mode)
+                                if (result.extractedText != null &&
+                                    _generateSummary(result.extractedText!) !=
+                                        null)
+                                  _buildSummaryCard(
+                                    context,
+                                    _generateSummary(result.extractedText!)!,
+                                  ),
+                                // Texte extrait
+                                _buildViewModeContent(
+                                  context,
+                                  result.extractedText,
+                                ),
+                              ],
+                            ),
+                          ),
                   ),
-                  child: Column(
-                    children: [
-                      AppButton(
-                        text: 'Créer un projet',
-                        fullWidth: true,
-                        size: AppButtonSize.lg,
-                        icon: const Icon(
-                          LucideIcons.plus,
-                          size: 20,
-                          color: Colors.white,
+
+                  // Boutons d'action
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Theme.of(context).colorScheme.surface,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, -4),
                         ),
-                        onPressed: () {
-                          final importProvider = context.read<ImportProvider>();
-                          final result = importProvider.uploadResult;
-                          final file = importProvider.selectedFile;
-                          importProvider.reset();
-                          context.push(
-                            AppRoutes.createProject,
-                            extra: {
-                              'textId': result?.fileId,
-                              'textName': file?.name,
-                              'extractedText': result?.extractedText,
-                            },
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      AppButton(
-                        text: 'Annuler',
-                        variant: AppButtonVariant.outline,
-                        fullWidth: true,
-                        onPressed: () {
-                          provider.reset();
-                          context.go(AppRoutes.dashboard);
-                        },
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        AppButton(
+                          text: 'Créer un projet',
+                          fullWidth: true,
+                          size: AppButtonSize.lg,
+                          icon: const Icon(
+                            LucideIcons.plus,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            final importProvider = context
+                                .read<ImportProvider>();
+                            final result = importProvider.uploadResult;
+                            final file = importProvider.selectedFile;
+                            importProvider.reset();
+                            context.push(
+                              AppRoutes.createProject,
+                              extra: {
+                                'textId': result?.fileId,
+                                'textName': file?.name,
+                                'extractedText': result?.extractedText,
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        AppButton(
+                          text: 'Annuler',
+                          variant: AppButtonVariant.outline,
+                          fullWidth: true,
+                          onPressed: () {
+                            provider.reset();
+                            context.go(AppRoutes.dashboard);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

@@ -1,8 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 
-/// Widget generique pour selectionner une option dans une liste
 class OptionSelector<T> extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -23,6 +23,7 @@ class OptionSelector<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final selected = options.firstWhere(
       (o) => o.value == selectedValue,
       orElse: () => options.first,
@@ -34,7 +35,11 @@ class OptionSelector<T> extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.neutral200),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.15)
+                : AppColors.neutral200,
+          ),
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         ),
         child: Row(
@@ -43,10 +48,18 @@ class OptionSelector<T> extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppColors.neutral100,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : AppColors.neutral100,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: AppColors.neutral700, size: 22),
+              child: Icon(
+                icon,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.7)
+                    : AppColors.neutral700,
+                size: 22,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -62,7 +75,12 @@ class OptionSelector<T> extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(LucideIcons.chevronRight, color: AppColors.neutral400),
+            Icon(
+              LucideIcons.chevronRight,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.4)
+                  : AppColors.neutral400,
+            ),
           ],
         ),
       ),
@@ -70,54 +88,71 @@ class OptionSelector<T> extends StatelessWidget {
   }
 
   void _showOptionsSheet(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.neutral300,
-                borderRadius: BorderRadius.circular(2),
+      isScrollControlled: true,
+      builder: (context) => ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.7,
+            ),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.7)
+                  : Colors.white.withValues(alpha: 0.85),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
               ),
             ),
-            const SizedBox(height: 24),
-            Text(title, style: Theme.of(context).textTheme.headlineSmall),
-            if (subtitle != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                subtitle!,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppColors.neutral500),
-                textAlign: TextAlign.center,
-              ),
-            ],
-            const SizedBox(height: 24),
-            ...options.map(
-              (option) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: _OptionTile(
-                  option: option,
-                  isSelected: option.value == selectedValue,
-                  onTap: () {
-                    onChanged(option.value);
-                    Navigator.pop(context);
-                  },
-                ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.3)
+                          : AppColors.neutral300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(title, style: Theme.of(context).textTheme.headlineSmall),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      subtitle!,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  ...options.map(
+                    (option) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _OptionTile(
+                        option: option,
+                        isSelected: option.value == selectedValue,
+                        onTap: () {
+                          onChanged(option.value);
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-          ],
+          ),
         ),
       ),
     );
@@ -151,6 +186,18 @@ class _OptionTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectedBg = isDark
+        ? Colors.white.withValues(alpha: 0.12)
+        : Colors.white;
+    final selectedBorder = isDark
+        ? Colors.white.withValues(alpha: 0.3)
+        : AppColors.neutral900;
+    final unselectedBorder = isDark
+        ? Colors.white.withValues(alpha: 0.12)
+        : AppColors.neutral200;
+    final checkColor = isDark ? Colors.white : AppColors.neutral900;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -158,11 +205,11 @@ class _OptionTile<T> extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? AppColors.neutral900 : AppColors.neutral200,
+            color: isSelected ? selectedBorder : unselectedBorder,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          color: isSelected ? AppColors.neutral50 : Colors.transparent,
+          color: isSelected ? selectedBg : Colors.transparent,
         ),
         child: Row(
           children: [
@@ -186,16 +233,13 @@ class _OptionTile<T> extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       option.description!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.neutral500,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ],
               ),
             ),
-            if (isSelected)
-              const Icon(LucideIcons.check, color: AppColors.neutral900),
+            if (isSelected) Icon(LucideIcons.check, color: checkColor),
           ],
         ),
       ),

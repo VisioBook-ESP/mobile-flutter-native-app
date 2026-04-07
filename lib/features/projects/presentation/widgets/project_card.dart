@@ -26,31 +26,43 @@ class ProjectCard extends StatelessWidget {
             Container(
               width: cardWidth,
               height: coverHeight,
-              color: AppColors.neutral100,
-              child: project.coverUrl != null
-                  ? Image.network(
-                      project.coverUrl!,
-                      fit: BoxFit.cover,
-                      width: cardWidth,
-                      height: coverHeight,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                : null,
-                            color: AppColors.neutral400,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildPlaceholder();
-                      },
-                    )
-                  : _buildPlaceholder(),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                child: project.coverUrl != null
+                    ? Image.network(
+                        project.coverUrl!,
+                        fit: BoxFit.cover,
+                        width: cardWidth,
+                        height: coverHeight,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                  : null,
+                              color: AppColors.neutral400,
+                            ),
+                          );
+                        },
+                        errorBuilder: (ctx, error, stackTrace) {
+                          return _buildPlaceholder(context);
+                        },
+                      )
+                    : _buildPlaceholder(context),
+              ),
             ),
             // Titre et statut
             Padding(
@@ -75,9 +87,24 @@ class ProjectCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder() {
-    return const Center(
-      child: Icon(LucideIcons.bookOpen, size: 32, color: AppColors.neutral400),
+  Widget _buildPlaceholder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.white.withValues(alpha: 0.7),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: isDark ? 0.12 : 0.3),
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          LucideIcons.bookOpen,
+          size: 32,
+          color: isDark ? AppColors.neutral600 : AppColors.neutral400,
+        ),
+      ),
     );
   }
 

@@ -45,113 +45,126 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.pop(),
+    return AnimatedGradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              LucideIcons.arrowLeft,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () => context.pop(),
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Consumer<AuthProvider>(
-          builder: (context, authProvider, _) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    const SizedBox(height: 48),
-                    Text(
-                      'Connexion',
-                      style: Theme.of(context).textTheme.displaySmall,
-                    ),
-                    const SizedBox(height: 48),
-                    if (authProvider.error != null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              LucideIcons.alertCircle,
-                              color: AppColors.error,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                authProvider.error!,
-                                style: const TextStyle(
-                                  color: AppColors.error,
-                                  fontSize: 14,
+        body: SafeArea(
+          child: Consumer<AuthProvider>(
+            builder: (context, authProvider, _) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 48),
+                      Text(
+                        'Connexion',
+                        style: Theme.of(context).textTheme.displaySmall,
+                      ),
+                      const SizedBox(height: 48),
+                      if (authProvider.error != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                LucideIcons.alertCircle,
+                                color: AppColors.error,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  authProvider.error!,
+                                  style: const TextStyle(
+                                    color: AppColors.error,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                        const SizedBox(height: 24),
+                      ],
+                      AppInput(
+                        label: 'Email',
+                        placeholder: 'votre@email.com',
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: Validators.email,
+                        enabled: !authProvider.isLoading,
+                      ),
+                      const SizedBox(height: 20),
+                      AppInput(
+                        label: 'Mot de passe',
+                        placeholder: 'Votre mot de passe',
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        validator: (value) =>
+                            Validators.required(value, 'Mot de passe'),
+                        enabled: !authProvider.isLoading,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? LucideIcons.eyeOff
+                                : LucideIcons.eye,
+                            color: AppColors.neutral500,
+                          ),
+                          onPressed: () {
+                            setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      AppButton(
+                        text: 'Se connecter',
+                        fullWidth: true,
+                        size: AppButtonSize.lg,
+                        isLoading: authProvider.isLoading,
+                        onPressed: authProvider.isLoading ? null : _handleLogin,
                       ),
                       const SizedBox(height: 24),
+                      TextButton(
+                        onPressed: authProvider.isLoading
+                            ? null
+                            : () => context.push(AppRoutes.forgotPassword),
+                        child: Text(
+                          'Mot de passe oublié ?',
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.neutral300
+                                : AppColors.neutral500,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 48),
                     ],
-                    AppInput(
-                      label: 'Email',
-                      placeholder: 'votre@email.com',
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: Validators.email,
-                      enabled: !authProvider.isLoading,
-                    ),
-                    const SizedBox(height: 20),
-                    AppInput(
-                      label: 'Mot de passe',
-                      placeholder: 'Votre mot de passe',
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      validator: (value) =>
-                          Validators.required(value, 'Mot de passe'),
-                      enabled: !authProvider.isLoading,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? LucideIcons.eyeOff
-                              : LucideIcons.eye,
-                          color: AppColors.neutral500,
-                        ),
-                        onPressed: () {
-                          setState(() => _obscurePassword = !_obscurePassword);
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    AppButton(
-                      text: 'Se connecter',
-                      fullWidth: true,
-                      size: AppButtonSize.lg,
-                      isLoading: authProvider.isLoading,
-                      onPressed: authProvider.isLoading ? null : _handleLogin,
-                    ),
-                    const SizedBox(height: 24),
-                    TextButton(
-                      onPressed: authProvider.isLoading
-                          ? null
-                          : () => context.push(AppRoutes.forgotPassword),
-                      child: Text(
-                        'Mot de passe oublié ?',
-                        style: TextStyle(
-                          color: AppColors.neutral500,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

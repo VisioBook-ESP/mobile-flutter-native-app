@@ -103,172 +103,200 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
   Widget build(BuildContext context) {
     final hasTitle = _titleController.text.trim().isNotEmpty;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.pop(),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              LucideIcons.arrowLeft,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () => context.pop(),
+          ),
+          title: Text(
+            'Nouveau VisioBook',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          centerTitle: true,
         ),
-        title: const Text('Nouveau VisioBook'),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Titre
-                  _buildSectionLabel('Titre du projet'),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      hintText: 'Mon VisioBook...',
-                      filled: true,
-                      fillColor: AppColors.neutral50,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                        borderSide: const BorderSide(
-                          color: AppColors.neutral200,
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Titre
+                    _buildSectionLabel('Titre du projet'),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _titleController,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      decoration: InputDecoration(
+                        hintText: 'Mon VisioBook...',
+                        filled: true,
+                        fillColor: isDark
+                            ? Colors.white.withValues(alpha: 0.06)
+                            : AppColors.neutral50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusMd,
+                          ),
+                          borderSide: BorderSide.none,
                         ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                        borderSide: const BorderSide(
-                          color: AppColors.neutral900,
-                          width: 2,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusMd,
+                          ),
+                          borderSide: BorderSide(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.15)
+                                : AppColors.neutral200,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusMd,
+                          ),
+                          borderSide: BorderSide(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.35)
+                                : AppColors.neutral900,
+                            width: 2,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 28),
+                    const SizedBox(height: 28),
 
-                  // Source
-                  _buildSectionLabel('Source du texte'),
-                  const SizedBox(height: 12),
-                  if (_selectedTextId != null)
-                    _buildSelectedSourceCard()
-                  else
-                    _buildSourceOptions(),
-                  const SizedBox(height: 28),
+                    // Source
+                    _buildSectionLabel('Source du texte'),
+                    const SizedBox(height: 12),
+                    if (_selectedTextId != null)
+                      _buildSelectedSourceCard()
+                    else
+                      _buildSourceOptions(),
+                    const SizedBox(height: 28),
 
-                  // Style graphique
-                  StyleSelector(
-                    selectedStyle: _config.style,
-                    onStyleChanged: (style) {
-                      setState(() {
-                        _config = _config.copyWith(style: style);
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 24),
+                    // Style graphique
+                    StyleSelector(
+                      selectedStyle: _config.style,
+                      onStyleChanged: (style) {
+                        setState(() {
+                          _config = _config.copyWith(style: style);
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 24),
 
-                  // Vibe / Ambiance
-                  OptionSelector<VideoVibe>(
-                    title: 'Ambiance',
-                    subtitle: 'Choisissez l\'ambiance de votre video',
-                    icon: LucideIcons.music,
-                    selectedValue: _config.vibe,
-                    options: VideoVibe.values
-                        .map((v) => OptionItem(value: v, label: v.label))
-                        .toList(),
-                    onChanged: (vibe) {
-                      setState(() {
-                        _config = _config.copyWith(vibe: vibe);
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                    // Vibe / Ambiance
+                    OptionSelector<VideoVibe>(
+                      title: 'Ambiance',
+                      subtitle: 'Choisissez l\'ambiance de votre video',
+                      icon: LucideIcons.music,
+                      selectedValue: _config.vibe,
+                      options: VideoVibe.values
+                          .map((v) => OptionItem(value: v, label: v.label))
+                          .toList(),
+                      onChanged: (vibe) {
+                        setState(() {
+                          _config = _config.copyWith(vibe: vibe);
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
 
-                  // Langue
-                  OptionSelector<AudioLanguage>(
-                    title: 'Langue',
-                    subtitle: 'Choisissez la langue de la narration',
-                    icon: LucideIcons.languages,
-                    selectedValue: _config.language,
-                    options: AudioLanguage.values
-                        .map(
-                          (l) => OptionItem(
-                            value: l,
-                            label: l.label,
-                            prefix: l.codeUpperCase,
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (language) {
-                      setState(() {
-                        _config = _config.copyWith(language: language);
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                    // Langue
+                    OptionSelector<AudioLanguage>(
+                      title: 'Langue',
+                      subtitle: 'Choisissez la langue de la narration',
+                      icon: LucideIcons.languages,
+                      selectedValue: _config.language,
+                      options: AudioLanguage.values
+                          .map(
+                            (l) => OptionItem(
+                              value: l,
+                              label: l.label,
+                              prefix: l.codeUpperCase,
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (language) {
+                        setState(() {
+                          _config = _config.copyWith(language: language);
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
 
-                  // Format
-                  OptionSelector<VideoFormat>(
-                    title: 'Format',
-                    subtitle: 'Orientation de la video',
-                    icon: LucideIcons.monitor,
-                    selectedValue: _config.format,
-                    options: VideoFormat.values
-                        .map(
-                          (f) => OptionItem(
-                            value: f,
-                            label: f.label,
-                            description: f.description,
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (format) {
-                      setState(() {
-                        _config = _config.copyWith(format: format);
-                      });
-                    },
+                    // Format
+                    OptionSelector<VideoFormat>(
+                      title: 'Format',
+                      subtitle: 'Orientation de la video',
+                      icon: LucideIcons.monitor,
+                      selectedValue: _config.format,
+                      options: VideoFormat.values
+                          .map(
+                            (f) => OptionItem(
+                              value: f,
+                              label: f.label,
+                              description: f.description,
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (format) {
+                        setState(() {
+                          _config = _config.copyWith(format: format);
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 100),
+                  ],
+                ),
+              ),
+            ),
+
+            // Bottom bar
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Theme.of(context).colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -4),
                   ),
-                  const SizedBox(height: 100),
                 ],
               ),
-            ),
-          ),
-
-          // Bottom bar
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -4),
+              child: SafeArea(
+                top: false,
+                child: AppButton(
+                  text: 'Generer le VisioBook',
+                  onPressed: hasTitle && !_isLoading ? _generateProject : null,
+                  isLoading: _isLoading,
+                  fullWidth: true,
+                  size: AppButtonSize.lg,
+                  icon: _isLoading
+                      ? null
+                      : Icon(
+                          LucideIcons.sparkles,
+                          size: 20,
+                          color: isDark ? Colors.white : Colors.white,
+                        ),
                 ),
-              ],
-            ),
-            child: SafeArea(
-              top: false,
-              child: AppButton(
-                text: 'Generer le VisioBook',
-                onPressed: hasTitle && !_isLoading ? _generateProject : null,
-                isLoading: _isLoading,
-                fullWidth: true,
-                size: AppButtonSize.lg,
-                icon: _isLoading
-                    ? null
-                    : const Icon(
-                        LucideIcons.sparkles,
-                        size: 20,
-                        color: Colors.white,
-                      ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -278,11 +306,17 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
   }
 
   Widget _buildSelectedSourceCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        border: Border.all(color: AppColors.neutral900, width: 2),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.3)
+              : AppColors.neutral900,
+          width: 2,
+        ),
       ),
       child: Row(
         children: [
@@ -295,10 +329,9 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
           Expanded(
             child: Text(
               _selectedTextName ?? '',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: AppColors.neutral900,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -344,29 +377,37 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     required String label,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          border: Border.all(color: AppColors.neutral200),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.15)
+                : AppColors.neutral200,
+          ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.neutral400, size: 20),
+            Icon(
+              icon,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.5)
+                  : AppColors.neutral400,
+              size: 20,
+            ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                label,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral900),
-              ),
+              child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
             ),
-            const Icon(
+            Icon(
               LucideIcons.chevronRight,
-              color: AppColors.neutral400,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.3)
+                  : AppColors.neutral400,
               size: 18,
             ),
           ],

@@ -60,7 +60,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final storage = context.read<SecureStorageService>();
     await storage.setOnboardingComplete(true);
     if (!mounted) return;
-    context.go(AppRoutes.splash);
+    // Si on peut revenir en arrière (ex: depuis le profil), on pop
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.splash);
+    }
   }
 
   @override

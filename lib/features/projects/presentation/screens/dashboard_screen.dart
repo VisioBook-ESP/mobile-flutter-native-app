@@ -9,6 +9,7 @@ import 'package:visiobook_mobile/features/projects/domain/project.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 import 'package:visiobook_mobile/features/projects/presentation/widgets/project_card.dart';
 import 'package:visiobook_mobile/features/projects/presentation/widgets/stats_card.dart';
+import 'package:visiobook_mobile/features/generation/presentation/providers/generation_provider.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -95,22 +96,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildProjectsList(List<Project> projects) {
     return SizedBox(
       height: 260,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        itemCount: projects.length,
-        itemBuilder: (context, index) {
-          final project = projects[index];
-          return Padding(
-            padding: EdgeInsets.only(
-              right: index < projects.length - 1 ? 16 : 0,
-            ),
-            child: ProjectCard(
-              project: project,
-              onTap: () {
-                context.push('/project/${project.id}');
-              },
-            ),
+      child: Consumer<GenerationProvider>(
+        builder: (context, genProvider, _) {
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            itemCount: projects.length,
+            itemBuilder: (context, index) {
+              final project = projects[index];
+              final hasGeneration = genProvider.hasActiveGeneration(project.id);
+              final progress = hasGeneration
+                  ? genProvider.getProgress(project.id)
+                  : null;
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: index < projects.length - 1 ? 16 : 0,
+                ),
+                child: ProjectCard(
+                  project: project,
+                  generationProgress: progress,
+                  onTap: () {
+                    if (hasGeneration && genProvider.isInProgress(project.id)) {
+                      final gen = genProvider.getGeneration(project.id)!;
+                      context.push(
+                        '/project/${project.id}/generate/${gen.versionId}/${gen.executionId}',
+                      );
+                    } else {
+                      context.push('/project/${project.id}');
+                    }
+                  },
+                ),
+              );
+            },
           );
         },
       ),

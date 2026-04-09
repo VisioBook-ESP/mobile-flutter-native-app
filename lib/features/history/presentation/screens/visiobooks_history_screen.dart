@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/skeleton_loader.dart';
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
+import 'package:visiobook_mobile/features/generation/presentation/providers/generation_provider.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
 enum _VisioBookFilter { tous, prets, enCours }
@@ -219,9 +220,28 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
                       itemCount: projects.length,
                       itemBuilder: (context, index) {
                         final project = projects[index];
+                        final genProvider = context.watch<GenerationProvider>();
+                        final hasGen = genProvider.hasActiveGeneration(
+                          project.id,
+                        );
                         return _VisioBookCard(
                           project: project,
-                          onTap: () => context.push('/project/${project.id}'),
+                          generationProgress: hasGen
+                              ? genProvider.getProgress(project.id)
+                              : null,
+                          onTap: () {
+                            if (hasGen &&
+                                genProvider.isInProgress(project.id)) {
+                              final gen = genProvider.getGeneration(
+                                project.id,
+                              )!;
+                              context.push(
+                                '/project/${project.id}/generate/${gen.versionId}/${gen.executionId}',
+                              );
+                            } else {
+                              context.push('/project/${project.id}');
+                            }
+                          },
                           onLongPress: () => _showContextMenu(context, project),
                         );
                       },
@@ -317,11 +337,13 @@ class _VisioBookCard extends StatelessWidget {
   final Project project;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+  final double? generationProgress;
 
   const _VisioBookCard({
     required this.project,
     required this.onTap,
     required this.onLongPress,
+    this.generationProgress,
   });
 
   String _formatDate(DateTime date) {
@@ -353,6 +375,28 @@ class _VisioBookCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(child: _buildCover(context)),
+          if (generationProgress != null &&
+              project.status == ProjectStatus.processing)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: generationProgress!),
+                  duration: const Duration(milliseconds: 500),
+                  builder: (context, value, _) {
+                    return LinearProgressIndicator(
+                      value: value,
+                      minHeight: 4,
+                      backgroundColor: AppColors.neutral200,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppColors.info,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
           const SizedBox(height: 8),
           Text(
             project.title,

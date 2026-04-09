@@ -24,8 +24,11 @@ import 'package:visiobook_mobile/features/payment/presentation/providers/payment
 import 'package:visiobook_mobile/features/projects/data/project_service.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
+import 'package:visiobook_mobile/core/services/notification_service.dart';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationService.instance.init();
 
   // Style de la barre de statut
   SystemChrome.setSystemUIOverlayStyle(
@@ -72,9 +75,19 @@ class VisioBookApp extends StatelessWidget {
           create: (_) => ProjectDetailProvider(projectService: projectService),
         ),
         ChangeNotifierProvider(
-          create: (_) => GenerationProvider(
-            generationService: GenerationService(apiClient: apiClient),
-          ),
+          create: (_) {
+            final provider = GenerationProvider(
+              generationService: GenerationService(apiClient: apiClient),
+            );
+            provider.onGenerationFinished = (projectId, success, error) {
+              if (success) {
+                NotificationService.instance.showGenerationComplete(projectId);
+              } else {
+                NotificationService.instance.showGenerationFailed(projectId);
+              }
+            };
+            return provider;
+          },
         ),
         ChangeNotifierProvider(
           create: (_) => PlayerProvider(

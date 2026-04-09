@@ -6,6 +6,7 @@ import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
 import 'package:visiobook_mobile/core/widgets/gradient_background.dart';
+import 'package:visiobook_mobile/core/widgets/skeleton_loader.dart';
 import 'package:visiobook_mobile/features/history/domain/user_file.dart';
 import 'package:visiobook_mobile/features/history/presentation/providers/texts_provider.dart';
 
@@ -96,7 +97,7 @@ class _TextDetailScreenState extends State<TextDetailScreen> {
           child: Consumer<TextsProvider>(
             builder: (context, textsProvider, _) {
               if (textsProvider.isLoading && _file == null) {
-                return const Center(child: CircularProgressIndicator());
+                return const SkeletonTextDetail();
               }
 
               final file = _file;

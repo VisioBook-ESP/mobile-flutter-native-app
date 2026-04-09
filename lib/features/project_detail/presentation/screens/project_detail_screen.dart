@@ -72,34 +72,6 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             'Configuration',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          actions: [
-            Consumer<ProjectDetailProvider>(
-              builder: (context, provider, _) {
-                if (provider.isSaving) {
-                  return const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  );
-                }
-                return TextButton(
-                  onPressed: () async {
-                    provider.setTitle(_titleController.text);
-                    await provider.saveProject();
-                    if (context.mounted && provider.error == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Projet sauvegardé')),
-                      );
-                    }
-                  },
-                  child: const Text('Sauvegarder'),
-                );
-              },
-            ),
-          ],
         ),
         body: Consumer<ProjectDetailProvider>(
           builder: (context, provider, _) {

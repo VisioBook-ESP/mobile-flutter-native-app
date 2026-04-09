@@ -142,6 +142,139 @@ class SkeletonListItem extends StatelessWidget {
   }
 }
 
+/// Skeleton placeholder that mimics the ProjectViewScreen layout:
+/// cover area, title, metadata, button, action buttons, source text.
+class SkeletonProjectView extends StatelessWidget {
+  const SkeletonProjectView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cover area
+          SkeletonLoader(
+            width: width - 48,
+            height: 220,
+            borderRadius: AppTheme.radiusLg,
+          ),
+          const SizedBox(height: 24),
+          // Title
+          const SkeletonLoader(
+            width: 220,
+            height: 24,
+            borderRadius: AppTheme.radiusSm,
+          ),
+          const SizedBox(height: 12),
+          // Metadata line
+          const SkeletonLoader(
+            width: 180,
+            height: 14,
+            borderRadius: AppTheme.radiusSm,
+          ),
+          const SizedBox(height: 24),
+          // Visionner button
+          SkeletonLoader(width: width - 48, height: 56, borderRadius: 100),
+          const SizedBox(height: 16),
+          // Action buttons row
+          Row(
+            children: [
+              Expanded(
+                child: SkeletonLoader(
+                  width: double.infinity,
+                  height: 80,
+                  borderRadius: AppTheme.radiusMd,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SkeletonLoader(
+                  width: double.infinity,
+                  height: 80,
+                  borderRadius: AppTheme.radiusMd,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          // Source text section
+          SkeletonLoader(
+            width: width - 48,
+            height: 80,
+            borderRadius: AppTheme.radiusMd,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Skeleton placeholder that mimics the TextDetailScreen layout:
+/// file header, summary section, text content, bottom buttons.
+class SkeletonTextDetail extends StatelessWidget {
+  const SkeletonTextDetail({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    return Column(
+      children: [
+        // File header
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const SkeletonLoader(width: 40, height: 40, borderRadius: 10),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SkeletonLoader(
+                      width: width * 0.4,
+                      height: 16,
+                      borderRadius: AppTheme.radiusSm,
+                    ),
+                    const SizedBox(height: 6),
+                    const SkeletonLoader(
+                      width: 80,
+                      height: 12,
+                      borderRadius: AppTheme.radiusSm,
+                    ),
+                  ],
+                ),
+              ),
+              const SkeletonLoader(width: 50, height: 28, borderRadius: 20),
+            ],
+          ),
+        ),
+        // Summary section
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+          child: SkeletonLoader(
+            width: width - 48,
+            height: 100,
+            borderRadius: AppTheme.radiusMd,
+          ),
+        ),
+        // Text content
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: SkeletonLoader(
+            width: width - 48,
+            height: 200,
+            borderRadius: AppTheme.radiusMd,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Skeleton placeholder for the dashboard loading state: greeting placeholder,
 /// stats placeholder, and a horizontal list of [SkeletonProjectCard]s.
 class SkeletonDashboard extends StatelessWidget {

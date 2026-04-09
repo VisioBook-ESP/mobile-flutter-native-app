@@ -169,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildAboutSection(context),
           const SizedBox(height: 24),
           _buildAccountSection(context, provider),
-          const SizedBox(height: 40),
+          const SizedBox(height: 120),
         ],
       ),
     );
@@ -825,6 +825,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildCard(
           child: Column(
             children: [
+              InkWell(
+                onTap: () => context.push(AppRoutes.onboarding),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(AppTheme.radiusMd),
+                ),
+                child: _buildSimpleRow(
+                  context,
+                  icon: LucideIcons.helpCircle,
+                  label: 'Aide — Revoir le tutoriel',
+                  trailing: const Icon(
+                    LucideIcons.chevronRight,
+                    size: 16,
+                    color: AppColors.neutral400,
+                  ),
+                ),
+              ),
+              const Divider(height: 1, color: AppColors.neutral200),
               _buildSimpleRow(
                 context,
                 icon: LucideIcons.smartphone,

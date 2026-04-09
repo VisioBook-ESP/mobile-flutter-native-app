@@ -27,148 +27,88 @@ class BottomNavBar extends StatelessWidget {
     final edgeLowAlpha = isDark ? 0.2 : 0.3;
     final iconColor = isDark ? Colors.white : AppColors.neutral900;
 
-    return SizedBox(
-      height: 88 + bottomPadding,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // Glass nav bar
-          Positioned(
-            left: 12,
-            right: 12,
-            bottom: bottomPadding + 8,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                child: CustomPaint(
-                  painter: _NavBarGlassPainter(
-                    highAlpha: edgeHighAlpha,
-                    lowAlpha: edgeLowAlpha,
+    return Padding(
+      padding: EdgeInsets.only(left: 12, right: 12, bottom: bottomPadding + 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: CustomPaint(
+            painter: _NavBarGlassPainter(
+              highAlpha: edgeHighAlpha,
+              lowAlpha: edgeLowAlpha,
+            ),
+            child: Container(
+              height: 64,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: glassAlpha),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: borderAlpha),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 32,
+                    offset: const Offset(0, 8),
                   ),
-                  child: Container(
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: glassAlpha),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: borderAlpha),
-                      ),
-                      boxShadow: [
-                        // Outer shadow
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 32,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    // Inner glow overlay
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        gradient: RadialGradient(
-                          center: Alignment.center,
-                          radius: 1.2,
-                          colors: [
-                            Colors.white.withValues(alpha: innerGlowAlpha),
-                            Colors.white.withValues(alpha: 0.0),
-                          ],
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          _NavItem(
-                            icon: LucideIcons.home,
-                            isSelected: currentIndex == 0,
-                            onTap: () => onTap(0),
-                            iconColor: iconColor,
-                            isDark: isDark,
-                          ),
-                          _NavItem(
-                            icon: LucideIcons.fileText,
-                            isSelected: currentIndex == 1,
-                            onTap: () => onTap(1),
-                            iconColor: iconColor,
-                            isDark: isDark,
-                          ),
-                          const Expanded(child: SizedBox()),
-                          _NavItem(
-                            icon: LucideIcons.plus,
-                            isSelected: false,
-                            onTap: () => onAddTap?.call(),
-                            iconColor: iconColor,
-                            isDark: isDark,
-                          ),
-                          _NavItem(
-                            icon: LucideIcons.user,
-                            isSelected: currentIndex == 4,
-                            onTap: () => onTap(4),
-                            iconColor: iconColor,
-                            isDark: isDark,
-                          ),
-                        ],
-                      ),
-                    ),
+                ],
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 1.2,
+                    colors: [
+                      Colors.white.withValues(alpha: innerGlowAlpha),
+                      Colors.white.withValues(alpha: 0.0),
+                    ],
                   ),
+                ),
+                child: Row(
+                  children: [
+                    _NavItem(
+                      icon: LucideIcons.home,
+                      isSelected: currentIndex == 0,
+                      onTap: () => onTap(0),
+                      iconColor: iconColor,
+                      isDark: isDark,
+                    ),
+                    _NavItem(
+                      icon: LucideIcons.fileText,
+                      isSelected: currentIndex == 1,
+                      onTap: () => onTap(1),
+                      iconColor: iconColor,
+                      isDark: isDark,
+                    ),
+                    _NavItem(
+                      icon: LucideIcons.playCircle,
+                      isSelected: currentIndex == 2,
+                      onTap: () => onTap(2),
+                      iconColor: iconColor,
+                      isDark: isDark,
+                    ),
+                    _NavItem(
+                      icon: LucideIcons.plus,
+                      isSelected: false,
+                      onTap: () => onAddTap?.call(),
+                      iconColor: iconColor,
+                      isDark: isDark,
+                    ),
+                    _NavItem(
+                      icon: LucideIcons.user,
+                      isSelected: currentIndex == 4,
+                      onTap: () => onTap(4),
+                      iconColor: iconColor,
+                      isDark: isDark,
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-          // Central play button - glass style
-          Positioned(
-            bottom: bottomPadding + 28,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: GestureDetector(
-                onTap: () => onTap(2),
-                child: ClipOval(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: glassAlpha),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: borderAlpha),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 32,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            center: Alignment.center,
-                            radius: 0.9,
-                            colors: [
-                              Colors.white.withValues(alpha: innerGlowAlpha),
-                              Colors.white.withValues(alpha: 0.0),
-                            ],
-                          ),
-                        ),
-                        child: Icon(
-                          LucideIcons.playCircle,
-                          color: iconColor.withValues(alpha: 0.8),
-                          size: 28,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

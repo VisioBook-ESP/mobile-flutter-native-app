@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/gradient_background.dart';
+import 'package:visiobook_mobile/core/widgets/skeleton_loader.dart';
 import 'package:visiobook_mobile/features/player/presentation/screens/video_player_screen.dart';
 import 'package:visiobook_mobile/features/player/presentation/widgets/generation_selector_sheet.dart';
 import 'package:visiobook_mobile/features/export/presentation/providers/export_provider.dart';
@@ -134,7 +135,23 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
   @override
   Widget build(BuildContext context) {
     if (_project == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return GradientBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(
+                LucideIcons.arrowLeft,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              onPressed: () => context.pop(),
+            ),
+          ),
+          body: const SkeletonProjectView(),
+        ),
+      );
     }
 
     final project = _project!;

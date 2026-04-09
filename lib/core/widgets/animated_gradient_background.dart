@@ -67,7 +67,8 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
                 baseY: -0.05,
                 radiusX: 0.15,
                 radiusY: 0.08,
-                speed: 1.0,
+                speedX: 1,
+                speedY: 2,
                 size: 260,
                 color: const Color(0xFF93B5E1),
                 alpha: isDark ? 0.2 : 0.45,
@@ -78,7 +79,8 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
                 baseY: 0.4,
                 radiusX: 0.12,
                 radiusY: 0.1,
-                speed: 0.7,
+                speedX: 1,
+                speedY: 3,
                 phase: 1.2,
                 size: 300,
                 color: const Color(0xFFB8A4D8),
@@ -90,7 +92,8 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
                 baseY: 0.75,
                 radiusX: 0.1,
                 radiusY: 0.12,
-                speed: 0.9,
+                speedX: 2,
+                speedY: 1,
                 phase: 2.5,
                 size: 240,
                 color: const Color(0xFF8FBFAA),
@@ -102,7 +105,8 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
                 baseY: 0.2,
                 radiusX: 0.08,
                 radiusY: 0.06,
-                speed: 1.3,
+                speedX: 3,
+                speedY: 2,
                 phase: 0.8,
                 size: 150,
                 color: const Color(0xFFE8A4B8),
@@ -114,7 +118,8 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
                 baseY: 0.65,
                 radiusX: 0.1,
                 radiusY: 0.07,
-                speed: 0.5,
+                speedX: 1,
+                speedY: 2,
                 phase: 3.5,
                 size: 200,
                 color: const Color(0xFFA4C8E8),
@@ -136,7 +141,8 @@ class _AnimatedBlob extends StatelessWidget {
   final double baseY;
   final double radiusX;
   final double radiusY;
-  final double speed;
+  final int speedX;
+  final int speedY;
   final double phase;
   final double size;
   final Color color;
@@ -148,7 +154,8 @@ class _AnimatedBlob extends StatelessWidget {
     required this.baseY,
     required this.radiusX,
     required this.radiusY,
-    required this.speed,
+    required this.speedX,
+    required this.speedY,
     this.phase = 0.0,
     required this.size,
     required this.color,
@@ -160,10 +167,10 @@ class _AnimatedBlob extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    final angle = t * 2 * pi * speed + phase;
-    final x = (baseX + radiusX * cos(angle)) * screenWidth - size / 2;
-    final y =
-        (baseY + radiusY * sin(angle * 0.7 + phase)) * screenHeight - size / 2;
+    final angleX = t * 2 * pi * speedX + phase;
+    final angleY = t * 2 * pi * speedY + phase;
+    final x = (baseX + radiusX * cos(angleX)) * screenWidth - size / 2;
+    final y = (baseY + radiusY * sin(angleY)) * screenHeight - size / 2;
 
     return Positioned(
       left: x,

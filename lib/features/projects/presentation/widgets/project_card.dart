@@ -6,8 +6,14 @@ import 'package:visiobook_mobile/features/projects/domain/project.dart';
 class ProjectCard extends StatelessWidget {
   final Project project;
   final VoidCallback? onTap;
+  final double? generationProgress;
 
-  const ProjectCard({super.key, required this.project, this.onTap});
+  const ProjectCard({
+    super.key,
+    required this.project,
+    this.onTap,
+    this.generationProgress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +70,29 @@ class ProjectCard extends StatelessWidget {
                     : _buildPlaceholder(context),
               ),
             ),
+            // Barre de progression si generation en cours
+            if (generationProgress != null &&
+                project.status == ProjectStatus.processing)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: generationProgress!),
+                    duration: const Duration(milliseconds: 500),
+                    builder: (context, value, _) {
+                      return LinearProgressIndicator(
+                        value: value,
+                        minHeight: 4,
+                        backgroundColor: AppColors.neutral200,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.info,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
             // Titre et statut
             Padding(
               padding: const EdgeInsets.only(top: 8),

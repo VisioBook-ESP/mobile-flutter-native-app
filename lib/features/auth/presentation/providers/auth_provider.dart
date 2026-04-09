@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:visiobook_mobile/config/environment.dart';
+import 'package:visiobook_mobile/core/services/notification_service.dart';
 import 'package:visiobook_mobile/features/auth/data/auth_service.dart';
 
 /// Etats possibles de l'authentification
@@ -71,6 +72,7 @@ class AuthProvider extends ChangeNotifier {
     if (result.success) {
       _state = AuthState.authenticated;
       _userName = result.userName ?? email.split('@').first;
+      NotificationService.instance.requestPermission();
       notifyListeners();
       return true;
     } else {

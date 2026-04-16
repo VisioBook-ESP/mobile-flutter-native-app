@@ -216,6 +216,7 @@ Finalement, le petit prince arriva sur Terre, ou il rencontra un renard qui lui 
   }
 
   /// Upload des images scannees (via camera)
+  /// Meme flux que uploadFile : upload + extract texte (OCR) + ingestion
   Future<bool> uploadScannedImages(List<String> imagePaths) async {
     if (imagePaths.isEmpty) {
       _error = 'Aucune image capturee';
@@ -229,58 +230,90 @@ Finalement, le petit prince arriva sur Terre, ou il rencontra un renard qui lui 
     _error = null;
     notifyListeners();
 
+    // Mode mock: simuler l'upload
+    if (EnvironmentConfig.useMockData) {
+      _selectedFile = ImportFile(
+        name: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        path: imagePaths.first,
+        type: ImportFileType.jpeg,
+        sizeBytes: 0,
+        selectedAt: DateTime.now(),
+      );
+      await _mockUpload();
+      return true;
+    }
+
     try {
       final totalImages = imagePaths.length;
-      StorageResult<UploadResult>? lastResult;
+      String? firstFileId;
 
       for (int i = 0; i < totalImages; i++) {
         final file = File(imagePaths[i]);
+        final ext = imagePaths[i].split('.').last.toLowerCase();
+        final fileType = ImportFileType.fromExtension(ext);
         final fileName =
-            'scan_${DateTime.now().millisecondsSinceEpoch}_${i + 1}.jpg';
+            'scan_${DateTime.now().millisecondsSinceEpoch}_${i + 1}.$ext';
         final fileSize = await file.length();
 
         _selectedFile = ImportFile(
           name: fileName,
           path: imagePaths[i],
-          type: ImportFileType.unknown,
+          type: fileType == ImportFileType.unknown
+              ? ImportFileType.jpeg
+              : fileType,
           sizeBytes: fileSize,
           selectedAt: DateTime.now(),
         );
 
-        // Mode mock: simuler l'upload
-        if (EnvironmentConfig.useMockData) {
-          await _mockUpload();
-          return true;
-        }
-
-        lastResult = await _storageService.uploadFile(
+        // Upload
+        final uploadResult = await _storageService.uploadFile(
           _selectedFile!,
           onProgress: (progress) {
-            _uploadProgress = (i + progress) / totalImages;
+            _uploadProgress = (i + progress) / totalImages * 0.9;
             notifyListeners();
           },
         );
 
-        if (!lastResult.success) {
-          _error = lastResult.error;
+        if (!uploadResult.success || uploadResult.data == null) {
+          _error = uploadResult.error;
           _state = ImportState.error;
           notifyListeners();
           return false;
         }
+
+        firstFileId ??= uploadResult.data!.fileId;
       }
 
-      if (lastResult != null && lastResult.success && lastResult.data != null) {
-        _uploadResult = lastResult.data;
-        _uploadProgress = 1.0;
-        _state = ImportState.uploaded;
+      // Lancer l'ingestion (le backend fait l'OCR)
+      if (firstFileId != null && firstFileId.isNotEmpty) {
+        _uploadProgress = 0.95;
         notifyListeners();
-        return true;
+        final ingestionResult = await _storageService.startIngestion(
+          fileId: firstFileId,
+          projectId: '',
+        );
+        if (ingestionResult.success && ingestionResult.data != null) {
+          _lastIngestionJobId = ingestionResult.data;
+          _lastIngestionFileId = firstFileId;
+        }
       }
 
-      _error = lastResult?.error ?? 'Erreur inconnue';
-      _state = ImportState.error;
+      _selectedFile = ImportFile(
+        name: 'Scan $totalImages page${totalImages > 1 ? 's' : ''}',
+        path: imagePaths.first,
+        type: ImportFileType.jpeg,
+        sizeBytes: 0,
+        selectedAt: DateTime.now(),
+      );
+
+      _uploadResult = UploadResult.success(
+        fileId: firstFileId ?? '',
+        fileUrl: '',
+      );
+      _uploadProgress = 1.0;
+      _state = ImportState.uploaded;
       notifyListeners();
-      return false;
+      return true;
     } catch (e) {
       _error = 'Erreur lors du traitement du scan: $e';
       _state = ImportState.error;

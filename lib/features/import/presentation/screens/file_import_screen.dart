@@ -296,6 +296,10 @@ class _FileSelectedCard extends StatelessWidget {
         return LucideIcons.fileText;
       case ImportFileType.epub:
         return LucideIcons.bookOpen;
+      case ImportFileType.jpeg:
+      case ImportFileType.png:
+      case ImportFileType.gif:
+        return LucideIcons.image;
       case ImportFileType.unknown:
         return LucideIcons.file;
     }

@@ -4,9 +4,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/gradient_background.dart';
+import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/widgets/skeleton_loader.dart';
-import 'package:visiobook_mobile/features/player/presentation/screens/video_player_screen.dart';
-import 'package:visiobook_mobile/features/player/presentation/widgets/generation_selector_sheet.dart';
 import 'package:visiobook_mobile/features/export/presentation/providers/export_provider.dart';
 import 'package:visiobook_mobile/features/generation/presentation/providers/generation_provider.dart';
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
@@ -79,58 +78,10 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
     provider.shareNative(_project!.id, _project!.title);
   }
 
-  Future<void> _onVisionner() async {
+  void _onVisionner() {
     if (_project == null) return;
-
-    final project = _project!;
-
-    // Determiner quelle video lancer
-    String? videoUrl;
-    String? generationId;
-
-    if (project.generations.length > 1) {
-      // Plusieurs generations: afficher le selecteur
-      final selectedGeneration = await GenerationSelectorSheet.show(
-        context: context,
-        generations: project.generations,
-        projectTitle: project.title,
-      );
-
-      if (selectedGeneration == null || !mounted) return;
-
-      videoUrl = selectedGeneration.videoUrl;
-      generationId = selectedGeneration.id;
-    } else if (project.generations.length == 1) {
-      // Une seule generation
-      videoUrl = project.generations.first.videoUrl;
-      generationId = project.generations.first.id;
-    } else {
-      // Pas de generation, utiliser la video principale du projet
-      videoUrl = project.videoUrl;
-    }
-
-    if (videoUrl == null || videoUrl.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Aucune video disponible')),
-        );
-      }
-      return;
-    }
-
-    // Ouvrir le lecteur video
-    if (mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => VideoPlayerScreen(
-            projectId: project.id,
-            projectTitle: project.title,
-            videoUrl: videoUrl!,
-            generationId: generationId,
-          ),
-        ),
-      );
-    }
+    // Ouvrir le reader VisioBook (BD animee avec panels video)
+    context.push(AppRoutes.player.replaceAll(':id', _project!.id));
   }
 
   @override

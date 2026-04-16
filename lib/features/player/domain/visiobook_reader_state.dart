@@ -20,13 +20,22 @@ class VisiobookPanel {
 
   factory VisiobookPanel.fromJson(Map<String, dynamic> json) {
     return VisiobookPanel(
-      id: json['id'] as String,
-      order: json['order'] as int,
-      videoUrl: json['videoUrl'] as String,
-      thumbnailUrl: json['thumbnailUrl'] as String,
-      dialogueText: json['dialogueText'] as String?,
-      narratorText: json['narratorText'] as String?,
-      videoDurationMs: json['videoDurationMs'] as int,
+      id: json['id'] as String? ?? '',
+      order: (json['order'] as num?)?.toInt() ?? 0,
+      videoUrl:
+          json['videoUrl'] as String? ?? json['video_url'] as String? ?? '',
+      thumbnailUrl:
+          json['thumbnailUrl'] as String? ??
+          json['thumbnail_url'] as String? ??
+          '',
+      dialogueText:
+          json['dialogueText'] as String? ?? json['dialogue_text'] as String?,
+      narratorText:
+          json['narratorText'] as String? ?? json['narrator_text'] as String?,
+      videoDurationMs:
+          (json['videoDurationMs'] as num?)?.toInt() ??
+          (json['video_duration_ms'] as num?)?.toInt() ??
+          0,
     );
   }
 }
@@ -47,14 +56,19 @@ class VisiobookPage {
 
   factory VisiobookPage.fromJson(Map<String, dynamic> json) {
     return VisiobookPage(
-      pageNumber: json['pageNumber'] as int,
+      pageNumber:
+          (json['pageNumber'] as num?)?.toInt() ??
+          (json['page_number'] as num?)?.toInt() ??
+          1,
       panels:
-          (json['panels'] as List)
+          (json['panels'] as List? ?? [])
               .map((p) => VisiobookPanel.fromJson(p as Map<String, dynamic>))
               .toList()
             ..sort((a, b) => a.order.compareTo(b.order)),
-      audioUrl: json['audioUrl'] as String?,
-      audioDurationMs: json['audioDurationMs'] as int?,
+      audioUrl: json['audioUrl'] as String? ?? json['audio_url'] as String?,
+      audioDurationMs:
+          (json['audioDurationMs'] as num?)?.toInt() ??
+          (json['audio_duration_ms'] as num?)?.toInt(),
     );
   }
 }
@@ -93,19 +107,35 @@ class VisiobookData {
   int get totalPanels => allPanels.length;
 
   factory VisiobookData.fromJson(Map<String, dynamic> json) {
+    // Handle wrapper: { "data": { ... } }
+    final data =
+        json.containsKey('data') && json['data'] is Map<String, dynamic>
+        ? json['data'] as Map<String, dynamic>
+        : json;
+
+    final pages =
+        (data['pages'] as List? ?? [])
+            .map((p) => VisiobookPage.fromJson(p as Map<String, dynamic>))
+            .toList()
+          ..sort((a, b) => a.pageNumber.compareTo(b.pageNumber));
+
     return VisiobookData(
-      projectId: json['projectId'] as String,
-      title: json['title'] as String,
-      pages:
-          (json['pages'] as List)
-              .map((p) => VisiobookPage.fromJson(p as Map<String, dynamic>))
-              .toList()
-            ..sort((a, b) => a.pageNumber.compareTo(b.pageNumber)),
-      coverUrl: json['coverUrl'] as String?,
-      totalPages: json['totalPages'] as int,
-      style: json['style'] as String?,
-      language: json['language'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      projectId:
+          data['projectId'] as String? ?? data['project_id'] as String? ?? '',
+      title: data['title'] as String? ?? 'Sans titre',
+      pages: pages,
+      coverUrl: data['coverUrl'] as String? ?? data['cover_url'] as String?,
+      totalPages:
+          (data['totalPages'] as num?)?.toInt() ??
+          (data['total_pages'] as num?)?.toInt() ??
+          pages.length,
+      style: data['style'] as String?,
+      language: data['language'] as String?,
+      createdAt:
+          DateTime.tryParse(
+            data['createdAt'] as String? ?? data['created_at'] as String? ?? '',
+          ) ??
+          DateTime.now(),
     );
   }
 }

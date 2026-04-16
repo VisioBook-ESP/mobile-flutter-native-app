@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/core/network/api_client.dart';
 import 'package:visiobook_mobile/features/import/domain/import_file.dart';
@@ -33,10 +34,15 @@ class StorageService {
         return StorageResult(success: false, error: 'Fichier introuvable');
       }
 
+      final contentType = importFile.type.mimeType != null
+          ? MediaType.parse(importFile.type.mimeType!)
+          : null;
+
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(
           importFile.path,
           filename: importFile.name,
+          contentType: contentType,
         ),
         'project_id': projectId ?? '',
       });

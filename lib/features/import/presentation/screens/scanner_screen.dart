@@ -10,8 +10,8 @@ import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
 import 'package:visiobook_mobile/core/widgets/gradient_background.dart';
+import 'package:visiobook_mobile/features/history/presentation/providers/texts_provider.dart';
 import 'package:visiobook_mobile/features/import/presentation/providers/import_provider.dart';
-import 'package:visiobook_mobile/features/project_detail/presentation/providers/project_detail_provider.dart';
 
 /// Ecran de scan de document via la camera
 class ScannerScreen extends StatefulWidget {
@@ -203,18 +203,19 @@ class _ScannerScreenState extends State<ScannerScreen>
       if (!mounted) return;
 
       if (provider.state == ImportState.uploaded) {
-        final result = provider.uploadResult;
-        final file = provider.selectedFile;
-        if (result != null && file != null) {
-          context.read<ProjectDetailProvider>().initFromImport(
-            fileId: result.fileId ?? 'unknown',
-            fileName: file.name,
-            extractedText: result.extractedText,
-            wordCount: result.wordCount,
+        // Lancer le tracking d'ingestion
+        final jobId = provider.lastIngestionJobId;
+        final fileId = provider.lastIngestionFileId;
+        if (jobId != null && fileId != null) {
+          context.read<TextsProvider>().startIngestionTracking(
+            fileId,
+            jobId,
+            provider.selectedFile?.name ?? 'Scan',
           );
-          provider.reset();
-          context.push(AppRoutes.projectConfig);
         }
+        provider.reset();
+        // Retour au dashboard — l'ingestion tourne en background
+        context.go(AppRoutes.dashboard);
       } else if (provider.state == ImportState.error) {
         setState(() {
           _isUploading = false;

@@ -4,6 +4,9 @@ enum ImportFileType {
   txt,
   docx,
   epub,
+  jpeg,
+  png,
+  gif,
   unknown;
 
   static ImportFileType fromExtension(String extension) {
@@ -16,6 +19,13 @@ enum ImportFileType {
         return ImportFileType.docx;
       case 'epub':
         return ImportFileType.epub;
+      case 'jpg':
+      case 'jpeg':
+        return ImportFileType.jpeg;
+      case 'png':
+        return ImportFileType.png;
+      case 'gif':
+        return ImportFileType.gif;
       default:
         return ImportFileType.unknown;
     }
@@ -31,10 +41,44 @@ enum ImportFileType {
         return 'Word';
       case ImportFileType.epub:
         return 'EPUB';
+      case ImportFileType.jpeg:
+        return 'JPEG';
+      case ImportFileType.png:
+        return 'PNG';
+      case ImportFileType.gif:
+        return 'GIF';
       case ImportFileType.unknown:
         return 'Inconnu';
     }
   }
+
+  /// Type MIME correspondant
+  String? get mimeType {
+    switch (this) {
+      case ImportFileType.pdf:
+        return 'application/pdf';
+      case ImportFileType.txt:
+        return 'text/plain';
+      case ImportFileType.docx:
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case ImportFileType.epub:
+        return 'application/epub+zip';
+      case ImportFileType.jpeg:
+        return 'image/jpeg';
+      case ImportFileType.png:
+        return 'image/png';
+      case ImportFileType.gif:
+        return 'image/gif';
+      case ImportFileType.unknown:
+        return null;
+    }
+  }
+
+  /// Vrai si c'est un type image
+  bool get isImage =>
+      this == ImportFileType.jpeg ||
+      this == ImportFileType.png ||
+      this == ImportFileType.gif;
 }
 
 /// Represente un fichier importe
@@ -70,7 +114,7 @@ class ImportFile {
   /// Validation: fichier < 50MB
   bool get isValidSize => sizeBytes <= 50 * 1024 * 1024;
 
-  /// Validation: format supporte
+  /// Validation: format supporte (documents et images)
   bool get isValidFormat => type != ImportFileType.unknown;
 }
 

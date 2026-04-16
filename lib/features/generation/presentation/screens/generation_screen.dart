@@ -99,6 +99,7 @@ class _GenerationScreenState extends State<GenerationScreen>
 
           switch (state.status) {
             case WorkflowStatus.pending:
+            case WorkflowStatus.running:
             case WorkflowStatus.processing:
               return _buildGeneratingState(context, provider, state);
             case WorkflowStatus.completed:
@@ -107,6 +108,8 @@ class _GenerationScreenState extends State<GenerationScreen>
               return _buildCompletedState(context, state);
             case WorkflowStatus.failed:
               return _buildErrorState(context, provider, state);
+            case WorkflowStatus.cancelled:
+              return _buildCancelledState(context);
           }
         },
       ),
@@ -290,13 +293,14 @@ class _GenerationScreenState extends State<GenerationScreen>
   Widget _buildStepIndicators(GenerationStep currentStep) {
     final steps = [
       _StepInfo(GenerationStep.analysis, 'Analyse', LucideIcons.fileSearch),
-      _StepInfo(GenerationStep.images, 'Images', LucideIcons.image),
-      _StepInfo(GenerationStep.audio, 'Audio', LucideIcons.mic),
       _StepInfo(
-        GenerationStep.assembly,
-        'Assemblage',
-        LucideIcons.clapperboard,
+        GenerationStep.referenceGeneration,
+        'Réfs',
+        LucideIcons.palette,
       ),
+      _StepInfo(GenerationStep.imageGeneration, 'Images', LucideIcons.image),
+      _StepInfo(GenerationStep.audioGeneration, 'Audio', LucideIcons.mic),
+      _StepInfo(GenerationStep.assembly, 'Montage', LucideIcons.clapperboard),
     ];
 
     final currentIndex = GenerationStep.values.indexOf(currentStep);
@@ -309,7 +313,7 @@ class _GenerationScreenState extends State<GenerationScreen>
         final isCurrent = index == currentIndex;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 5),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -318,7 +322,7 @@ class _GenerationScreenState extends State<GenerationScreen>
               Text(
                 step.label,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
                   color: isCurrent
                       ? Colors.white
@@ -337,13 +341,13 @@ class _GenerationScreenState extends State<GenerationScreen>
   Widget _buildStepDot({required bool isCompleted, required bool isCurrent}) {
     if (isCompleted) {
       return Container(
-        width: 24,
-        height: 24,
+        width: 20,
+        height: 20,
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.success,
         ),
-        child: const Icon(LucideIcons.check, size: 14, color: Colors.white),
+        child: const Icon(LucideIcons.check, size: 12, color: Colors.white),
       );
     }
 
@@ -351,8 +355,8 @@ class _GenerationScreenState extends State<GenerationScreen>
       return ScaleTransition(
         scale: _pulseAnimation,
         child: Container(
-          width: 24,
-          height: 24,
+          width: 20,
+          height: 20,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white,
@@ -369,8 +373,8 @@ class _GenerationScreenState extends State<GenerationScreen>
     }
 
     return Container(
-      width: 24,
-      height: 24,
+      width: 20,
+      height: 20,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(

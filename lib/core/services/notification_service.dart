@@ -98,4 +98,44 @@ class NotificationService {
       );
     } catch (_) {}
   }
+
+  Future<void> showIngestionComplete(String fileName) async {
+    if (!_initialized) return;
+    try {
+      await _plugin.show(
+        id: 2,
+        title: 'Texte ingéré avec succès',
+        body: '$fileName est prêt à être utilisé.',
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            _channelId,
+            _channelName,
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(),
+        ),
+      );
+    } catch (_) {}
+  }
+
+  Future<void> showIngestionFailed(String fileName) async {
+    if (!_initialized) return;
+    try {
+      await _plugin.show(
+        id: 3,
+        title: 'Échec de l\'ingestion',
+        body: 'L\'ingestion de $fileName a échoué.',
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            _channelId,
+            _channelName,
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(),
+        ),
+      );
+    } catch (_) {}
+  }
 }

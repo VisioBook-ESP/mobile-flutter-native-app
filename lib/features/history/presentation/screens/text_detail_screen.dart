@@ -8,6 +8,7 @@ import 'package:visiobook_mobile/core/widgets/app_button.dart';
 import 'package:visiobook_mobile/core/widgets/gradient_background.dart';
 import 'package:visiobook_mobile/core/widgets/skeleton_loader.dart';
 import 'package:visiobook_mobile/features/history/domain/user_file.dart';
+import 'package:visiobook_mobile/features/generation/domain/ingestion_state.dart';
 import 'package:visiobook_mobile/features/history/presentation/providers/texts_provider.dart';
 
 /// Ecran de detail d'un texte (depuis la bibliotheque de fichiers)
@@ -194,6 +195,84 @@ class _TextDetailScreenState extends State<TextDetailScreen> {
                     ),
                   ),
 
+                  // Ingestion status banner
+                  Builder(
+                    builder: (context) {
+                      final ingestionState = textsProvider.getIngestionState(
+                        file.id,
+                      );
+                      if (ingestionState == null) {
+                        return const SizedBox.shrink();
+                      }
+
+                      final isIngesting = ingestionState.isInProgress;
+                      final isFailed =
+                          ingestionState.status == IngestionStatus.failed;
+
+                      if (!isIngesting && !isFailed) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        color: isIngesting
+                            ? Colors.blue.withValues(alpha: 0.1)
+                            : AppColors.error.withValues(alpha: 0.1),
+                        child: Row(
+                          children: [
+                            if (isIngesting) ...[
+                              const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.blue,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Ingestion en cours...',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDark
+                                        ? Colors.blue.shade200
+                                        : Colors.blue.shade700,
+                                  ),
+                                ),
+                              ),
+                            ] else if (isFailed) ...[
+                              Icon(
+                                LucideIcons.alertCircle,
+                                size: 16,
+                                color: AppColors.error,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  ingestionState.error ??
+                                      'L\'ingestion a échoué',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.error,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+
                   // Resume + texte
                   Expanded(
                     child: SingleChildScrollView(
@@ -305,36 +384,50 @@ class _TextDetailScreenState extends State<TextDetailScreen> {
                         ),
                       ],
                     ),
-                    child: Column(
-                      children: [
-                        AppButton(
-                          text: 'Créer un projet',
-                          fullWidth: true,
-                          size: AppButtonSize.lg,
-                          icon: const Icon(
-                            LucideIcons.plus,
-                            size: 20,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            context.push(
-                              AppRoutes.createProject,
-                              extra: {
-                                'textId': file.id,
-                                'textName': file.name,
-                                'extractedText': file.extractedText,
-                              },
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        AppButton(
-                          text: 'Retour',
-                          variant: AppButtonVariant.outline,
-                          fullWidth: true,
-                          onPressed: () => context.pop(),
-                        ),
-                      ],
+                    child: Builder(
+                      builder: (context) {
+                        final isFileIngesting = textsProvider.isIngesting(
+                          file.id,
+                        );
+                        return Column(
+                          children: [
+                            AppButton(
+                              text: isFileIngesting
+                                  ? 'Ingestion en cours...'
+                                  : 'Créer un projet',
+                              fullWidth: true,
+                              size: AppButtonSize.lg,
+                              isLoading: isFileIngesting,
+                              icon: isFileIngesting
+                                  ? null
+                                  : const Icon(
+                                      LucideIcons.plus,
+                                      size: 20,
+                                      color: Colors.white,
+                                    ),
+                              onPressed: isFileIngesting
+                                  ? null
+                                  : () {
+                                      context.push(
+                                        AppRoutes.createProject,
+                                        extra: {
+                                          'textId': file.id,
+                                          'textName': file.name,
+                                          'extractedText': file.extractedText,
+                                        },
+                                      );
+                                    },
+                            ),
+                            const SizedBox(height: 12),
+                            AppButton(
+                              text: 'Retour',
+                              variant: AppButtonVariant.outline,
+                              fullWidth: true,
+                              onPressed: () => context.pop(),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],

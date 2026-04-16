@@ -63,6 +63,7 @@ class AuthProvider extends ChangeNotifier {
       // Mode demo : pas d'appel API, succes immediat
       _state = AuthState.authenticated;
       _userName = email.split('@').first;
+      NotificationService.instance.requestPermission();
       notifyListeners();
       return true;
     }

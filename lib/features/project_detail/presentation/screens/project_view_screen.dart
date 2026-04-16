@@ -8,6 +8,7 @@ import 'package:visiobook_mobile/core/widgets/skeleton_loader.dart';
 import 'package:visiobook_mobile/features/player/presentation/screens/video_player_screen.dart';
 import 'package:visiobook_mobile/features/player/presentation/widgets/generation_selector_sheet.dart';
 import 'package:visiobook_mobile/features/export/presentation/providers/export_provider.dart';
+import 'package:visiobook_mobile/features/generation/presentation/providers/generation_provider.dart';
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
@@ -295,14 +296,26 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
   }
 
   Widget _buildVisionnerButton(Project project) {
-    final isReady = project.status == ProjectStatus.ready;
-    final isProcessing = project.status == ProjectStatus.processing;
+    final genProvider = context.watch<GenerationProvider>();
+    final hasActiveGen = genProvider.hasActiveGeneration(project.id);
+    final isActivelyGenerating =
+        hasActiveGen && genProvider.isInProgress(project.id);
+    final generationJustFinished =
+        hasActiveGen && genProvider.isFinished(project.id);
+
+    // En cours : generation active OU status processing sans generation terminee
+    final isProcessing =
+        isActivelyGenerating ||
+        (project.status == ProjectStatus.processing && !generationJustFinished);
+    // Peut visionner : projet ready OU generation vient de finir
+    final canWatch =
+        project.status == ProjectStatus.ready || generationJustFinished;
 
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton.icon(
-        onPressed: isReady ? _onVisionner : null,
+        onPressed: canWatch ? _onVisionner : null,
         icon: isProcessing
             ? const SizedBox(
                 width: 20,

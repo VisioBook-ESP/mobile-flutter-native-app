@@ -239,6 +239,9 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
                                 '/project/${project.id}/generate/${gen.versionId}/${gen.executionId}',
                               );
                             } else {
+                              if (hasGen) {
+                                genProvider.clearGeneration(project.id);
+                              }
                               context.push('/project/${project.id}');
                             }
                           },
@@ -379,22 +382,36 @@ class _VisioBookCard extends StatelessWidget {
               project.status == ProjectStatus.processing)
             Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: generationProgress!),
-                  duration: const Duration(milliseconds: 500),
-                  builder: (context, value, _) {
-                    return LinearProgressIndicator(
-                      value: value,
-                      minHeight: 4,
-                      backgroundColor: AppColors.neutral200,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        AppColors.info,
-                      ),
-                    );
-                  },
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: generationProgress!),
+                      duration: const Duration(milliseconds: 500),
+                      builder: (context, value, _) {
+                        return LinearProgressIndicator(
+                          value: value,
+                          minHeight: 4,
+                          backgroundColor: AppColors.neutral200,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.info,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${(generationProgress! * 100).toInt()}%',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.info,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
           const SizedBox(height: 8),

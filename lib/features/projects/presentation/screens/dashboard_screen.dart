@@ -9,6 +9,7 @@ import 'package:visiobook_mobile/features/projects/domain/project.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 import 'package:visiobook_mobile/features/projects/presentation/widgets/project_card.dart';
 import 'package:visiobook_mobile/features/projects/presentation/widgets/stats_card.dart';
+import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/features/generation/presentation/providers/generation_provider.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -23,8 +24,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     // Charger les projets au demarrage
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProjectProvider>().loadProjects();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<ProjectProvider>().loadProjects();
+      if (!mounted) return;
+      // En mode mock, demarrer les generations pour les projets en processing
+      if (EnvironmentConfig.useMockData) {
+        final processingIds = context
+            .read<ProjectProvider>()
+            .projects
+            .where((p) => p.status == ProjectStatus.processing)
+            .map((p) => p.id)
+            .toList();
+        if (processingIds.isNotEmpty) {
+          context.read<GenerationProvider>().startMockGenerations(
+            processingIds,
+          );
+        }
+      }
     });
   }
 
@@ -95,7 +111,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildProjectsList(List<Project> projects) {
     return SizedBox(
-      height: 260,
+      height: 280,
       child: Consumer<GenerationProvider>(
         builder: (context, genProvider, _) {
           return ListView.builder(
@@ -123,6 +139,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         '/project/${project.id}/generate/${gen.versionId}/${gen.executionId}',
                       );
                     } else {
+                      // Clear la generation terminee au premier clic
+                      if (hasGeneration) {
+                        genProvider.clearGeneration(project.id);
+                      }
                       context.push('/project/${project.id}');
                     }
                   },

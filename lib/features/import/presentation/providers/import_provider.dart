@@ -18,6 +18,8 @@ class ImportProvider extends ChangeNotifier {
   UploadResult? _uploadResult;
   String? _error;
   double _uploadProgress = 0;
+  String? _lastIngestionJobId;
+  String? _lastIngestionFileId;
 
   ImportProvider({required StorageService storageService})
     : _storageService = storageService;
@@ -30,6 +32,8 @@ class ImportProvider extends ChangeNotifier {
   double get uploadProgress => _uploadProgress;
   bool get isUploading => _state == ImportState.uploading;
   bool get hasFile => _selectedFile != null;
+  String? get lastIngestionJobId => _lastIngestionJobId;
+  String? get lastIngestionFileId => _lastIngestionFileId;
 
   /// Formats supportes
   static const List<String> supportedExtensions = [
@@ -155,7 +159,14 @@ class ImportProvider extends ChangeNotifier {
     if (fileId != null && fileId.isNotEmpty) {
       _uploadProgress = 0.9;
       notifyListeners();
-      await _storageService.startIngestion(fileId: fileId, projectId: '');
+      final ingestionResult = await _storageService.startIngestion(
+        fileId: fileId,
+        projectId: '',
+      );
+      if (ingestionResult.success && ingestionResult.data != null) {
+        _lastIngestionJobId = ingestionResult.data;
+        _lastIngestionFileId = fileId;
+      }
     }
 
     _uploadResult = UploadResult.success(
@@ -188,6 +199,8 @@ class ImportProvider extends ChangeNotifier {
       extractedText: mockText,
       wordCount: mockText.split(' ').length,
     );
+    _lastIngestionFileId = _uploadResult!.fileId;
+    _lastIngestionJobId = 'mock_job_${DateTime.now().millisecondsSinceEpoch}';
     _state = ImportState.uploaded;
     notifyListeners();
   }
@@ -300,6 +313,8 @@ Finalement, le petit prince arriva sur Terre, ou il rencontra un renard qui lui 
     _uploadResult = null;
     _error = null;
     _uploadProgress = 0;
+    _lastIngestionJobId = null;
+    _lastIngestionFileId = null;
     notifyListeners();
   }
 

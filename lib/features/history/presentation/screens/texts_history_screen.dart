@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/skeleton_loader.dart';
 import 'package:visiobook_mobile/features/history/domain/user_file.dart';
+import 'package:visiobook_mobile/features/generation/domain/ingestion_state.dart';
 import 'package:visiobook_mobile/features/history/presentation/providers/texts_provider.dart';
 
 /// Filtre actif pour la liste des textes
@@ -255,6 +256,11 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
     final wordCount = file.wordCount ?? 0;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final textsProvider = context.read<TextsProvider>();
+    final isIngesting = textsProvider.isIngesting(file.id);
+    final ingestionState = textsProvider.getIngestionState(file.id);
+    final isFailed = ingestionState?.status == IngestionStatus.failed;
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8),
       leading: Container(
@@ -268,7 +274,11 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
         ),
         child: Icon(
           _getFileIcon(file.fileType),
-          color: isDark ? AppColors.neutral300 : AppColors.neutral600,
+          color: isIngesting
+              ? Colors.blue
+              : isDark
+              ? AppColors.neutral300
+              : AppColors.neutral600,
           size: 22,
         ),
       ),
@@ -283,14 +293,33 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
-        '$wordCount mots · $formattedDate',
-        style: const TextStyle(fontSize: 13, color: AppColors.neutral500),
+        isIngesting
+            ? 'Ingestion en cours...'
+            : isFailed
+            ? 'Échec de l\'ingestion'
+            : '$wordCount mots · $formattedDate',
+        style: TextStyle(
+          fontSize: 13,
+          color: isIngesting
+              ? Colors.blue
+              : isFailed
+              ? AppColors.error
+              : AppColors.neutral500,
+        ),
       ),
-      trailing: const Icon(
-        LucideIcons.chevronRight,
-        color: AppColors.neutral400,
-        size: 20,
-      ),
+      trailing: isIngesting
+          ? const Icon(LucideIcons.loader, color: Colors.blue, size: 20)
+          : isFailed
+          ? const Icon(
+              LucideIcons.alertCircle,
+              color: AppColors.error,
+              size: 20,
+            )
+          : const Icon(
+              LucideIcons.chevronRight,
+              color: AppColors.neutral400,
+              size: 20,
+            ),
       onTap: () => context.push('/text/${file.id}'),
     );
   }

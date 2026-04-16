@@ -1,8 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:visiobook_mobile/config/environment.dart';
+import 'package:visiobook_mobile/core/services/sse_service.dart';
 import 'package:visiobook_mobile/features/generation/data/generation_service.dart';
+import 'package:visiobook_mobile/features/generation/data/ingestion_polling_service.dart';
 import 'package:visiobook_mobile/features/generation/domain/generation_state.dart';
+import 'package:visiobook_mobile/features/generation/domain/ingestion_state.dart';
 
 /// Donnees d'une generation active
 class ActiveGeneration {
@@ -13,6 +17,8 @@ class ActiveGeneration {
   Timer? pollingTimer;
   bool isCancelled;
   String? error;
+
+  StreamSubscription? sseSubscription;
 
   ActiveGeneration({
     required this.projectId,
@@ -33,6 +39,8 @@ typedef GenerationCallback =
 /// Supporte plusieurs generations en parallele et continue en arriere-plan.
 class GenerationProvider extends ChangeNotifier {
   final GenerationService _generationService;
+  final SseService? _sseService;
+  final IngestionPollingService? _ingestionPollingService;
 
   /// Map des generations actives par projectId
   final Map<String, ActiveGeneration> _activeGenerations = {};
@@ -40,8 +48,17 @@ class GenerationProvider extends ChangeNotifier {
   /// Callback appele quand une generation se termine
   GenerationCallback? onGenerationFinished;
 
-  GenerationProvider({required GenerationService generationService})
-    : _generationService = generationService;
+  /// Ingestion tracking
+  final Map<String, IngestionState> _ingestionStates = {};
+  final Map<String, StreamSubscription> _ingestionSubscriptions = {};
+
+  GenerationProvider({
+    required GenerationService generationService,
+    SseService? sseService,
+    IngestionPollingService? ingestionPollingService,
+  }) : _generationService = generationService,
+       _sseService = sseService,
+       _ingestionPollingService = ingestionPollingService;
 
   /// Liste des generations actives
   Map<String, ActiveGeneration> get activeGenerations =>
@@ -100,6 +117,16 @@ class GenerationProvider extends ChangeNotifier {
       _activeGenerations[projectId]?.error ??
       _activeGenerations[projectId]?.workflowState?.errorMessage;
 
+  /// Demarre des mock generations pour des projets en processing.
+  /// A appeler depuis le dashboard en mode mock.
+  void startMockGenerations(List<String> projectIds) {
+    for (final projectId in projectIds) {
+      if (_activeGenerations.containsKey(projectId)) continue;
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      startPolling(projectId, 'mock_version_$ts', 'mock_execution_$ts');
+    }
+  }
+
   /// Demarre la generation et lance le polling
   Future<bool> startGeneration(String projectId) async {
     // Annuler une eventuelle generation precedente pour ce projet
@@ -129,7 +156,7 @@ class GenerationProvider extends ChangeNotifier {
     );
     notifyListeners();
 
-    _startPollingForProject(projectId);
+    _startTrackingForProject(projectId);
     return true;
   }
 
@@ -146,10 +173,90 @@ class GenerationProvider extends ChangeNotifier {
       versionId: versionId,
       executionId: executionId,
     );
+    // Initialiser le workflowState pour que isInProgress soit vrai tout de suite
+    generation.workflowState = WorkflowState(
+      workflowId: executionId,
+      status: WorkflowStatus.pending,
+    );
     _activeGenerations[projectId] = generation;
 
     _generationService.resetMockTimer();
-    _startPollingForProject(projectId);
+    _startTrackingForProject(projectId);
+  }
+
+  /// Demarre le tracking SSE (si disponible) ou polling pour un projet
+  void _startTrackingForProject(String projectId) {
+    final generation = _activeGenerations[projectId];
+    if (generation == null) return;
+
+    // Skip SSE in mock mode — go straight to polling
+    if (EnvironmentConfig.useMockData) {
+      _startPollingForProject(projectId);
+      return;
+    }
+
+    // Try SSE first
+    if (_sseService != null) {
+      _startSseForProject(projectId);
+    } else {
+      _startPollingForProject(projectId);
+    }
+  }
+
+  void _startSseForProject(String projectId) {
+    final generation = _activeGenerations[projectId];
+    if (generation == null || _sseService == null) return;
+
+    generation.sseSubscription?.cancel();
+
+    final stream = _sseService.connectToWorkflowProgress(
+      projectId: projectId,
+      versionId: generation.versionId,
+    );
+
+    generation.sseSubscription = stream.listen(
+      (event) {
+        if (generation.isCancelled) {
+          generation.sseSubscription?.cancel();
+          return;
+        }
+
+        // Convert SSE event to WorkflowState
+        generation.workflowState = WorkflowState(
+          workflowId: event.executionId,
+          status: WorkflowStatus.fromString(event.status),
+          progress: event.progress / 100.0,
+          currentStep: GenerationStep.fromString(
+            event.currentStep ?? 'analysis',
+          ),
+          steps: event.steps
+              .map(
+                (s) => StepDetail(
+                  step: GenerationStep.fromString(s.step),
+                  status: s.status,
+                  progress: s.progress,
+                ),
+              )
+              .toList(),
+        );
+        notifyListeners();
+
+        // Check if finished
+        if (event.isTerminal) {
+          generation.sseSubscription?.cancel();
+          final success = event.status == 'completed';
+          onGenerationFinished?.call(
+            projectId,
+            success,
+            generation.workflowState?.errorMessage,
+          );
+        }
+      },
+      onError: (error) {
+        // Fall back to polling on SSE error
+        _startPollingForProject(projectId);
+      },
+    );
   }
 
   void _startPollingForProject(String projectId) {
@@ -211,6 +318,7 @@ class GenerationProvider extends ChangeNotifier {
 
     generation.isCancelled = true;
     generation.pollingTimer?.cancel();
+    generation.sseSubscription?.cancel();
     notifyListeners();
   }
 
@@ -218,6 +326,7 @@ class GenerationProvider extends ChangeNotifier {
   void clearGeneration(String projectId) {
     final generation = _activeGenerations.remove(projectId);
     generation?.pollingTimer?.cancel();
+    generation?.sseSubscription?.cancel();
     notifyListeners();
   }
 
@@ -230,17 +339,55 @@ class GenerationProvider extends ChangeNotifier {
     }
   }
 
+  // -------------------------------------------------------------------------
+  // Ingestion tracking
+  // -------------------------------------------------------------------------
+
+  /// Start tracking ingestion status for a project
+  void startIngestionTracking(String projectId, String jobId) {
+    if (_ingestionPollingService == null) return;
+
+    _ingestionSubscriptions[projectId]?.cancel();
+    final stream = _ingestionPollingService.pollIngestionStatus(jobId);
+    _ingestionSubscriptions[projectId] = stream.listen((state) {
+      _ingestionStates[projectId] = state;
+      notifyListeners();
+      if (state.isFinished) {
+        _ingestionSubscriptions[projectId]?.cancel();
+      }
+    });
+  }
+
+  /// Get the current ingestion state for a project
+  IngestionState? getIngestionState(String projectId) =>
+      _ingestionStates[projectId];
+
+  /// Clear ingestion state and stop tracking for a project
+  void clearIngestionState(String projectId) {
+    _ingestionSubscriptions[projectId]?.cancel();
+    _ingestionSubscriptions.remove(projectId);
+    _ingestionStates.remove(projectId);
+    notifyListeners();
+  }
+
   void _stopGeneration(String projectId) {
     final generation = _activeGenerations.remove(projectId);
     generation?.pollingTimer?.cancel();
+    generation?.sseSubscription?.cancel();
   }
 
   @override
   void dispose() {
     for (final generation in _activeGenerations.values) {
       generation.pollingTimer?.cancel();
+      generation.sseSubscription?.cancel();
     }
     _activeGenerations.clear();
+    for (final sub in _ingestionSubscriptions.values) {
+      sub.cancel();
+    }
+    _ingestionSubscriptions.clear();
+    _ingestionStates.clear();
     super.dispose();
   }
 }

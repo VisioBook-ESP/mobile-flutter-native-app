@@ -123,19 +123,36 @@ class GenerationService {
     }
   }
 
-  /// Simule une progression realiste pour le mode mock
-  /// Duree totale ~15 secondes :
-  ///   - analysis   : 0s  -> 3s   (0% -> 20%)
-  ///   - images     : 3s  -> 9s   (20% -> 60%)
-  ///   - audio      : 9s  -> 12s  (60% -> 80%)
-  ///   - assembly   : 12s -> 15s  (80% -> 100%)
+  /// Definit les etapes du pipeline mock avec les memes poids que le backend.
+  /// Duree totale ~20 secondes pour laisser le temps de voir chaque etape.
+  static const _mockTotalDuration = 20000; // 20 secondes
+
+  /// Simule une progression realiste pour le mode mock.
+  /// Reproduit exactement le format SSE du core-project-service :
+  /// - status: running | completed
+  /// - currentStep: analysis | reference_generation | image_generation | ...
+  /// - progress: 0-100 (normalisé en 0.0-1.0)
+  /// - steps: liste detaillee avec status + progress par etape
   WorkflowState _simulateMockProgress(String workflowId) {
     final startTime = _mockStartTime ?? DateTime.now();
     final elapsed = DateTime.now().difference(startTime).inMilliseconds;
-    final totalDuration = 15000; // 15 secondes
+
+    // Bornes cumulees de chaque etape (en ms)
+    // analysis:              0 ->  3000  (15%)
+    // reference_generation:  3000 ->  5000  (10%)
+    // image_generation:      5000 -> 12000  (35%)
+    // audio_generation:      12000 -> 15600  (18%)
+    // assembly:              15600 -> 20000  (22%)
+    const stepBounds = [
+      (GenerationStep.analysis, 0, 3000),
+      (GenerationStep.referenceGeneration, 3000, 5000),
+      (GenerationStep.imageGeneration, 5000, 12000),
+      (GenerationStep.audioGeneration, 12000, 15600),
+      (GenerationStep.assembly, 15600, 20000),
+    ];
 
     // Generation terminee
-    if (elapsed >= totalDuration) {
+    if (elapsed >= _mockTotalDuration) {
       return WorkflowState(
         workflowId: workflowId,
         status: WorkflowStatus.completed,
@@ -143,30 +160,47 @@ class GenerationService {
         currentStep: GenerationStep.assembly,
         videoUrl: 'https://example.com/mock-video.mp4',
         thumbnailUrl: 'https://picsum.photos/seed/mock/640/360',
+        steps: stepBounds
+            .map(
+              (b) => StepDetail(step: b.$1, status: 'completed', progress: 100),
+            )
+            .toList(),
       );
     }
 
-    // Calcul de la progression et de l'etape courante
-    final progress = elapsed / totalDuration;
-    final GenerationStep step;
-    final int remainingMs = totalDuration - elapsed;
+    // Progression globale 0.0-1.0
+    final progress = elapsed / _mockTotalDuration;
+    final remainingMs = _mockTotalDuration - elapsed;
 
-    if (elapsed < 3000) {
-      step = GenerationStep.analysis;
-    } else if (elapsed < 9000) {
-      step = GenerationStep.images;
-    } else if (elapsed < 12000) {
-      step = GenerationStep.audio;
-    } else {
-      step = GenerationStep.assembly;
+    // Determiner l'etape courante et construire la liste steps
+    GenerationStep currentStep = GenerationStep.analysis;
+    final steps = <StepDetail>[];
+
+    for (final (step, startMs, endMs) in stepBounds) {
+      if (elapsed >= endMs) {
+        // Etape terminee
+        steps.add(StepDetail(step: step, status: 'completed', progress: 100));
+      } else if (elapsed >= startMs) {
+        // Etape en cours
+        currentStep = step;
+        final stepProgress = ((elapsed - startMs) / (endMs - startMs) * 100)
+            .round();
+        steps.add(
+          StepDetail(step: step, status: 'running', progress: stepProgress),
+        );
+      } else {
+        // Etape pas encore commencee
+        steps.add(StepDetail(step: step, status: 'pending', progress: 0));
+      }
     }
 
     return WorkflowState(
       workflowId: workflowId,
-      status: WorkflowStatus.processing,
+      status: WorkflowStatus.running,
       progress: progress,
-      currentStep: step,
+      currentStep: currentStep,
       estimatedTimeRemaining: Duration(milliseconds: remainingMs),
+      steps: steps,
     );
   }
 

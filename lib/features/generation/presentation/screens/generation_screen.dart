@@ -38,7 +38,6 @@ class _GenerationScreenState extends State<GenerationScreen>
   void initState() {
     super.initState();
 
-    // Animation de pulsation pour l'icone principale
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -48,7 +47,6 @@ class _GenerationScreenState extends State<GenerationScreen>
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // Animation de succes (checkmark)
     _successController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
@@ -58,13 +56,16 @@ class _GenerationScreenState extends State<GenerationScreen>
       CurvedAnimation(parent: _successController, curve: Curves.elasticOut),
     );
 
-    // Demarrer le polling de la generation
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<GenerationProvider>().startPolling(
-        widget.projectId,
-        widget.versionId,
-        widget.executionId,
-      );
+      final provider = context.read<GenerationProvider>();
+      // Ne demarrer le polling que si pas deja actif pour ce projet
+      if (!provider.hasActiveGeneration(widget.projectId)) {
+        provider.startPolling(
+          widget.projectId,
+          widget.versionId,
+          widget.executionId,
+        );
+      }
     });
   }
 
@@ -81,36 +82,40 @@ class _GenerationScreenState extends State<GenerationScreen>
       backgroundColor: AppColors.neutral900,
       body: Consumer<GenerationProvider>(
         builder: (context, provider, _) {
-          // Gerer l'animation de succes
-          if (provider.workflowState?.status == WorkflowStatus.completed) {
-            _pulseController.stop();
-            _successController.forward();
+          final generation = provider.getGeneration(widget.projectId);
+
+          if (generation == null) {
+            return _buildLoadingState();
           }
 
-          if (provider.isCancelled) {
+          if (generation.isCancelled) {
             return _buildCancelledState(context);
           }
 
-          final state = provider.workflowState;
+          final state = generation.workflowState;
           if (state == null) {
             return _buildLoadingState();
           }
 
           switch (state.status) {
             case WorkflowStatus.pending:
+            case WorkflowStatus.running:
             case WorkflowStatus.processing:
               return _buildGeneratingState(context, provider, state);
             case WorkflowStatus.completed:
+              _pulseController.stop();
+              _successController.forward();
               return _buildCompletedState(context, state);
             case WorkflowStatus.failed:
               return _buildErrorState(context, provider, state);
+            case WorkflowStatus.cancelled:
+              return _buildCancelledState(context);
           }
         },
       ),
     );
   }
 
-  /// Etat de chargement initial (avant de recevoir le premier etat)
   Widget _buildLoadingState() {
     return const Center(
       child: CircularProgressIndicator(
@@ -119,7 +124,6 @@ class _GenerationScreenState extends State<GenerationScreen>
     );
   }
 
-  /// Etat principal: generation en cours
   Widget _buildGeneratingState(
     BuildContext context,
     GenerationProvider provider,
@@ -128,7 +132,6 @@ class _GenerationScreenState extends State<GenerationScreen>
     return SafeArea(
       child: Column(
         children: [
-          // Contenu central
           Expanded(
             child: Center(
               child: Padding(
@@ -136,7 +139,6 @@ class _GenerationScreenState extends State<GenerationScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Icone pulsante
                     ScaleTransition(
                       scale: _pulseAnimation,
                       child: Container(
@@ -154,13 +156,11 @@ class _GenerationScreenState extends State<GenerationScreen>
                       ),
                     ),
                     const SizedBox(height: 40),
-
-                    // Label de l'etape en cours
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 400),
                       child: Text(
-                        provider.currentStepLabel,
-                        key: ValueKey(provider.currentStepLabel),
+                        provider.getStepLabel(widget.projectId),
+                        key: ValueKey(provider.getStepLabel(widget.projectId)),
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w600,
@@ -171,13 +171,13 @@ class _GenerationScreenState extends State<GenerationScreen>
                       ),
                     ),
                     const SizedBox(height: 12),
-
-                    // Description de l'etape
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 400),
                       child: Text(
-                        provider.currentStepDescription,
-                        key: ValueKey(provider.currentStepDescription),
+                        provider.getStepDescription(widget.projectId),
+                        key: ValueKey(
+                          provider.getStepDescription(widget.projectId),
+                        ),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.normal,
@@ -188,12 +188,8 @@ class _GenerationScreenState extends State<GenerationScreen>
                       ),
                     ),
                     const SizedBox(height: 40),
-
-                    // Barre de progression
                     _buildProgressBar(state),
                     const SizedBox(height: 12),
-
-                    // Pourcentage
                     Text(
                       '${(state.progress * 100).toInt()}%',
                       style: TextStyle(
@@ -203,12 +199,8 @@ class _GenerationScreenState extends State<GenerationScreen>
                       ),
                     ),
                     const SizedBox(height: 32),
-
-                    // Indicateurs d'etapes
                     _buildStepIndicators(state.currentStep),
                     const SizedBox(height: 20),
-
-                    // Temps estime restant
                     if (state.estimatedTimeRemaining != null)
                       Text(
                         _formatTimeRemaining(state.estimatedTimeRemaining!),
@@ -223,30 +215,55 @@ class _GenerationScreenState extends State<GenerationScreen>
               ),
             ),
           ),
-
-          // Bouton annuler
+          // Boutons: retour au dashboard + annuler
           Padding(
             padding: const EdgeInsets.fromLTRB(32, 0, 32, 24),
-            child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () => _showCancelConfirmation(context, provider),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.white54, width: 1.5),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100),
+            child: Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => context.go(AppRoutes.dashboard),
+                    icon: const Icon(
+                      LucideIcons.arrowLeft,
+                      size: 18,
+                      color: Colors.white70,
+                    ),
+                    label: const Text(
+                      'Continuer en arrière-plan',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.white54, width: 1.5),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    ),
                   ),
                 ),
-                child: const Text(
-                  'Annuler',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: () => _showCancelConfirmation(context, provider),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      'Annuler la génération',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.4),
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.white.withValues(alpha: 0.4),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ],
@@ -254,7 +271,6 @@ class _GenerationScreenState extends State<GenerationScreen>
     );
   }
 
-  /// Barre de progression animee
   Widget _buildProgressBar(WorkflowState state) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(4),
@@ -274,17 +290,17 @@ class _GenerationScreenState extends State<GenerationScreen>
     );
   }
 
-  /// Indicateurs d'etapes (4 pastilles)
   Widget _buildStepIndicators(GenerationStep currentStep) {
     final steps = [
       _StepInfo(GenerationStep.analysis, 'Analyse', LucideIcons.fileSearch),
-      _StepInfo(GenerationStep.images, 'Images', LucideIcons.image),
-      _StepInfo(GenerationStep.audio, 'Audio', LucideIcons.mic),
       _StepInfo(
-        GenerationStep.assembly,
-        'Assemblage',
-        LucideIcons.clapperboard,
+        GenerationStep.referenceGeneration,
+        'Réfs',
+        LucideIcons.palette,
       ),
+      _StepInfo(GenerationStep.imageGeneration, 'Images', LucideIcons.image),
+      _StepInfo(GenerationStep.audioGeneration, 'Audio', LucideIcons.mic),
+      _StepInfo(GenerationStep.assembly, 'Montage', LucideIcons.clapperboard),
     ];
 
     final currentIndex = GenerationStep.values.indexOf(currentStep);
@@ -297,7 +313,7 @@ class _GenerationScreenState extends State<GenerationScreen>
         final isCurrent = index == currentIndex;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 5),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -306,7 +322,7 @@ class _GenerationScreenState extends State<GenerationScreen>
               Text(
                 step.label,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
                   color: isCurrent
                       ? Colors.white
@@ -322,17 +338,16 @@ class _GenerationScreenState extends State<GenerationScreen>
     );
   }
 
-  /// Pastille individuelle d'etape
   Widget _buildStepDot({required bool isCompleted, required bool isCurrent}) {
     if (isCompleted) {
       return Container(
-        width: 24,
-        height: 24,
+        width: 20,
+        height: 20,
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.success,
         ),
-        child: const Icon(LucideIcons.check, size: 14, color: Colors.white),
+        child: const Icon(LucideIcons.check, size: 12, color: Colors.white),
       );
     }
 
@@ -340,8 +355,8 @@ class _GenerationScreenState extends State<GenerationScreen>
       return ScaleTransition(
         scale: _pulseAnimation,
         child: Container(
-          width: 24,
-          height: 24,
+          width: 20,
+          height: 20,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white,
@@ -358,8 +373,8 @@ class _GenerationScreenState extends State<GenerationScreen>
     }
 
     return Container(
-      width: 24,
-      height: 24,
+      width: 20,
+      height: 20,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
@@ -370,7 +385,6 @@ class _GenerationScreenState extends State<GenerationScreen>
     );
   }
 
-  /// Etat: generation terminee
   Widget _buildCompletedState(BuildContext context, WorkflowState state) {
     return SafeArea(
       child: Center(
@@ -379,7 +393,6 @@ class _GenerationScreenState extends State<GenerationScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Animation de succes
               ScaleTransition(
                 scale: _successScaleAnimation,
                 child: Container(
@@ -397,7 +410,6 @@ class _GenerationScreenState extends State<GenerationScreen>
                 ),
               ),
               const SizedBox(height: 32),
-
               const Text(
                 'Votre VisioBook est prêt !',
                 style: TextStyle(
@@ -408,7 +420,6 @@ class _GenerationScreenState extends State<GenerationScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-
               Text(
                 'Votre vidéo a été générée avec succès.',
                 style: TextStyle(
@@ -418,8 +429,6 @@ class _GenerationScreenState extends State<GenerationScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 48),
-
-              // Bouton voir le resultat
               AppButton(
                 text: 'Voir le résultat',
                 fullWidth: true,
@@ -430,20 +439,22 @@ class _GenerationScreenState extends State<GenerationScreen>
                   color: AppColors.neutral900,
                 ),
                 onPressed: () {
-                  context.read<GenerationProvider>().reset();
+                  context.read<GenerationProvider>().clearGeneration(
+                    widget.projectId,
+                  );
                   context.go(
                     AppRoutes.player.replaceAll(':id', widget.projectId),
                   );
                 },
               ),
               const SizedBox(height: 12),
-
-              // Bouton retour au projet
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () {
-                    context.read<GenerationProvider>().reset();
+                    context.read<GenerationProvider>().clearGeneration(
+                      widget.projectId,
+                    );
                     context.go(
                       AppRoutes.projectView.replaceAll(':id', widget.projectId),
                     );
@@ -472,7 +483,6 @@ class _GenerationScreenState extends State<GenerationScreen>
     );
   }
 
-  /// Etat: erreur de generation
   Widget _buildErrorState(
     BuildContext context,
     GenerationProvider provider,
@@ -485,7 +495,6 @@ class _GenerationScreenState extends State<GenerationScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Icone d'erreur
               Container(
                 width: 96,
                 height: 96,
@@ -500,7 +509,6 @@ class _GenerationScreenState extends State<GenerationScreen>
                 ),
               ),
               const SizedBox(height: 32),
-
               const Text(
                 'Échec de la génération',
                 style: TextStyle(
@@ -511,7 +519,6 @@ class _GenerationScreenState extends State<GenerationScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-
               Text(
                 state.errorMessage ?? 'Une erreur inattendue est survenue.',
                 style: TextStyle(
@@ -522,8 +529,6 @@ class _GenerationScreenState extends State<GenerationScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
-
-              // Bouton reessayer
               AppButton(
                 text: 'Réessayer',
                 fullWidth: true,
@@ -542,14 +547,12 @@ class _GenerationScreenState extends State<GenerationScreen>
                 },
               ),
               const SizedBox(height: 12),
-
-              // Bouton ajuster les parametres
               AppButton(
                 text: 'Ajuster les paramètres',
                 variant: AppButtonVariant.outline,
                 fullWidth: true,
                 onPressed: () {
-                  provider.reset();
+                  provider.clearGeneration(widget.projectId);
                   context.go(
                     AppRoutes.projectEditConfig.replaceAll(
                       ':id',
@@ -559,11 +562,9 @@ class _GenerationScreenState extends State<GenerationScreen>
                 },
               ),
               const SizedBox(height: 12),
-
-              // Bouton retour au dashboard
               GestureDetector(
                 onTap: () {
-                  provider.reset();
+                  provider.clearGeneration(widget.projectId);
                   context.go(AppRoutes.dashboard);
                 },
                 child: Padding(
@@ -587,7 +588,6 @@ class _GenerationScreenState extends State<GenerationScreen>
     );
   }
 
-  /// Etat: generation annulee
   Widget _buildCancelledState(BuildContext context) {
     return SafeArea(
       child: Center(
@@ -610,7 +610,6 @@ class _GenerationScreenState extends State<GenerationScreen>
                 ),
               ),
               const SizedBox(height: 32),
-
               const Text(
                 'Génération annulée',
                 style: TextStyle(
@@ -621,7 +620,6 @@ class _GenerationScreenState extends State<GenerationScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-
               Text(
                 'La génération de votre VisioBook a été annulée.',
                 style: TextStyle(
@@ -631,13 +629,14 @@ class _GenerationScreenState extends State<GenerationScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 48),
-
               AppButton(
                 text: 'Retour au projet',
                 fullWidth: true,
                 size: AppButtonSize.lg,
                 onPressed: () {
-                  context.read<GenerationProvider>().reset();
+                  context.read<GenerationProvider>().clearGeneration(
+                    widget.projectId,
+                  );
                   context.go(
                     AppRoutes.projectView.replaceAll(':id', widget.projectId),
                   );
@@ -650,7 +649,6 @@ class _GenerationScreenState extends State<GenerationScreen>
     );
   }
 
-  /// Affiche un dialogue de confirmation avant d'annuler
   void _showCancelConfirmation(
     BuildContext context,
     GenerationProvider provider,
@@ -685,7 +683,7 @@ class _GenerationScreenState extends State<GenerationScreen>
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              provider.cancelGeneration();
+              provider.cancelGeneration(widget.projectId);
             },
             child: const Text(
               'Annuler la génération',
@@ -697,7 +695,6 @@ class _GenerationScreenState extends State<GenerationScreen>
     );
   }
 
-  /// Formate le temps restant estime
   String _formatTimeRemaining(Duration duration) {
     if (duration.inMinutes >= 1) {
       final minutes = duration.inMinutes;
@@ -708,7 +705,6 @@ class _GenerationScreenState extends State<GenerationScreen>
   }
 }
 
-/// Donnees d'une etape pour l'affichage des indicateurs
 class _StepInfo {
   final GenerationStep step;
   final String label;

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
+import 'package:visiobook_mobile/core/widgets/gradient_background.dart';
 
 /// Ecran de selection du mode d'import
 class InputModeScreen extends StatelessWidget {
@@ -10,48 +11,59 @@ class InputModeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.pop(),
+    return GradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              LucideIcons.arrowLeft,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () => context.pop(),
+          ),
+          title: Text(
+            'Nouveau projet',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
         ),
-        title: const Text('Nouveau projet'),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Comment souhaitez-vous\nimporter votre texte ?',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Choisissez une méthode pour ajouter du contenu',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral500),
-              ),
-              const SizedBox(height: 32),
-              _InputModeCard(
-                icon: LucideIcons.upload,
-                title: 'Importer un fichier',
-                subtitle: 'PDF, TXT, DOCX, EPUB',
-                description: 'Sélectionnez un fichier depuis votre appareil',
-                onTap: () => context.push(AppRoutes.fileImport),
-              ),
-              const SizedBox(height: 16),
-              _InputModeCard(
-                icon: LucideIcons.camera,
-                title: 'Scanner un document',
-                subtitle: 'Appareil photo',
-                description: 'Prenez une photo de votre texte',
-                onTap: () => context.push(AppRoutes.scan),
-              ),
-            ],
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Comment souhaitez-vous\nimporter votre texte ?',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Choisissez une méthode pour ajouter du contenu',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral500),
+                ),
+                const SizedBox(height: 32),
+                _InputModeCard(
+                  icon: LucideIcons.upload,
+                  title: 'Importer un fichier',
+                  subtitle: 'PDF, TXT, DOCX, EPUB',
+                  description: 'Sélectionnez un fichier depuis votre appareil',
+                  onTap: () => context.push(AppRoutes.fileImport),
+                ),
+                const SizedBox(height: 16),
+                _InputModeCard(
+                  icon: LucideIcons.camera,
+                  title: 'Scanner un document',
+                  subtitle: 'Appareil photo',
+                  description: 'Prenez une photo de votre texte',
+                  onTap: () => context.push(AppRoutes.scan),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -76,6 +88,7 @@ class _InputModeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.radiusLg),
@@ -84,6 +97,9 @@ class _InputModeCard extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(color: Theme.of(context).colorScheme.outline),
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.transparent,
         ),
         child: Row(
           children: [
@@ -91,10 +107,14 @@ class _InputModeCard extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: AppColors.neutral900,
+                color: isDark ? AppColors.neutral50 : AppColors.neutral900,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, color: Colors.white, size: 28),
+              child: Icon(
+                icon,
+                color: isDark ? AppColors.neutral900 : Colors.white,
+                size: 28,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(

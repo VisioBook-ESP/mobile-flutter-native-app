@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
+import 'package:visiobook_mobile/core/widgets/glass_container.dart';
 
 class StatsCard extends StatelessWidget {
   final int visiobooksCount;
@@ -13,19 +14,20 @@ class StatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GlassContainer(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-      decoration: BoxDecoration(
-        color: AppColors.neutral100,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-      ),
+      borderRadius: AppTheme.radiusMd,
       child: Row(
         children: [
           Expanded(
             child: _StatItem(count: visiobooksCount, label: 'VisioBooks'),
           ),
-          Container(width: 1, height: 40, color: AppColors.neutral300),
+          Container(
+            width: 1,
+            height: 40,
+            color: Colors.white.withValues(alpha: 0.2),
+          ),
           Expanded(
             child: _StatItem(count: textsCount, label: 'Textes'),
           ),
@@ -54,9 +56,11 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: AppColors.neutral500),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.neutral400
+                : AppColors.neutral500,
+          ),
         ),
       ],
     );

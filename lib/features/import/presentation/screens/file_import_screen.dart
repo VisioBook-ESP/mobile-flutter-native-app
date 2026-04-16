@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
+import 'package:visiobook_mobile/core/widgets/gradient_background.dart';
 import 'package:visiobook_mobile/features/import/domain/import_file.dart';
+import 'package:visiobook_mobile/features/history/presentation/providers/texts_provider.dart';
 import 'package:visiobook_mobile/features/import/presentation/providers/import_provider.dart';
 
 /// Ecran d'import de fichier
@@ -14,105 +16,128 @@ class FileImportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () {
-            context.read<ImportProvider>().reset();
-            context.pop();
-          },
+    return GradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              LucideIcons.arrowLeft,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () {
+              context.read<ImportProvider>().reset();
+              context.pop();
+            },
+          ),
+          title: Text(
+            'Importer un fichier',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
         ),
-        title: const Text('Importer un fichier'),
-      ),
-      body: SafeArea(
-        child: Consumer<ImportProvider>(
-          builder: (context, provider, _) {
-            return Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sélectionnez un fichier',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Formats supportés: PDF, TXT, DOCX, EPUB\nTaille max: 50 MB',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.neutral500,
+        body: SafeArea(
+          child: Consumer<ImportProvider>(
+            builder: (context, provider, _) {
+              return Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sélectionnez un fichier',
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Zone de selection / fichier selectionne
-                  if (provider.hasFile)
-                    _FileSelectedCard(file: provider.selectedFile!)
-                  else
-                    _FilePickerZone(onTap: () => provider.pickFile()),
-
-                  // Erreur
-                  if (provider.error != null) ...[
-                    const SizedBox(height: 16),
-                    _ErrorMessage(message: provider.error!),
-                  ],
-
-                  // Progress bar
-                  if (provider.isUploading) ...[
-                    const SizedBox(height: 24),
-                    _UploadProgress(progress: provider.uploadProgress),
-                  ],
-
-                  const Spacer(),
-
-                  // Boutons
-                  if (provider.hasFile && !provider.isUploading) ...[
-                    AppButton(
-                      text: 'Continuer',
-                      fullWidth: true,
-                      size: AppButtonSize.lg,
-                      onPressed: () async {
-                        final success = await provider.uploadFile();
-                        if (success && context.mounted) {
-                          context.push(AppRoutes.textPreview);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    AppButton(
-                      text: 'Changer de fichier',
-                      variant: AppButtonVariant.outline,
-                      fullWidth: true,
-                      onPressed: () => provider.pickFile(),
-                    ),
-                  ],
-
-                  if (!provider.hasFile && !provider.isUploading)
-                    AppButton(
-                      text: 'Parcourir les fichiers',
-                      fullWidth: true,
-                      size: AppButtonSize.lg,
-                      icon: const Icon(
-                        LucideIcons.folderOpen,
-                        size: 20,
-                        color: Colors.white,
+                    const SizedBox(height: 8),
+                    Text(
+                      'Formats supportés: PDF, TXT, DOCX, EPUB\nTaille max: 50 MB',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.neutral500,
                       ),
-                      onPressed: () => provider.pickFile(),
                     ),
+                    const SizedBox(height: 32),
 
-                  if (provider.isUploading)
-                    AppButton(
-                      text: 'Upload en cours...',
-                      fullWidth: true,
-                      size: AppButtonSize.lg,
-                      isLoading: true,
-                      onPressed: null,
-                    ),
-                ],
-              ),
-            );
-          },
+                    // Zone de selection / fichier selectionne
+                    if (provider.hasFile)
+                      _FileSelectedCard(file: provider.selectedFile!)
+                    else
+                      _FilePickerZone(onTap: () => provider.pickFile()),
+
+                    // Erreur
+                    if (provider.error != null) ...[
+                      const SizedBox(height: 16),
+                      _ErrorMessage(message: provider.error!),
+                    ],
+
+                    // Progress bar
+                    if (provider.isUploading) ...[
+                      const SizedBox(height: 24),
+                      _UploadProgress(progress: provider.uploadProgress),
+                    ],
+
+                    const Spacer(),
+
+                    // Boutons
+                    if (provider.hasFile && !provider.isUploading) ...[
+                      AppButton(
+                        text: 'Continuer',
+                        fullWidth: true,
+                        size: AppButtonSize.lg,
+                        onPressed: () async {
+                          final success = await provider.uploadFile();
+                          if (success && context.mounted) {
+                            // Start ingestion tracking if jobId available
+                            final jobId = provider.lastIngestionJobId;
+                            final fileId = provider.lastIngestionFileId;
+                            if (jobId != null && fileId != null) {
+                              context
+                                  .read<TextsProvider>()
+                                  .startIngestionTracking(
+                                    fileId,
+                                    jobId,
+                                    provider.selectedFile?.name ?? 'Fichier',
+                                  );
+                            }
+                            context.push(AppRoutes.textPreview);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      AppButton(
+                        text: 'Changer de fichier',
+                        variant: AppButtonVariant.outline,
+                        fullWidth: true,
+                        onPressed: () => provider.pickFile(),
+                      ),
+                    ],
+
+                    if (!provider.hasFile && !provider.isUploading)
+                      AppButton(
+                        text: 'Parcourir les fichiers',
+                        fullWidth: true,
+                        size: AppButtonSize.lg,
+                        icon: const Icon(
+                          LucideIcons.folderOpen,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => provider.pickFile(),
+                      ),
+
+                    if (provider.isUploading)
+                      AppButton(
+                        text: 'Upload en cours...',
+                        fullWidth: true,
+                        size: AppButtonSize.lg,
+                        isLoading: true,
+                        onPressed: null,
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -127,6 +152,7 @@ class _FilePickerZone extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.radiusLg),
@@ -135,12 +161,14 @@ class _FilePickerZone extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
         decoration: BoxDecoration(
           border: Border.all(
-            color: AppColors.neutral300,
+            color: isDark ? AppColors.neutral600 : AppColors.neutral300,
             width: 2,
             strokeAlign: BorderSide.strokeAlignInside,
           ),
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-          color: AppColors.neutral50,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : AppColors.neutral50,
         ),
         child: Column(
           children: [
@@ -148,7 +176,9 @@ class _FilePickerZone extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: AppColors.neutral200,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : AppColors.neutral200,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Icon(
@@ -184,12 +214,18 @@ class _FileSelectedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.neutral900, width: 2),
+        border: Border.all(
+          color: isDark ? AppColors.neutral50 : AppColors.neutral900,
+          width: 2,
+        ),
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        color: AppColors.neutral50,
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : AppColors.neutral50,
       ),
       child: Row(
         children: [

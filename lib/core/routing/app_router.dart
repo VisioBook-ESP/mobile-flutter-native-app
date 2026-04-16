@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/core/utils/secure_storage.dart';
+import 'package:visiobook_mobile/core/widgets/main_shell.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/splash_screen.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/onboarding_screen.dart';
@@ -87,9 +88,49 @@ class AppRouter {
         path: AppRoutes.register,
         builder: (context, state) => const RegisterScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.dashboard,
-        builder: (context, state) => const DashboardScreen(),
+      // Shell route for main tabs with persistent bottom nav bar
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainShell(navigationShell: navigationShell);
+        },
+        branches: [
+          // Index 0: Dashboard (Home)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.dashboard,
+                builder: (context, state) => const DashboardScreen(),
+              ),
+            ],
+          ),
+          // Index 1: Texts History
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.textsHistory,
+                builder: (context, state) => const TextsHistoryScreen(),
+              ),
+            ],
+          ),
+          // Index 2: VisioBooks History
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.visiobooksHistory,
+                builder: (context, state) => const VisiobooksHistoryScreen(),
+              ),
+            ],
+          ),
+          // Index 3: Profile (visual nav index 4)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.profile,
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
         path: AppRoutes.createProject,
@@ -159,24 +200,11 @@ class AppRouter {
       ),
       // History routes
       GoRoute(
-        path: AppRoutes.textsHistory,
-        builder: (context, state) => const TextsHistoryScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.textDetail,
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return TextDetailScreen(projectId: id);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.visiobooksHistory,
-        builder: (context, state) => const VisiobooksHistoryScreen(),
-      ),
-      // Profile
-      GoRoute(
-        path: AppRoutes.profile,
-        builder: (context, state) => const ProfileScreen(),
       ),
       // Payment
       GoRoute(

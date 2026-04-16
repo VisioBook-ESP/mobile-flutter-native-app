@@ -60,6 +60,7 @@ class _StyleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -68,7 +69,11 @@ class _StyleCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           border: Border.all(
-            color: isSelected ? AppColors.neutral900 : AppColors.neutral200,
+            color: isSelected
+                ? (isDark ? Colors.white : AppColors.neutral900)
+                : (isDark
+                      ? Colors.white.withValues(alpha: 0.12)
+                      : AppColors.neutral200),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -83,7 +88,9 @@ class _StyleCard extends StatelessWidget {
               child: Container(
                 height: 80,
                 width: double.infinity,
-                color: AppColors.neutral100,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : AppColors.neutral100,
                 child: Image.network(
                   style.previewUrl,
                   fit: BoxFit.cover,
@@ -115,7 +122,7 @@ class _StyleCard extends StatelessWidget {
                         width: 16,
                         height: 2,
                         decoration: BoxDecoration(
-                          color: AppColors.neutral900,
+                          color: isDark ? Colors.white : AppColors.neutral900,
                           borderRadius: BorderRadius.circular(1),
                         ),
                       ),

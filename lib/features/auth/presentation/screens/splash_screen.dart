@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
+import 'package:visiobook_mobile/core/widgets/animated_gradient_background.dart';
 import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/utils/secure_storage.dart';
 import 'package:visiobook_mobile/features/auth/presentation/providers/auth_provider.dart';
@@ -69,49 +70,52 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(),
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: Text(
-                    'Prêts à\ntransformer\nla lecture ?',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.displayLarge,
+    return AnimatedGradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Spacer(),
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Text(
+                      'Prêts à\ntransformer\nla lecture ?',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.displayLarge,
+                    ),
                   ),
                 ),
-              ),
-              const Spacer(),
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: Column(
-                  children: [
-                    AppButton(
-                      text: 'Se connecter',
-                      fullWidth: true,
-                      size: AppButtonSize.lg,
-                      onPressed: () => context.push(AppRoutes.login),
-                    ),
-                    const SizedBox(height: 12),
-                    AppButton(
-                      text: "S'enregistrer",
-                      variant: AppButtonVariant.outline,
-                      fullWidth: true,
-                      size: AppButtonSize.lg,
-                      onPressed: () => context.push(AppRoutes.register),
-                    ),
-                  ],
+                const Spacer(),
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Column(
+                    children: [
+                      AppButton(
+                        text: 'Se connecter',
+                        fullWidth: true,
+                        size: AppButtonSize.lg,
+                        onPressed: () => context.push(AppRoutes.login),
+                      ),
+                      const SizedBox(height: 12),
+                      AppButton(
+                        text: "S'enregistrer",
+                        variant: AppButtonVariant.outline,
+                        fullWidth: true,
+                        size: AppButtonSize.lg,
+                        onPressed: () => context.push(AppRoutes.register),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 48),
-            ],
+                const SizedBox(height: 48),
+              ],
+            ),
           ),
         ),
       ),

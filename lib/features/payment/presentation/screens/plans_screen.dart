@@ -69,24 +69,29 @@ class _PlansScreenState extends State<PlansScreen> {
   Widget build(BuildContext context) {
     final paymentProvider = context.watch<PaymentProvider>();
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.neutral900),
-          onPressed: () => context.pop(),
+    return GradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              LucideIcons.arrowLeft,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () => context.pop(),
+          ),
+          title: Text(
+            'Choisir un plan',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          centerTitle: true,
         ),
-        title: Text(
-          'Choisir un plan',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        centerTitle: true,
+        body: paymentProvider.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _buildContent(context, paymentProvider),
       ),
-      body: paymentProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _buildContent(context, paymentProvider),
     );
   }
 
@@ -117,12 +122,17 @@ class _PlansScreenState extends State<PlansScreen> {
   // -- Interval toggle -------------------------------------------------------
 
   Widget _buildIntervalToggle(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.neutral100,
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : AppColors.neutral100,
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: AppColors.neutral200),
+        border: Border.all(
+          color: isDark ? AppColors.neutral700 : AppColors.neutral200,
+        ),
       ),
       child: Row(
         children: [
@@ -133,7 +143,11 @@ class _PlansScreenState extends State<PlansScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: !_isYearly ? AppColors.neutral900 : Colors.transparent,
+                  color: !_isYearly
+                      ? (isDark
+                            ? Colors.white.withValues(alpha: 0.15)
+                            : AppColors.neutral900)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Center(
@@ -142,7 +156,9 @@ class _PlansScreenState extends State<PlansScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: !_isYearly ? Colors.white : AppColors.neutral500,
+                      color: !_isYearly
+                          ? (isDark ? Colors.white : Colors.white)
+                          : AppColors.neutral500,
                     ),
                   ),
                 ),
@@ -156,7 +172,11 @@ class _PlansScreenState extends State<PlansScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: _isYearly ? AppColors.neutral900 : Colors.transparent,
+                  color: _isYearly
+                      ? (isDark
+                            ? Colors.white.withValues(alpha: 0.15)
+                            : AppColors.neutral900)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Center(
@@ -165,7 +185,9 @@ class _PlansScreenState extends State<PlansScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: _isYearly ? Colors.white : AppColors.neutral500,
+                      color: _isYearly
+                          ? (isDark ? Colors.white : Colors.white)
+                          : AppColors.neutral500,
                     ),
                   ),
                 ),
@@ -190,12 +212,23 @@ class _PlansScreenState extends State<PlansScreen> {
     final isRecommended = plan.id == 'pro';
     final savings = _savingsPercent(plan);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isRecommended ? AppColors.neutral900 : AppColors.neutral100,
+        color: isRecommended
+            ? (isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : AppColors.neutral900)
+            : (isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : AppColors.neutral100),
         border: Border.all(
-          color: isRecommended ? AppColors.neutral900 : AppColors.neutral200,
+          color: isRecommended
+              ? (isDark
+                    ? Colors.white.withValues(alpha: 0.25)
+                    : AppColors.neutral900)
+              : (isDark ? AppColors.neutral700 : AppColors.neutral200),
           width: isRecommended ? 2 : 1,
         ),
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -216,7 +249,7 @@ class _PlansScreenState extends State<PlansScreen> {
                       size: 20,
                       color: isRecommended
                           ? Colors.white
-                          : AppColors.neutral900,
+                          : Theme.of(context).colorScheme.onSurface,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -226,7 +259,7 @@ class _PlansScreenState extends State<PlansScreen> {
                         fontWeight: FontWeight.w600,
                         color: isRecommended
                             ? Colors.white
-                            : AppColors.neutral900,
+                            : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -237,15 +270,17 @@ class _PlansScreenState extends State<PlansScreen> {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.2)
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(100),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Recommand\u00e9',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.neutral900,
+                            color: isDark ? Colors.white : AppColors.neutral900,
                           ),
                         ),
                       ),
@@ -256,7 +291,9 @@ class _PlansScreenState extends State<PlansScreen> {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.neutral900,
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.15)
+                              : AppColors.neutral900,
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: const Text(
@@ -297,7 +334,9 @@ class _PlansScreenState extends State<PlansScreen> {
                     fontSize: 13,
                     color: isRecommended
                         ? Colors.white.withValues(alpha: 0.7)
-                        : AppColors.neutral500,
+                        : (isDark
+                              ? AppColors.neutral400
+                              : AppColors.neutral500),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -311,7 +350,7 @@ class _PlansScreenState extends State<PlansScreen> {
                         fontWeight: FontWeight.bold,
                         color: isRecommended
                             ? Colors.white
-                            : AppColors.neutral900,
+                            : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     if (_isYearly && savings > 0) ...[
@@ -356,7 +395,7 @@ class _PlansScreenState extends State<PlansScreen> {
                             size: 16,
                             color: isRecommended
                                 ? Colors.white
-                                : AppColors.neutral900,
+                                : Theme.of(context).colorScheme.onSurface,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -366,7 +405,9 @@ class _PlansScreenState extends State<PlansScreen> {
                                 fontSize: 14,
                                 color: isRecommended
                                     ? Colors.white.withValues(alpha: 0.9)
-                                    : AppColors.neutral700,
+                                    : (isDark
+                                          ? AppColors.neutral300
+                                          : AppColors.neutral700),
                               ),
                             ),
                           ),

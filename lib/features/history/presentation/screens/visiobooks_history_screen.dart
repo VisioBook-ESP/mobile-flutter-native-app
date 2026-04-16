@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/skeleton_loader.dart';
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
+import 'package:visiobook_mobile/features/generation/presentation/providers/generation_provider.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
 enum _VisioBookFilter { tous, prets, enCours }
@@ -134,12 +135,19 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
     required VoidCallback onTap,
     Color? color,
   }) {
+    final isDarkCtx = Theme.of(context).brightness == Brightness.dark;
     return ListTile(
-      leading: Icon(icon, color: color ?? AppColors.neutral700, size: 20),
+      leading: Icon(
+        icon,
+        color:
+            color ?? (isDarkCtx ? AppColors.neutral300 : AppColors.neutral700),
+        size: 20,
+      ),
       title: Text(
         label,
         style: TextStyle(
-          color: color ?? AppColors.neutral900,
+          color:
+              color ?? (isDarkCtx ? AppColors.neutral50 : AppColors.neutral900),
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -153,13 +161,11 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.neutral900),
-          onPressed: () => context.pop(),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           'Mes VisioBooks',
           style: Theme.of(context).textTheme.headlineSmall,
@@ -214,9 +220,31 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
                       itemCount: projects.length,
                       itemBuilder: (context, index) {
                         final project = projects[index];
+                        final genProvider = context.watch<GenerationProvider>();
+                        final hasGen = genProvider.hasActiveGeneration(
+                          project.id,
+                        );
                         return _VisioBookCard(
                           project: project,
-                          onTap: () => context.push('/project/${project.id}'),
+                          generationProgress: hasGen
+                              ? genProvider.getProgress(project.id)
+                              : null,
+                          onTap: () {
+                            if (hasGen &&
+                                genProvider.isInProgress(project.id)) {
+                              final gen = genProvider.getGeneration(
+                                project.id,
+                              )!;
+                              context.push(
+                                '/project/${project.id}/generate/${gen.versionId}/${gen.executionId}',
+                              );
+                            } else {
+                              if (hasGen) {
+                                genProvider.clearGeneration(project.id);
+                              }
+                              context.push('/project/${project.id}');
+                            }
+                          },
                           onLongPress: () => _showContextMenu(context, project),
                         );
                       },
@@ -249,12 +277,19 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
 
   Widget _buildChip(String label, _VisioBookFilter filter) {
     final isSelected = _selectedFilter == filter;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => setState(() => _selectedFilter = filter),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.neutral900 : AppColors.neutral100,
+          color: isSelected
+              ? (isDark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : AppColors.neutral900)
+              : (isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : AppColors.neutral100),
           borderRadius: BorderRadius.circular(AppTheme.radiusXl),
         ),
         child: Text(
@@ -262,7 +297,9 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: isSelected ? Colors.white : AppColors.neutral600,
+            color: isSelected
+                ? Colors.white
+                : (isDark ? AppColors.neutral300 : AppColors.neutral600),
           ),
         ),
       ),
@@ -303,11 +340,13 @@ class _VisioBookCard extends StatelessWidget {
   final Project project;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+  final double? generationProgress;
 
   const _VisioBookCard({
     required this.project,
     required this.onTap,
     required this.onLongPress,
+    this.generationProgress,
   });
 
   String _formatDate(DateTime date) {
@@ -339,6 +378,42 @@ class _VisioBookCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(child: _buildCover(context)),
+          if (generationProgress != null &&
+              project.status == ProjectStatus.processing)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: generationProgress!),
+                      duration: const Duration(milliseconds: 500),
+                      builder: (context, value, _) {
+                        return LinearProgressIndicator(
+                          value: value,
+                          minHeight: 4,
+                          backgroundColor: AppColors.neutral200,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.info,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${(generationProgress! * 100).toInt()}%',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.info,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 8),
           Text(
             project.title,
@@ -436,15 +511,22 @@ class _VisioBookCard extends StatelessWidget {
   }
 
   Widget _buildPlaceholder() {
-    return Container(
-      color: AppColors.neutral100,
-      child: Center(
-        child: Icon(
-          LucideIcons.playCircle,
-          size: 40,
-          color: AppColors.neutral400,
-        ),
-      ),
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Container(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : AppColors.neutral100,
+          child: Center(
+            child: Icon(
+              LucideIcons.playCircle,
+              size: 40,
+              color: AppColors.neutral400,
+            ),
+          ),
+        );
+      },
     );
   }
 }

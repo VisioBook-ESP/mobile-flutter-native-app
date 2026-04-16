@@ -82,14 +82,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final profile = profileProvider.profile;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.neutral900),
-          onPressed: () => context.pop(),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           'Mon Profil',
           style: Theme.of(context).textTheme.headlineSmall,
@@ -172,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildAboutSection(context),
           const SizedBox(height: 24),
           _buildAccountSection(context, provider),
-          const SizedBox(height: 40),
+          const SizedBox(height: 120),
         ],
       ),
     );
@@ -189,14 +186,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppColors.neutral900,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withValues(alpha: 0.15)
+                  : AppColors.neutral900,
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 _getInitials(profile),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.white,
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
                 ),
@@ -247,6 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     String limitLabel(int limit) => limit < 0 ? '\u221e' : '$limit';
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return _buildCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -255,10 +257,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Row(
               children: [
-                const Icon(
+                Icon(
                   LucideIcons.barChart3,
                   size: 20,
-                  color: AppColors.neutral900,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -272,7 +274,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.neutral900,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.15)
+                        : AppColors.neutral900,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -290,9 +294,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // Generations (videos) usage
             Text(
               'G\u00e9n\u00e9rations',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral600),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDark ? AppColors.neutral400 : AppColors.neutral600,
+              ),
             ),
             const SizedBox(height: 6),
             ClipRRect(
@@ -300,9 +304,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: LinearProgressIndicator(
                 value: videosProgress,
                 minHeight: 8,
-                backgroundColor: AppColors.neutral200,
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                  AppColors.neutral900,
+                backgroundColor: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : AppColors.neutral200,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  isDark
+                      ? Colors.white.withValues(alpha: 0.5)
+                      : AppColors.neutral900,
                 ),
               ),
             ),
@@ -318,9 +326,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // Projects (storage) usage
             Text(
               'Projets',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral600),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDark ? AppColors.neutral400 : AppColors.neutral600,
+              ),
             ),
             const SizedBox(height: 6),
             ClipRRect(
@@ -328,9 +336,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: LinearProgressIndicator(
                 value: projectsProgress,
                 minHeight: 8,
-                backgroundColor: AppColors.neutral200,
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                  AppColors.neutral900,
+                backgroundColor: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : AppColors.neutral200,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  isDark
+                      ? Colors.white.withValues(alpha: 0.5)
+                      : AppColors.neutral900,
                 ),
               ),
             ),
@@ -409,7 +421,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Row(
           children: [
-            const Icon(LucideIcons.user, size: 20, color: AppColors.neutral900),
+            Icon(
+              LucideIcons.user,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             const SizedBox(width: 8),
             Text(
               'Informations personnelles',
@@ -481,6 +497,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }) {
     final isEditing = _editingField == fieldKey;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (isEditing) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -500,9 +518,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 controller: _editController,
                 validator: validator,
                 autofocus: true,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
-                  color: AppColors.neutral900,
+                  color: isDark ? AppColors.neutral50 : AppColors.neutral900,
                 ),
                 decoration: InputDecoration(
                   isDense: true,
@@ -513,13 +531,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
-                      color: AppColors.neutral900.withValues(alpha: 0.3),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.15)
+                          : AppColors.neutral900.withValues(alpha: 0.3),
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
-                      color: AppColors.neutral900.withValues(alpha: 0.5),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.35)
+                          : AppColors.neutral900.withValues(alpha: 0.5),
                       width: 2,
                     ),
                   ),
@@ -544,10 +566,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           LucideIcons.check,
                           size: 18,
-                          color: AppColors.neutral900,
+                          color: isDark ? Colors.white : AppColors.neutral900,
                         ),
                         onPressed: () =>
                             _saveField(fieldKey, validator, onSave),
@@ -623,7 +645,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Row(
           children: [
-            const Icon(LucideIcons.lock, size: 20, color: AppColors.neutral900),
+            Icon(
+              LucideIcons.lock,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             const SizedBox(width: 8),
             Text(
               'S\u00e9curit\u00e9',
@@ -696,10 +722,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Row(
           children: [
-            const Icon(
+            Icon(
               LucideIcons.creditCard,
               size: 20,
-              color: AppColors.neutral900,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             const SizedBox(width: 8),
             Text('Paiement', style: Theme.of(context).textTheme.headlineSmall),
@@ -783,7 +809,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Row(
           children: [
-            const Icon(LucideIcons.info, size: 20, color: AppColors.neutral900),
+            Icon(
+              LucideIcons.info,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             const SizedBox(width: 8),
             Text(
               '\u00c0 propos',
@@ -795,6 +825,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildCard(
           child: Column(
             children: [
+              InkWell(
+                onTap: () => context.push(AppRoutes.onboarding),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(AppTheme.radiusMd),
+                ),
+                child: _buildSimpleRow(
+                  context,
+                  icon: LucideIcons.helpCircle,
+                  label: 'Aide — Revoir le tutoriel',
+                  trailing: const Icon(
+                    LucideIcons.chevronRight,
+                    size: 16,
+                    color: AppColors.neutral400,
+                  ),
+                ),
+              ),
+              const Divider(height: 1, color: AppColors.neutral200),
               _buildSimpleRow(
                 context,
                 icon: LucideIcons.smartphone,
@@ -862,10 +909,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Row(
           children: [
-            const Icon(
+            Icon(
               LucideIcons.settings,
               size: 20,
-              color: AppColors.neutral900,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             const SizedBox(width: 8),
             Text('Compte', style: Theme.of(context).textTheme.headlineSmall),
@@ -907,11 +954,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // -- Card helper -----------------------------------------------------------
 
   Widget _buildCard({required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.neutral100,
-        border: Border.all(color: AppColors.neutral200),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : AppColors.neutral100,
+        border: Border.all(
+          color: isDark ? AppColors.neutral700 : AppColors.neutral200,
+        ),
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       ),
       child: child,

@@ -1,5 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:visiobook_mobile/config/environment.dart';
+import 'package:visiobook_mobile/core/services/notification_service.dart';
+import 'package:visiobook_mobile/features/generation/data/ingestion_polling_service.dart';
+import 'package:visiobook_mobile/features/generation/domain/ingestion_state.dart';
 import 'package:visiobook_mobile/features/history/domain/user_file.dart';
 import 'package:visiobook_mobile/features/import/data/storage_service.dart';
 
@@ -8,13 +13,24 @@ enum TextsState { initial, loading, loaded, error }
 /// Provider pour gerer la liste des textes/fichiers de l'utilisateur
 class TextsProvider extends ChangeNotifier {
   final StorageService _storageService;
+  final IngestionPollingService? _ingestionPollingService;
 
   TextsState _state = TextsState.initial;
   List<UserFile> _files = [];
   String? _error;
 
-  TextsProvider({required StorageService storageService})
-    : _storageService = storageService;
+  // Ingestion tracking: fileId -> IngestionState
+  final Map<String, IngestionState> _ingestionStates = {};
+  final Map<String, StreamSubscription<IngestionState>>
+  _ingestionSubscriptions = {};
+  // Map fileId -> fileName for notifications
+  final Map<String, String> _ingestionFileNames = {};
+
+  TextsProvider({
+    required StorageService storageService,
+    IngestionPollingService? ingestionPollingService,
+  }) : _storageService = storageService,
+       _ingestionPollingService = ingestionPollingService;
 
   TextsState get state => _state;
   List<UserFile> get files => _files;
@@ -81,7 +97,35 @@ class TextsProvider extends ChangeNotifier {
 
     if (EnvironmentConfig.useMockData) {
       await Future.delayed(const Duration(milliseconds: 300));
-      _files = _mockFiles;
+      _files = List.from(_mockFiles);
+
+      // Simulate one file currently being ingested
+      _files.insert(
+        0,
+        UserFile(
+          id: 'file-ingesting',
+          name: 'Nouveau_document.pdf',
+          extractedText: null,
+          wordCount: null,
+          fileType: 'pdf',
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      // Start mock ingestion for this file
+      if (!_ingestionStates.containsKey('file-ingesting')) {
+        _ingestionStates['file-ingesting'] = IngestionState(
+          jobId: 'mock_job_auto',
+          status: IngestionStatus.processing,
+        );
+        _ingestionFileNames['file-ingesting'] = 'Nouveau_document.pdf';
+        _simulateMockIngestion(
+          'file-ingesting',
+          'mock_job_auto',
+          'Nouveau_document.pdf',
+        );
+      }
+
       _state = TextsState.loaded;
       notifyListeners();
       return;
@@ -107,5 +151,109 @@ class TextsProvider extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Start tracking ingestion for a file
+  void startIngestionTracking(String fileId, String jobId, String fileName) {
+    _ingestionFileNames[fileId] = fileName;
+
+    // Set initial state
+    _ingestionStates[fileId] = IngestionState(
+      jobId: jobId,
+      status: IngestionStatus.queued,
+    );
+    notifyListeners();
+
+    // Mock mode: simulate ingestion progression
+    if (EnvironmentConfig.useMockData) {
+      _simulateMockIngestion(fileId, jobId, fileName);
+      return;
+    }
+
+    if (_ingestionPollingService == null) return;
+
+    _ingestionSubscriptions[fileId]?.cancel();
+
+    final stream = _ingestionPollingService.pollIngestionStatus(jobId);
+    _ingestionSubscriptions[fileId] = stream.listen((state) {
+      _ingestionStates[fileId] = state;
+      notifyListeners();
+
+      if (state.isFinished) {
+        _ingestionSubscriptions[fileId]?.cancel();
+        _ingestionSubscriptions.remove(fileId);
+
+        final name = _ingestionFileNames[fileId] ?? 'Fichier';
+        if (state.status == IngestionStatus.completed) {
+          NotificationService.instance.showIngestionComplete(name);
+          loadFiles();
+        } else if (state.status == IngestionStatus.failed) {
+          NotificationService.instance.showIngestionFailed(name);
+        }
+        _ingestionFileNames.remove(fileId);
+      }
+    });
+  }
+
+  /// Simulates ingestion in mock mode:
+  /// - 0s: queued
+  /// - 1s: processing
+  /// - 8s: completed (with notification)
+  void _simulateMockIngestion(String fileId, String jobId, String fileName) {
+    // After 1 second: switch to processing
+    Timer(const Duration(seconds: 1), () {
+      if (_ingestionStates.containsKey(fileId)) {
+        _ingestionStates[fileId] = IngestionState(
+          jobId: jobId,
+          status: IngestionStatus.processing,
+        );
+        notifyListeners();
+      }
+    });
+
+    // After 8 seconds: switch to completed
+    Timer(const Duration(seconds: 8), () {
+      if (_ingestionStates.containsKey(fileId)) {
+        _ingestionStates[fileId] = IngestionState(
+          jobId: jobId,
+          status: IngestionStatus.completed,
+          totalChunks: 5,
+        );
+        notifyListeners();
+
+        NotificationService.instance.showIngestionComplete(fileName);
+        _ingestionFileNames.remove(fileId);
+
+        // Refresh to update the file list
+        loadFiles();
+      }
+    });
+  }
+
+  /// Get ingestion state for a file
+  IngestionState? getIngestionState(String fileId) => _ingestionStates[fileId];
+
+  /// Check if a file is currently being ingested
+  bool isIngesting(String fileId) {
+    final state = _ingestionStates[fileId];
+    return state != null && state.isInProgress;
+  }
+
+  /// Clear ingestion state for a file
+  void clearIngestionState(String fileId) {
+    _ingestionSubscriptions[fileId]?.cancel();
+    _ingestionSubscriptions.remove(fileId);
+    _ingestionStates.remove(fileId);
+    _ingestionFileNames.remove(fileId);
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    for (final sub in _ingestionSubscriptions.values) {
+      sub.cancel();
+    }
+    _ingestionSubscriptions.clear();
+    super.dispose();
   }
 }

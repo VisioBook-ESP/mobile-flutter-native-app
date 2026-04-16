@@ -5,9 +5,6 @@ enum AppButtonVariant { primary, outline }
 
 enum AppButtonSize { md, lg }
 
-/// Bouton personnalise
-/// - Forme pilule (rounded-full)
-/// - Variantes: primary (fond noir) et outline (bordure noire)
 class AppButton extends StatefulWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -38,9 +35,10 @@ class _AppButtonState extends State<AppButton> {
   @override
   Widget build(BuildContext context) {
     final isDisabled = widget.onPressed == null || widget.isLoading;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final double horizontalPadding = widget.size == AppButtonSize.lg ? 32 : 24;
-    final double verticalPadding = widget.size == AppButtonSize.lg ? 12 : 10;
+    final double verticalPadding = widget.size == AppButtonSize.lg ? 14 : 12;
     final double fontSize = widget.size == AppButtonSize.lg ? 16 : 14;
 
     Color backgroundColor;
@@ -48,21 +46,38 @@ class _AppButtonState extends State<AppButton> {
     BoxBorder? border;
 
     if (widget.variant == AppButtonVariant.primary) {
-      backgroundColor = _isPressed
-          ? AppColors.neutral900.withValues(alpha: 0.9)
-          : AppColors.neutral900;
-      textColor = Colors.white;
-      border = null;
+      if (isDark) {
+        backgroundColor = _isPressed
+            ? Colors.white.withValues(alpha: 0.18)
+            : Colors.white.withValues(alpha: 0.14);
+        textColor = Colors.white;
+        border = Border.all(color: Colors.white.withValues(alpha: 0.25));
+      } else {
+        backgroundColor = _isPressed
+            ? AppColors.neutral900.withValues(alpha: 0.85)
+            : AppColors.neutral900;
+        textColor = Colors.white;
+        border = null;
+      }
     } else {
-      backgroundColor = _isPressed
-          ? AppColors.neutral900.withValues(alpha: 0.05)
-          : Colors.transparent;
-      textColor = AppColors.neutral900;
-      border = Border.all(color: AppColors.neutral900, width: 2);
+      if (isDark) {
+        backgroundColor = _isPressed
+            ? Colors.white.withValues(alpha: 0.1)
+            : Colors.white.withValues(alpha: 0.05);
+        textColor = Colors.white.withValues(alpha: 0.9);
+        border = Border.all(color: Colors.white.withValues(alpha: 0.2));
+      } else {
+        backgroundColor = _isPressed
+            ? AppColors.neutral900.withValues(alpha: 0.05)
+            : Colors.transparent;
+        textColor = AppColors.neutral900;
+        border = Border.all(color: AppColors.neutral900, width: 2);
+      }
     }
 
     if (isDisabled) {
       backgroundColor = backgroundColor.withValues(alpha: 0.5);
+      textColor = textColor.withValues(alpha: 0.4);
     }
 
     Widget buttonContent = Row(
@@ -84,14 +99,14 @@ class _AppButtonState extends State<AppButton> {
             widget.text,
             style: TextStyle(
               fontSize: fontSize,
-              fontWeight: FontWeight.w500,
-              color: isDisabled ? textColor.withValues(alpha: 0.5) : textColor,
+              fontWeight: FontWeight.w600,
+              color: textColor,
             ),
           ),
       ],
     );
 
-    Widget button = GestureDetector(
+    return GestureDetector(
       onTapDown: isDisabled ? null : (_) => setState(() => _isPressed = true),
       onTapUp: isDisabled ? null : (_) => setState(() => _isPressed = false),
       onTapCancel: isDisabled ? null : () => setState(() => _isPressed = false),
@@ -110,7 +125,5 @@ class _AppButtonState extends State<AppButton> {
         child: Center(child: buttonContent),
       ),
     );
-
-    return button;
   }
 }

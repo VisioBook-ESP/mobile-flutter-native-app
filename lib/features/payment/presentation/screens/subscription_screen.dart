@@ -77,24 +77,29 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   Widget build(BuildContext context) {
     final paymentProvider = context.watch<PaymentProvider>();
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.neutral900),
-          onPressed: () => context.pop(),
+    return GradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              LucideIcons.arrowLeft,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () => context.pop(),
+          ),
+          title: Text(
+            'Mon abonnement',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          centerTitle: true,
         ),
-        title: Text(
-          'Mon abonnement',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        centerTitle: true,
+        body: paymentProvider.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _buildContent(context, paymentProvider),
       ),
-      body: paymentProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _buildContent(context, paymentProvider),
     );
   }
 
@@ -604,11 +609,16 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   // -- Card helper ----------------------------------------------------------
 
   Widget _buildCard({required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.neutral100,
-        border: Border.all(color: AppColors.neutral200),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : AppColors.neutral100,
+        border: Border.all(
+          color: isDark ? AppColors.neutral700 : AppColors.neutral200,
+        ),
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       ),
       child: child,

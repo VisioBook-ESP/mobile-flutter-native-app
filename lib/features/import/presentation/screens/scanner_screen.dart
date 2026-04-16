@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
+import 'package:visiobook_mobile/core/widgets/gradient_background.dart';
 import 'package:visiobook_mobile/features/import/presentation/providers/import_provider.dart';
 import 'package:visiobook_mobile/features/project_detail/presentation/providers/project_detail_provider.dart';
 
@@ -292,63 +293,74 @@ class _ScannerScreenState extends State<ScannerScreen>
   }
 
   Widget _buildPermissionDeniedScreen() {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.pop(),
+    return GradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              LucideIcons.arrowLeft,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () => context.pop(),
+          ),
+          title: Text(
+            'Scanner',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
         ),
-        title: const Text('Scanner'),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: AppColors.neutral100,
-                  borderRadius: BorderRadius.circular(20),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: AppColors.neutral100,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Icon(
+                    LucideIcons.cameraOff,
+                    size: 40,
+                    color: AppColors.neutral500,
+                  ),
                 ),
-                child: const Icon(
-                  LucideIcons.cameraOff,
-                  size: 40,
-                  color: AppColors.neutral500,
+                const SizedBox(height: 24),
+                Text(
+                  'Acces a la camera requis',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Acces a la camera requis',
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Pour scanner un document, veuillez autoriser '
-                "l'acces a la camera dans les reglages.",
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral500),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              AppButton(
-                text: 'Ouvrir les reglages',
-                fullWidth: true,
-                size: AppButtonSize.lg,
-                onPressed: () => openAppSettings(),
-              ),
-              const SizedBox(height: 12),
-              AppButton(
-                text: 'Retour',
-                variant: AppButtonVariant.outline,
-                fullWidth: true,
-                onPressed: () => context.pop(),
-              ),
-            ],
+                const SizedBox(height: 12),
+                Text(
+                  'Pour scanner un document, veuillez autoriser '
+                  "l'acces a la camera dans les reglages.",
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral500),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                AppButton(
+                  text: 'Ouvrir les reglages',
+                  fullWidth: true,
+                  size: AppButtonSize.lg,
+                  onPressed: () => openAppSettings(),
+                ),
+                const SizedBox(height: 12),
+                AppButton(
+                  text: 'Retour',
+                  variant: AppButtonVariant.outline,
+                  fullWidth: true,
+                  onPressed: () => context.pop(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -635,7 +647,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
   Widget _buildUploadingScreen() {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Center(
           child: Padding(

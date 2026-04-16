@@ -3,9 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
+import 'package:visiobook_mobile/core/widgets/gradient_background.dart';
+import 'package:visiobook_mobile/core/widgets/skeleton_loader.dart';
 import 'package:visiobook_mobile/features/player/presentation/screens/video_player_screen.dart';
 import 'package:visiobook_mobile/features/player/presentation/widgets/generation_selector_sheet.dart';
 import 'package:visiobook_mobile/features/export/presentation/providers/export_provider.dart';
+import 'package:visiobook_mobile/features/generation/presentation/providers/generation_provider.dart';
 import 'package:visiobook_mobile/features/projects/domain/project.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
@@ -133,66 +136,98 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
   @override
   Widget build(BuildContext context) {
     if (_project == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return GradientBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(
+                LucideIcons.arrowLeft,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              onPressed: () => context.pop(),
+            ),
+          ),
+          body: const SkeletonProjectView(),
+        ),
+      );
     }
 
     final project = _project!;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text('Details de la BD'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Cover container
-            _buildCoverSection(project),
-            const SizedBox(height: 24),
-
-            // Title
-            Text(
-              project.title,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+    return GradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              LucideIcons.arrowLeft,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
-            const SizedBox(height: 8),
+            onPressed: () => context.pop(),
+          ),
+          title: Text(
+            'Details de la BD',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          centerTitle: true,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Cover container
+              _buildCoverSection(project),
+              const SizedBox(height: 24),
 
-            // Metadata line: Style • cases • duration • date
-            _buildMetadataLine(project),
-            const SizedBox(height: 24),
+              // Title
+              Text(
+                project.title,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
 
-            // Visionner button (main action)
-            _buildVisionnerButton(project),
-            const SizedBox(height: 16),
+              // Metadata line: Style • cases • duration • date
+              _buildMetadataLine(project),
+              const SizedBox(height: 24),
 
-            // Action buttons row: Modifier | Partager | Telecharger
-            _buildActionButtonsRow(),
-            const SizedBox(height: 24),
+              // Visionner button (main action)
+              _buildVisionnerButton(project),
+              const SizedBox(height: 16),
 
-            // Texte source section
-            _buildSourceTextSection(project),
-          ],
+              // Action buttons row: Modifier | Partager | Telecharger
+              _buildActionButtonsRow(),
+              const SizedBox(height: 24),
+
+              // Texte source section
+              _buildSourceTextSection(project),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildCoverSection(Project project) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: AppColors.neutral100,
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : AppColors.neutral100,
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        border: Border.all(color: AppColors.neutral200),
+        border: Border.all(
+          color: isDark ? AppColors.neutral700 : AppColors.neutral200,
+        ),
       ),
       child: Center(
         child: Container(
@@ -261,14 +296,26 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
   }
 
   Widget _buildVisionnerButton(Project project) {
-    final isReady = project.status == ProjectStatus.ready;
-    final isProcessing = project.status == ProjectStatus.processing;
+    final genProvider = context.watch<GenerationProvider>();
+    final hasActiveGen = genProvider.hasActiveGeneration(project.id);
+    final isActivelyGenerating =
+        hasActiveGen && genProvider.isInProgress(project.id);
+    final generationJustFinished =
+        hasActiveGen && genProvider.isFinished(project.id);
+
+    // En cours : generation active OU status processing sans generation terminee
+    final isProcessing =
+        isActivelyGenerating ||
+        (project.status == ProjectStatus.processing && !generationJustFinished);
+    // Peut visionner : projet ready OU generation vient de finir
+    final canWatch =
+        project.status == ProjectStatus.ready || generationJustFinished;
 
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton.icon(
-        onPressed: isReady ? _onVisionner : null,
+        onPressed: canWatch ? _onVisionner : null,
         icon: isProcessing
             ? const SizedBox(
                 width: 20,
@@ -315,13 +362,18 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
   }
 
   Widget _buildSourceTextSection(Project project) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.neutral100,
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : AppColors.neutral100,
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        border: Border.all(color: AppColors.neutral200),
+        border: Border.all(
+          color: isDark ? AppColors.neutral700 : AppColors.neutral200,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,15 +410,20 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.neutral100,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : AppColors.neutral100,
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          border: Border.all(color: AppColors.neutral200),
+          border: Border.all(
+            color: isDark ? AppColors.neutral700 : AppColors.neutral200,
+          ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

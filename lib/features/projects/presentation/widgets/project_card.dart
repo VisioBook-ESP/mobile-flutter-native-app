@@ -6,8 +6,14 @@ import 'package:visiobook_mobile/features/projects/domain/project.dart';
 class ProjectCard extends StatelessWidget {
   final Project project;
   final VoidCallback? onTap;
+  final double? generationProgress;
 
-  const ProjectCard({super.key, required this.project, this.onTap});
+  const ProjectCard({
+    super.key,
+    required this.project,
+    this.onTap,
+    this.generationProgress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,58 +32,130 @@ class ProjectCard extends StatelessWidget {
             Container(
               width: cardWidth,
               height: coverHeight,
-              color: AppColors.neutral100,
-              child: project.coverUrl != null
-                  ? Image.network(
-                      project.coverUrl!,
-                      fit: BoxFit.cover,
-                      width: cardWidth,
-                      height: coverHeight,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                : null,
-                            color: AppColors.neutral400,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildPlaceholder();
-                      },
-                    )
-                  : _buildPlaceholder(),
-            ),
-            // Titre et statut
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    project.title,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
                   ),
-                  const SizedBox(height: 2),
-                  _buildStatusBadge(context),
                 ],
               ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                child: project.coverUrl != null
+                    ? Image.network(
+                        project.coverUrl!,
+                        fit: BoxFit.cover,
+                        width: cardWidth,
+                        height: coverHeight,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                  : null,
+                              color: AppColors.neutral400,
+                            ),
+                          );
+                        },
+                        errorBuilder: (ctx, error, stackTrace) {
+                          return _buildPlaceholder(context);
+                        },
+                      )
+                    : _buildPlaceholder(context),
+              ),
             ),
+            // Barre de progression + infos si generation en cours
+            if (generationProgress != null &&
+                project.status == ProjectStatus.processing)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: generationProgress!),
+                        duration: const Duration(milliseconds: 500),
+                        builder: (context, value, _) {
+                          return LinearProgressIndicator(
+                            value: value,
+                            minHeight: 4,
+                            backgroundColor: AppColors.neutral200,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              AppColors.info,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'En cours · ${(generationProgress! * 100).toInt()}%',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: 11,
+                        color: AppColors.info,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      project.title,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              )
+            else
+              // Titre et statut (pas de generation en cours)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      project.title,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    _buildStatusBadge(context),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPlaceholder() {
-    return const Center(
-      child: Icon(LucideIcons.bookOpen, size: 32, color: AppColors.neutral400),
+  Widget _buildPlaceholder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.white.withValues(alpha: 0.7),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: isDark ? 0.12 : 0.3),
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          LucideIcons.bookOpen,
+          size: 32,
+          color: isDark ? AppColors.neutral600 : AppColors.neutral400,
+        ),
+      ),
     );
   }
 

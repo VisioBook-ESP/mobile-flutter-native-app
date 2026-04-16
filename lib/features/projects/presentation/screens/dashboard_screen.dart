@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/widgets.dart';
 import 'package:visiobook_mobile/features/auth/presentation/providers/auth_provider.dart';
@@ -10,6 +9,8 @@ import 'package:visiobook_mobile/features/projects/domain/project.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 import 'package:visiobook_mobile/features/projects/presentation/widgets/project_card.dart';
 import 'package:visiobook_mobile/features/projects/presentation/widgets/stats_card.dart';
+import 'package:visiobook_mobile/config/environment.dart';
+import 'package:visiobook_mobile/features/generation/presentation/providers/generation_provider.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -19,89 +20,34 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentNavIndex = 0;
-
   @override
   void initState() {
     super.initState();
     // Charger les projets au demarrage
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProjectProvider>().loadProjects();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<ProjectProvider>().loadProjects();
+      if (!mounted) return;
+      // En mode mock, demarrer les generations pour les projets en processing
+      if (EnvironmentConfig.useMockData) {
+        final processingIds = context
+            .read<ProjectProvider>()
+            .projects
+            .where((p) => p.status == ProjectStatus.processing)
+            .map((p) => p.id)
+            .toList();
+        if (processingIds.isNotEmpty) {
+          context.read<GenerationProvider>().startMockGenerations(
+            processingIds,
+          );
+        }
+      }
     });
-  }
-
-  void _onNavTap(int index) {
-    if (index == 1) {
-      context.push(AppRoutes.textsHistory);
-      return;
-    }
-    if (index == 2) {
-      context.push(AppRoutes.visiobooksHistory);
-      return;
-    }
-    if (index == 4) {
-      context.push(AppRoutes.profile);
-      return;
-    }
-    setState(() => _currentNavIndex = index);
-  }
-
-  void _showImportModal() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.neutral300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Ajouter un texte',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 24),
-            _ModalOption(
-              icon: LucideIcons.upload,
-              title: 'Importer un fichier',
-              subtitle: 'PDF, TXT, DOCX, EPUB',
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.fileImport);
-              },
-            ),
-            const SizedBox(height: 12),
-            _ModalOption(
-              icon: LucideIcons.camera,
-              title: 'Scanner un document',
-              subtitle: 'Utilisez votre caméra',
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.scan);
-              },
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: Consumer<ProjectProvider>(
@@ -150,11 +96,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
         ),
       ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentNavIndex,
-        onTap: _onNavTap,
-        onAddTap: _showImportModal,
-      ),
     );
   }
 
@@ -170,23 +111,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildProjectsList(List<Project> projects) {
     return SizedBox(
-      height: 260,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        itemCount: projects.length,
-        itemBuilder: (context, index) {
-          final project = projects[index];
-          return Padding(
-            padding: EdgeInsets.only(
-              right: index < projects.length - 1 ? 16 : 0,
-            ),
-            child: ProjectCard(
-              project: project,
-              onTap: () {
-                context.push('/project/${project.id}');
-              },
-            ),
+      height: 280,
+      child: Consumer<GenerationProvider>(
+        builder: (context, genProvider, _) {
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            itemCount: projects.length,
+            itemBuilder: (context, index) {
+              final project = projects[index];
+              final hasGeneration = genProvider.hasActiveGeneration(project.id);
+              final progress = hasGeneration
+                  ? genProvider.getProgress(project.id)
+                  : null;
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: index < projects.length - 1 ? 16 : 0,
+                ),
+                child: ProjectCard(
+                  project: project,
+                  generationProgress: progress,
+                  onTap: () {
+                    if (hasGeneration && genProvider.isInProgress(project.id)) {
+                      final gen = genProvider.getGeneration(project.id)!;
+                      context.push(
+                        '/project/${project.id}/generate/${gen.versionId}/${gen.executionId}',
+                      );
+                    } else {
+                      // Clear la generation terminee au premier clic
+                      if (hasGeneration) {
+                        genProvider.clearGeneration(project.id);
+                      }
+                      context.push('/project/${project.id}');
+                    }
+                  },
+                ),
+              );
+            },
           );
         },
       ),
@@ -199,20 +161,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Center(
         child: Column(
           children: [
-            Icon(LucideIcons.bookOpen, size: 64, color: AppColors.neutral300),
+            Icon(
+              LucideIcons.bookOpen,
+              size: 64,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.neutral600
+                  : AppColors.neutral300,
+            ),
             const SizedBox(height: 16),
             Text(
               'Aucun projet',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(color: AppColors.neutral500),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.neutral400
+                    : AppColors.neutral500,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Importez un texte pour créer votre premier VisioBook',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral400),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.neutral500
+                    : AppColors.neutral400,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -258,58 +230,12 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      child: Text(title, style: Theme.of(context).textTheme.headlineSmall),
-    );
-  }
-}
-
-class _ModalOption extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _ModalOption({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).colorScheme.outline),
-          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.neutral100,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: AppColors.neutral900),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: Theme.of(context).textTheme.titleLarge),
-                  Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
-                ],
-              ),
-            ),
-            const Icon(LucideIcons.chevronRight, color: AppColors.neutral400),
-          ],
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.neutral400
+              : AppColors.neutral600,
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
 import 'package:visiobook_mobile/core/widgets/app_button.dart';
@@ -268,8 +269,8 @@ class _VisioBookReaderScreenState extends State<VisioBookReaderScreen> {
   }
 }
 
-/// Carte d'un panel avec placeholder ou thumbnail
-class _PanelCard extends StatelessWidget {
+/// Carte d'un panel avec video autoplay ou thumbnail fallback
+class _PanelCard extends StatefulWidget {
   final VisiobookPanel panel;
   final int index;
   final bool isActive;
@@ -279,6 +280,15 @@ class _PanelCard extends StatelessWidget {
     required this.index,
     required this.isActive,
   });
+
+  @override
+  State<_PanelCard> createState() => _PanelCardState();
+}
+
+class _PanelCardState extends State<_PanelCard> {
+  VideoPlayerController? _videoController;
+  bool _videoInitialized = false;
+  bool _videoError = false;
 
   static const _panelColors = [
     Color(0xFF1a1a2e),
@@ -296,62 +306,91 @@ class _PanelCard extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _initVideo();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PanelCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isActive != widget.isActive) {
+      _handleActiveChange();
+    }
+  }
+
+  void _initVideo() {
+    final videoUrl = widget.panel.videoUrl;
+    if (videoUrl.isEmpty) {
+      _videoError = true;
+      return;
+    }
+
+    final uri = Uri.tryParse(videoUrl);
+    if (uri == null) {
+      _videoError = true;
+      return;
+    }
+
+    _videoController = VideoPlayerController.networkUrl(uri);
+    _videoController!.setLooping(true);
+    _videoController!.setVolume(0); // Muted per spec
+    _videoController!
+        .initialize()
+        .then((_) {
+          if (mounted) {
+            setState(() => _videoInitialized = true);
+            if (widget.isActive) {
+              _videoController!.play();
+            }
+          }
+        })
+        .catchError((_) {
+          if (mounted) {
+            setState(() => _videoError = true);
+          }
+        });
+  }
+
+  void _handleActiveChange() {
+    if (_videoController == null || !_videoInitialized) return;
+    if (widget.isActive) {
+      _videoController!.seekTo(Duration.zero);
+      _videoController!.play();
+    } else {
+      _videoController!.pause();
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final color = _panelColors[index % _panelColors.length];
+    final color = _panelColors[widget.index % _panelColors.length];
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isActive
+          color: widget.isActive
               ? Colors.white.withValues(alpha: 0.3)
               : Colors.white.withValues(alpha: 0.08),
-          width: isActive ? 1 : 0.5,
+          width: widget.isActive ? 1 : 0.5,
         ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Thumbnail ou placeholder
+          // Video ou thumbnail fallback
           _buildBackground(color),
-          // Indicateur central
-          Center(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              child: isActive
-                  ? _PlayingIndicator(key: ValueKey('playing_$index'))
-                  : Icon(
-                      LucideIcons.play,
-                      key: ValueKey('paused_$index'),
-                      color: Colors.white.withValues(alpha: 0.2),
-                      size: 48,
-                    ),
-            ),
-          ),
-          // Panel ID
-          Positioned(
-            top: 8,
-            right: 8,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                panel.id,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
-                  fontSize: 9,
-                  fontFamily: 'monospace',
-                ),
-              ),
-            ),
-          ),
           // Narrator text (cartouche en haut)
-          if (panel.narratorText != null)
+          if (widget.panel.narratorText != null)
             Positioned(
               top: 8,
               left: 8,
@@ -370,7 +409,7 @@ class _PanelCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  panel.narratorText!,
+                  widget.panel.narratorText!,
                   style: const TextStyle(
                     color: Color(0xFF2C1810),
                     fontSize: 12,
@@ -383,7 +422,7 @@ class _PanelCard extends StatelessWidget {
               ),
             ),
           // Dialogue text (bulle en bas)
-          if (panel.dialogueText != null)
+          if (widget.panel.dialogueText != null)
             Positioned(
               bottom: 12,
               left: 8,
@@ -405,7 +444,7 @@ class _PanelCard extends StatelessWidget {
                   ],
                 ),
                 child: Text(
-                  panel.dialogueText!,
+                  widget.panel.dialogueText!,
                   style: const TextStyle(
                     color: Colors.black87,
                     fontSize: 13,
@@ -417,148 +456,62 @@ class _PanelCard extends StatelessWidget {
                 ),
               ),
             ),
-          // Badge "En lecture"
-          if (isActive)
-            Positioned(
-              bottom: panel.dialogueText != null ? 56 : 12,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.success.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        LucideIcons.radio,
-                        size: 12,
-                        color: AppColors.success,
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'En lecture',
-                        style: TextStyle(
-                          color: AppColors.success,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );
   }
 
   Widget _buildBackground(Color fallbackColor) {
-    // Essaye de charger la thumbnail, sinon gradient
-    return Image.network(
-      panel.thumbnailUrl,
-      fit: BoxFit.cover,
-      errorBuilder: (_, _, _) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                fallbackColor,
-                Color.lerp(fallbackColor, Colors.black, 0.3)!,
-              ],
+    // Video initialisee et pas d'erreur → afficher la video
+    if (_videoInitialized && !_videoError && _videoController != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          // Thumbnail en dessous pendant le premier frame
+          _buildThumbnail(fallbackColor),
+          // Video par dessus
+          FittedBox(
+            fit: BoxFit.cover,
+            clipBehavior: Clip.antiAlias,
+            child: SizedBox(
+              width: _videoController!.value.size.width,
+              height: _videoController!.value.size.height,
+              child: VideoPlayer(_videoController!),
             ),
           ),
-        );
-      },
+        ],
+      );
+    }
+
+    // Fallback: thumbnail ou gradient
+    return _buildThumbnail(fallbackColor);
+  }
+
+  Widget _buildThumbnail(Color fallbackColor) {
+    if (widget.panel.thumbnailUrl.isEmpty) {
+      return _buildGradient(fallbackColor);
+    }
+
+    return Image.network(
+      widget.panel.thumbnailUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => _buildGradient(fallbackColor),
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                fallbackColor,
-                Color.lerp(fallbackColor, Colors.black, 0.3)!,
-              ],
-            ),
-          ),
-          child: Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                  : null,
-              color: Colors.white.withValues(alpha: 0.3),
-              strokeWidth: 2,
-            ),
-          ),
-        );
+        return _buildGradient(fallbackColor);
       },
     );
   }
-}
 
-/// Barres animees simulant une video en lecture
-class _PlayingIndicator extends StatefulWidget {
-  const _PlayingIndicator({super.key});
-
-  @override
-  State<_PlayingIndicator> createState() => _PlayingIndicatorState();
-}
-
-class _PlayingIndicatorState extends State<_PlayingIndicator>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: List.generate(4, (i) {
-            final offset = i * 0.15;
-            final value = (_controller.value + offset) % 1.0;
-            final height = 16.0 + 24.0 * value;
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              width: 4,
-              height: height,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            );
-          }),
-        );
-      },
+  Widget _buildGradient(Color color) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color, Color.lerp(color, Colors.black, 0.3)!],
+        ),
+      ),
     );
   }
 }

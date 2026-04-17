@@ -46,6 +46,24 @@ class ApiClient {
     data: {'token': token},
   );
 
+  Future<Response> forgotPassword(String email) => _dio.post(
+    '${EnvironmentConfig.userServiceUrl}/users/forgot-password',
+    data: {'email': email},
+  );
+
+  Future<Response> resetPassword({
+    required String resetToken,
+    required String newPassword,
+    required String confirmPassword,
+  }) => _dio.post(
+    '${EnvironmentConfig.userServiceUrl}/users/reset-password',
+    data: {
+      'reset_token': resetToken,
+      'new_password': newPassword,
+      'confirm_password': confirmPassword,
+    },
+  );
+
   // Project Service
   Future<Response> getProjects() =>
       _dio.get('${EnvironmentConfig.projectServiceUrl}/projects');

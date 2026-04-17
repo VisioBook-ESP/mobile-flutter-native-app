@@ -8,22 +8,28 @@ import 'package:visiobook_mobile/core/utils/validators.dart';
 import 'package:visiobook_mobile/core/widgets/widgets.dart';
 import 'package:visiobook_mobile/features/auth/presentation/providers/auth_provider.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+class ResetPasswordScreen extends StatefulWidget {
+  const ResetPasswordScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  bool _submitted = false;
+  final _tokenController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
   bool _isLoading = false;
+  bool _success = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _tokenController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
@@ -33,15 +39,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() => _isLoading = true);
 
     final provider = context.read<AuthProvider>();
-    final success = await provider.forgotPassword(
-      email: _emailController.text.trim(),
+    final success = await provider.resetPassword(
+      resetToken: _tokenController.text.trim(),
+      newPassword: _passwordController.text,
+      confirmPassword: _confirmController.text,
     );
 
     if (!mounted) return;
 
     setState(() {
       _isLoading = false;
-      if (success) _submitted = true;
+      if (success) _success = true;
     });
 
     if (!success && provider.error != null) {
@@ -71,7 +79,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: _submitted ? _buildSuccessState() : _buildFormState(),
+            child: _success ? _buildSuccessState() : _buildFormState(),
           ),
         ),
       ),
@@ -85,28 +93,60 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         children: [
           const SizedBox(height: 48),
           Text(
-            'Mot de passe oublié',
+            'Nouveau mot de passe',
             style: Theme.of(context).textTheme.displaySmall,
           ),
           const SizedBox(height: 16),
           Text(
-            'Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.',
+            'Entrez le code reçu par email et choisissez un nouveau mot de passe.',
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
             ).textTheme.bodyLarge?.copyWith(color: AppColors.neutral500),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 32),
           AppInput(
-            label: 'Email',
-            placeholder: 'votre@email.com',
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            validator: Validators.email,
+            label: 'Code de réinitialisation',
+            placeholder: 'Collez le code reçu par email',
+            controller: _tokenController,
+            validator: Validators.required,
+          ),
+          const SizedBox(height: 16),
+          AppInput(
+            label: 'Nouveau mot de passe',
+            placeholder: '••••••••',
+            controller: _passwordController,
+            obscureText: _obscurePassword,
+            validator: Validators.password,
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
+                size: 20,
+              ),
+              onPressed: () =>
+                  setState(() => _obscurePassword = !_obscurePassword),
+            ),
+          ),
+          const SizedBox(height: 16),
+          AppInput(
+            label: 'Confirmer le mot de passe',
+            placeholder: '••••••••',
+            controller: _confirmController,
+            obscureText: _obscureConfirm,
+            validator: (value) =>
+                Validators.confirmPassword(value, _passwordController.text),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureConfirm ? LucideIcons.eyeOff : LucideIcons.eye,
+                size: 20,
+              ),
+              onPressed: () =>
+                  setState(() => _obscureConfirm = !_obscureConfirm),
+            ),
           ),
           const SizedBox(height: 32),
           AppButton(
-            text: 'Envoyer le lien',
+            text: 'Réinitialiser',
             fullWidth: true,
             size: AppButtonSize.lg,
             isLoading: _isLoading,
@@ -126,22 +166,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withValues(alpha: 0.1)
-                : AppColors.neutral100,
+            color: AppColors.success.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(40),
           ),
-          child: Icon(
-            LucideIcons.mailCheck,
+          child: const Icon(
+            LucideIcons.checkCircle,
             size: 36,
-            color: Theme.of(context).colorScheme.onSurface,
+            color: AppColors.success,
           ),
         ),
         const SizedBox(height: 32),
-        Text('Email envoyé', style: Theme.of(context).textTheme.displaySmall),
+        Text(
+          'Mot de passe modifié',
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
         const SizedBox(height: 16),
         Text(
-          'Si un compte existe avec l\'adresse ${_emailController.text.trim()}, vous recevrez un email avec les instructions pour réinitialiser votre mot de passe.',
+          'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
@@ -149,17 +190,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 48),
         AppButton(
-          text: 'Retour à la connexion',
+          text: 'Se connecter',
           fullWidth: true,
           size: AppButtonSize.lg,
-          onPressed: () => context.pop(),
-        ),
-        const SizedBox(height: 12),
-        AppButton(
-          text: 'J\'ai reçu le code',
-          variant: AppButtonVariant.outline,
-          fullWidth: true,
-          onPressed: () => context.push(AppRoutes.resetPassword),
+          onPressed: () => context.go(AppRoutes.login),
         ),
         const SizedBox(height: 48),
       ],

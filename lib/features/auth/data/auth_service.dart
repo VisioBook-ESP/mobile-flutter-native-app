@@ -123,6 +123,38 @@ class AuthService {
     }
   }
 
+  /// Demande un email de réinitialisation de mot de passe
+  Future<AuthResult> forgotPassword({required String email}) async {
+    try {
+      await _apiClient.forgotPassword(email);
+      return AuthResult(success: true);
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return AuthResult(success: false, error: 'Erreur inattendue: $e');
+    }
+  }
+
+  /// Réinitialise le mot de passe avec le token reçu par email
+  Future<AuthResult> resetPassword({
+    required String resetToken,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      await _apiClient.resetPassword(
+        resetToken: resetToken,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
+      );
+      return AuthResult(success: true);
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } catch (e) {
+      return AuthResult(success: false, error: 'Erreur inattendue: $e');
+    }
+  }
+
   /// Recupere le nom stocke localement
   Future<String?> getSavedUserName() async {
     return _storage.getUserName();

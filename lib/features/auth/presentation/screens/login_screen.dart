@@ -146,7 +146,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextButton(
                         onPressed: authProvider.isLoading
                             ? null
-                            : () => context.push(AppRoutes.forgotPassword),
+                            : () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Cette fonctionnalité arrive bientôt !',
+                                    ),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
                         child: Text(
                           'Mot de passe oublié ?',
                           style: TextStyle(

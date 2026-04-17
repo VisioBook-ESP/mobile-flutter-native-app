@@ -142,4 +142,64 @@ class AuthProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  /// Demande la réinitialisation du mot de passe
+  Future<bool> forgotPassword({required String email}) async {
+    _state = AuthState.loading;
+    _error = null;
+    notifyListeners();
+
+    if (EnvironmentConfig.useMockData) {
+      _state = AuthState.unauthenticated;
+      notifyListeners();
+      return true;
+    }
+
+    final result = await _authService.forgotPassword(email: email);
+
+    if (result.success) {
+      _state = AuthState.unauthenticated;
+      notifyListeners();
+      return true;
+    } else {
+      _state = AuthState.error;
+      _error = result.error;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Réinitialise le mot de passe
+  Future<bool> resetPassword({
+    required String resetToken,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    _state = AuthState.loading;
+    _error = null;
+    notifyListeners();
+
+    if (EnvironmentConfig.useMockData) {
+      _state = AuthState.unauthenticated;
+      notifyListeners();
+      return true;
+    }
+
+    final result = await _authService.resetPassword(
+      resetToken: resetToken,
+      newPassword: newPassword,
+      confirmPassword: confirmPassword,
+    );
+
+    if (result.success) {
+      _state = AuthState.unauthenticated;
+      notifyListeners();
+      return true;
+    } else {
+      _state = AuthState.error;
+      _error = result.error;
+      notifyListeners();
+      return false;
+    }
+  }
 }

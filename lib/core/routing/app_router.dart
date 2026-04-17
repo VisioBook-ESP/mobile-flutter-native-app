@@ -8,6 +8,7 @@ import 'package:visiobook_mobile/features/auth/presentation/screens/login_screen
 import 'package:visiobook_mobile/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:visiobook_mobile/features/auth/presentation/screens/register_screen.dart';
+import 'package:visiobook_mobile/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:visiobook_mobile/features/import/presentation/screens/file_import_screen.dart';
 import 'package:visiobook_mobile/features/import/presentation/screens/input_mode_screen.dart';
 import 'package:visiobook_mobile/features/import/presentation/screens/scanner_screen.dart';
@@ -31,6 +32,7 @@ class AppRoutes {
   static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
   static const String register = '/register';
   static const String dashboard = '/dashboard';
   static const String projectView = '/project/:id';
@@ -83,6 +85,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.resetPassword,
+        builder: (context, state) => const ResetPasswordScreen(),
       ),
       GoRoute(
         path: AppRoutes.register,
@@ -233,6 +239,7 @@ class AppRouter {
     final isOnAuth =
         state.matchedLocation == AppRoutes.login ||
         state.matchedLocation == AppRoutes.forgotPassword ||
+        state.matchedLocation == AppRoutes.resetPassword ||
         state.matchedLocation == AppRoutes.register;
 
     // Si on est sur splash ou onboarding, laisser l'ecran gerer la redirection

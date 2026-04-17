@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -239,10 +240,17 @@ class ApiClient {
   );
 }
 
-/// Intercepteur pour ajouter le token et gérer le refresh
+/// Intercepteur pour ajouter le token et gérer le refresh.
+/// Utilise un Completer pour éviter les race conditions :
+/// si plusieurs requêtes reçoivent un 401 en même temps,
+/// seule la première lance le refresh, les autres attendent.
 class _AuthInterceptor extends Interceptor {
   final SecureStorageService _storage;
   final Dio _dio;
+
+  /// Completer actif pendant un refresh en cours.
+  /// null = pas de refresh en cours.
+  Completer<String?>? _refreshCompleter;
 
   _AuthInterceptor(this._storage, this._dio);
 
@@ -286,36 +294,69 @@ class _AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
-      // Token expiré, essayer de refresh
-      final refreshToken = await _storage.getRefreshToken();
-      if (refreshToken != null) {
+      final newToken = await _refreshTokenWithLock();
+
+      if (newToken != null) {
+        // Retry la requête originale avec le nouveau token
+        err.requestOptions.headers['Authorization'] = 'Bearer $newToken';
         try {
-          final response = await _dio.post(
-            '${EnvironmentConfig.userServiceUrl}/auth/refresh',
-            data: {'refreshToken': refreshToken},
-          );
-
-          final newAccessToken = response.data['access_token'] as String?;
-          final newRefreshToken = response.data['refresh_token'] as String?;
-
-          if (newAccessToken != null) {
-            await _storage.saveAccessToken(newAccessToken);
-            if (newRefreshToken != null) {
-              await _storage.saveRefreshToken(newRefreshToken);
-            }
-
-            // Retry la requête originale avec le nouveau token
-            err.requestOptions.headers['Authorization'] =
-                'Bearer $newAccessToken';
-            final retryResponse = await _dio.fetch(err.requestOptions);
-            return handler.resolve(retryResponse);
+          final retryResponse = await _dio.fetch(err.requestOptions);
+          return handler.resolve(retryResponse);
+        } catch (retryError) {
+          // Le retry a aussi échoué
+          if (retryError is DioException) {
+            return handler.next(retryError);
           }
-        } catch (_) {
-          // Refresh échoué, supprimer les tokens
-          await _storage.clearTokens();
         }
       }
     }
     handler.next(err);
+  }
+
+  /// Refresh le token avec un lock : si un refresh est déjà en cours,
+  /// attend le résultat au lieu de lancer un second refresh.
+  Future<String?> _refreshTokenWithLock() async {
+    // Un refresh est déjà en cours → attendre son résultat
+    if (_refreshCompleter != null) {
+      return _refreshCompleter!.future;
+    }
+
+    // Premier appelant : lancer le refresh
+    _refreshCompleter = Completer<String?>();
+
+    try {
+      final refreshToken = await _storage.getRefreshToken();
+      if (refreshToken == null) {
+        _refreshCompleter!.complete(null);
+        return null;
+      }
+
+      final response = await _dio.post(
+        '${EnvironmentConfig.userServiceUrl}/auth/refresh',
+        data: {'refreshToken': refreshToken},
+      );
+
+      final newAccessToken = response.data['access_token'] as String?;
+      final newRefreshToken = response.data['refresh_token'] as String?;
+
+      if (newAccessToken != null) {
+        await _storage.saveAccessToken(newAccessToken);
+        if (newRefreshToken != null) {
+          await _storage.saveRefreshToken(newRefreshToken);
+        }
+        _refreshCompleter!.complete(newAccessToken);
+        return newAccessToken;
+      }
+
+      _refreshCompleter!.complete(null);
+      return null;
+    } catch (_) {
+      // Refresh échoué, supprimer les tokens (déconnexion)
+      await _storage.clearTokens();
+      _refreshCompleter!.complete(null);
+      return null;
+    } finally {
+      _refreshCompleter = null;
+    }
   }
 }

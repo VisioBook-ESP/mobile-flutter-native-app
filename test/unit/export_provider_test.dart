@@ -133,7 +133,7 @@ void main() {
       expect(provider.status, ExportStatus.completed);
       expect(provider.isCompleted, isTrue);
       expect(provider.downloadedFilePath, isNotNull);
-      expect(provider.downloadedFilePath, '/tmp/visiobook_project_123.mp4');
+      expect(provider.downloadedFilePath, contains('VisioBook_project_123'));
       expect(provider.downloadProgress, 1.0);
       expect(provider.error, isNull);
     });

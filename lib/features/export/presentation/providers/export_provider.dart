@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:visiobook_mobile/features/export/data/export_service.dart';
 import 'package:visiobook_mobile/features/export/domain/export_state.dart';
@@ -73,8 +74,7 @@ class ExportProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    // Build a mock save path (in real app would use path_provider)
-    final savePath = '/tmp/visiobook_$projectId.mp4';
+    final savePath = await _buildSavePath(projectId);
 
     final result = await _exportService.downloadVideo(
       projectId: projectId,
@@ -133,6 +133,19 @@ class ExportProvider extends ChangeNotifier {
     await SharePlus.instance.share(
       ShareParams(text: 'Decouvre mon VisioBook "$title" !\n$link'),
     );
+  }
+
+  /// Construit le chemin de sauvegarde selon la plateforme
+  Future<String> _buildSavePath(String projectId) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final fileName = 'VisioBook_${projectId}_$timestamp.mp4';
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      return '${dir.path}/$fileName';
+    } catch (_) {
+      // Fallback (tests ou plateforme non supportee)
+      return '/tmp/$fileName';
+    }
   }
 
   /// Reset

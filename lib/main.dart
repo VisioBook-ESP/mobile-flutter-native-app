@@ -27,6 +27,7 @@ import 'package:visiobook_mobile/features/projects/data/project_service.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
 import 'package:visiobook_mobile/core/services/notification_service.dart';
+import 'package:visiobook_mobile/core/services/settings_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -122,14 +123,20 @@ class VisioBookApp extends StatelessWidget {
             paymentService: PaymentService(apiClient: apiClient),
           ),
         ),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
-      child: MaterialApp.router(
-        title: 'VisioBook',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        routerConfig: appRouter.router,
+      child: Builder(
+        builder: (context) {
+          final settings = context.watch<SettingsProvider>();
+          return MaterialApp.router(
+            title: 'VisioBook',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: settings.themeMode,
+            routerConfig: appRouter.router,
+          );
+        },
       ),
     );
   }

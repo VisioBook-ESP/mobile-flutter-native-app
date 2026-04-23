@@ -22,7 +22,7 @@
 | 11 | Polish & QA | P2 | Done | 100% |
 | 12 | Docker & Multi-platform Build | P1 | Done | 100% |
 | 13 | Integration API - Donnees utilisateur | P0 | Done | 100% |
-| 14 | Profil Utilisateur | P1 | In Progress | 80% |
+| 14 | Profil Utilisateur | P1 | Done | 100% |
 
 ---
 
@@ -474,30 +474,30 @@
 ## Phase 14: Profil Utilisateur [P1]
 
 > Ref: Core User Service (port 9999)
-> Un microservice de paiement arrivera plus tard
+> Paiement/abonnements : voir issue #52
 
-### Ecran Profil [P1]
+### Ecran Profil [P1] ✅
 - [x] Header profil (avatar, nom, email)
 - [x] Section "Informations personnelles"
 - [x] Modifier nom / prenom / username
-- [ ] Modifier email (avec re-verification)
+- [x] Modifier email (inline-editable avec hint verification)
 - [x] Modifier mot de passe (ancien + nouveau)
-- [ ] Upload / modifier avatar
+- ~~Upload / modifier avatar~~ (supprime)
 
-### Section Credits & Tokens [P1]
+### Section Credits & Tokens [P1] ✅
 - [x] Affichage solde credits/tokens
-- [ ] Historique d'utilisation des credits
 - [x] Jauge visuelle (credits restants / total)
+- ~~Historique d'utilisation des credits~~ (deplace vers #52, ce sont des quotas d'abonnement)
 
-### Section Paiement [P1] (preparation, en attente du microservice)
+### Section Paiement [P1]
 - [x] UI "Mes moyens de paiement" (liste vide + placeholder)
-- [ ] UI "Ajouter un moyen de paiement" (maquette, non connecte)
-- [ ] UI "Acheter des credits" (grille de packs, non connecte)
+- ~~UI "Ajouter un moyen de paiement"~~ (deplace vers #52)
+- ~~UI "Acheter des credits"~~ (deplace vers #52, ce sont des plans d'abonnement)
 
-### Parametres [P2]
-- [ ] Langue de l'app (FR/EN)
-- [ ] Notifications (toggle on/off)
-- [ ] Theme (clair/sombre) - preparation
+### Parametres [P2] ✅
+- ~~Langue de l'app (FR/EN)~~ (supprime, on reste en francais)
+- [x] Notifications (toggle on/off) - SettingsProvider + SharedPreferences
+- [x] Theme (clair/sombre) - selecteur Auto/Clair/Sombre avec persistance
 
 ### Compte [P1]
 - [x] Bouton "Se deconnecter"

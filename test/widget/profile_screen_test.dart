@@ -11,6 +11,7 @@ import 'package:visiobook_mobile/features/payment/presentation/providers/payment
 import 'package:visiobook_mobile/features/profile/data/profile_service.dart';
 import 'package:visiobook_mobile/features/profile/presentation/providers/profile_provider.dart';
 import 'package:visiobook_mobile/features/profile/presentation/screens/profile_screen.dart';
+import 'package:visiobook_mobile/core/services/settings_provider.dart';
 
 class _FakeStorage implements SecureStorageService {
   @override
@@ -64,6 +65,9 @@ void main() {
         ),
         ChangeNotifierProvider<AuthProvider>(
           create: (_) => AuthProvider(authService: authService),
+        ),
+        ChangeNotifierProvider<SettingsProvider>(
+          create: (_) => SettingsProvider(),
         ),
       ],
       child: const MaterialApp(home: ProfileScreen()),

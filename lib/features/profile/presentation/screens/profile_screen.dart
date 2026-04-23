@@ -10,6 +10,7 @@ import 'package:visiobook_mobile/features/auth/presentation/providers/auth_provi
 import 'package:visiobook_mobile/features/payment/presentation/providers/payment_provider.dart';
 import 'package:visiobook_mobile/features/profile/domain/user_profile.dart';
 import 'package:visiobook_mobile/features/profile/presentation/providers/profile_provider.dart';
+import 'package:visiobook_mobile/core/services/settings_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -167,6 +168,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildPaymentSection(context, paymentProvider),
           const SizedBox(height: 24),
           _buildAboutSection(context),
+          const SizedBox(height: 24),
+          _buildSettingsSection(context),
           const SizedBox(height: 24),
           _buildAccountSection(context, provider),
           const SizedBox(height: 120),
@@ -898,6 +901,163 @@ class _ProfileScreenState extends State<ProfileScreen> {
           trailing,
         ],
       ),
+    );
+  }
+
+  // -- Settings --------------------------------------------------------------
+
+  Widget _buildSettingsSection(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              LucideIcons.sliders,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Param\u00e8tres',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildCard(
+          child: Column(
+            children: [
+              // Notifications toggle
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      LucideIcons.bell,
+                      size: 20,
+                      color: isDark
+                          ? AppColors.neutral400
+                          : AppColors.neutral500,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Notifications',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                    Switch.adaptive(
+                      value: settings.notificationsEnabled,
+                      activeTrackColor: AppColors.info,
+                      onChanged: (value) => settings.toggleNotifications(value),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.neutral700 : AppColors.neutral200,
+              ),
+              // Theme selector
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isDark ? LucideIcons.moon : LucideIcons.sun,
+                      size: 20,
+                      color: isDark
+                          ? AppColors.neutral400
+                          : AppColors.neutral500,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Th\u00e8me',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                    _buildThemeSelector(context, settings),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildThemeSelector(BuildContext context, SettingsProvider settings) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Widget chip(String label, ThemeMode mode, IconData icon) {
+      final selected = settings.themeMode == mode;
+      return GestureDetector(
+        onTap: () => settings.setThemeMode(mode),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.info.withValues(alpha: 0.15)
+                : isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : AppColors.neutral100,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: selected ? AppColors.info : Colors.transparent,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: selected
+                    ? AppColors.info
+                    : isDark
+                    ? AppColors.neutral400
+                    : AppColors.neutral500,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                  color: selected
+                      ? AppColors.info
+                      : isDark
+                      ? AppColors.neutral400
+                      : AppColors.neutral500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        chip('Auto', ThemeMode.system, LucideIcons.smartphone),
+        const SizedBox(width: 6),
+        chip('Clair', ThemeMode.light, LucideIcons.sun),
+        const SizedBox(width: 6),
+        chip('Sombre', ThemeMode.dark, LucideIcons.moon),
+      ],
     );
   }
 

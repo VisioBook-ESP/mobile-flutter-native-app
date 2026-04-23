@@ -21,7 +21,7 @@
 | 10 | Historique | P1 | Done | 100% |
 | 11 | Polish & QA | P2 | Done | 100% |
 | 12 | Docker & Multi-platform Build | P1 | Done | 100% |
-| 13 | Integration API - Donnees utilisateur | P0 | In Progress | 75% |
+| 13 | Integration API - Donnees utilisateur | P0 | Done | 100% |
 | 14 | Profil Utilisateur | P1 | In Progress | 80% |
 
 ---
@@ -445,25 +445,25 @@
 ### 13.4 - Export & Partage [P0] ✅
 - [x] `ExportService.downloadVideo()` : utiliser `ApiClient.getDownloadUrl()` puis download
 - [x] `ExportService.generateShareLink()` : utiliser `_apiClient.shareProject()`
-- [ ] Verifier que le `videoId` pour le download vient bien des donnees du projet/workflow
+- [x] Verifier que le `videoId` pour le download vient bien des donnees du projet/workflow
 
 ### 13.5 - Auth : champs manquants [P1] ✅
 - [x] Login : stocker le `refresh_token` retourne
 - [x] Stocker et exposer `firstName`/`userName` depuis la reponse login
 - [x] `AuthProvider.checkAuthStatus()` : recharger le nom user depuis le storage
 
-### 13.6 - VisioBook Reader : deserialisation [P0]
-- [ ] Verifier que `VisiobookData.fromJson()` correspond au format reel
-- [ ] Gerer le cas ou le backend retourne un wrapper
-- [ ] `VisiobookPanel.fromJson()` : gerer les types numeriques flexibles
+### 13.6 - VisioBook Reader : deserialisation [P0] ✅
+- [x] Verifier que `VisiobookData.fromJson()` correspond au format reel
+- [x] Gerer le cas ou le backend retourne un wrapper
+- [x] `VisiobookPanel.fromJson()` : gerer les types numeriques flexibles
 
-### 13.7 - Environment & Routing [P1]
+### 13.7 - Environment & Routing [P1] ✅
 - [x] Ajouter `ingestionServiceUrl` dans `EnvironmentConfig`
-- [ ] Verifier les URLs/ports quand les services seront deployes
+- [x] Verifier les URLs/ports quand les services seront deployes
 
-### 13.8 - Tests [P0]
-- [ ] Tests unitaires pour les nouveaux champs
-- [ ] Test d'integration du flux complet
+### 13.8 - Tests [P0] ✅
+- [x] Tests unitaires pour les nouveaux champs
+- [x] Test d'integration du flux complet
 
 ### 13.9 - Documentation API [P1] ✅
 - [x] Recuperer les specs API depuis docs-architecture

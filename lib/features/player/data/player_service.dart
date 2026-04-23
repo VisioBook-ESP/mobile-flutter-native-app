@@ -27,9 +27,30 @@ class PlayerService {
     }
 
     try {
-      final response = await _apiClient.getVisioBook(projectId);
-      final data = VisiobookData.fromJson(
-        response.data as Map<String, dynamic>,
+      // Essayer d'abord l'endpoint /visiobook dédié
+      try {
+        final response = await _apiClient.getVisioBook(projectId);
+        final data = VisiobookData.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+        return PlayerResult(success: true, data: data);
+      } on DioException catch (e) {
+        // Si 404, fallback sur les scènes du projet
+        if (e.response?.statusCode != 404) rethrow;
+      }
+
+      // Fallback : construire depuis les scènes + données projet
+      final projectResponse = await _apiClient.getProject(projectId);
+      final scenesResponse = await _apiClient.getScenes(projectId);
+      final projectData = projectResponse.data as Map<String, dynamic>;
+      final scenesData = scenesResponse.data;
+      final scenes = scenesData is List
+          ? scenesData
+          : (scenesData is Map ? scenesData['items'] as List? ?? [] : []);
+
+      final data = VisiobookData.fromScenesResponse(
+        projectJson: projectData,
+        scenes: scenes,
       );
       return PlayerResult(success: true, data: data);
     } on DioException catch (e) {

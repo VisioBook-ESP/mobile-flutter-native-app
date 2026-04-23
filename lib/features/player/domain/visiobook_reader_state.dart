@@ -38,6 +38,42 @@ class VisiobookPanel {
           0,
     );
   }
+
+  /// Crée un panel depuis une scène du backend (core-project-service).
+  /// Format scène: { id, order, text, description, generatedImageUrl,
+  ///   duration, narrationText, dialogues: [{ speaker, line }] }
+  factory VisiobookPanel.fromScene(Map<String, dynamic> scene) {
+    // Construire le texte des dialogues
+    final dialogues = scene['dialogues'] as List?;
+    String? dialogueText;
+    if (dialogues != null && dialogues.isNotEmpty) {
+      dialogueText = dialogues
+          .map((d) {
+            final speaker = d['speaker'] as String? ?? '';
+            final line = d['line'] as String? ?? '';
+            return speaker.isNotEmpty ? '$speaker : $line' : line;
+          })
+          .join('\n');
+    }
+
+    final durationSec = (scene['duration'] as num?)?.toDouble() ?? 5.0;
+
+    return VisiobookPanel(
+      id: scene['id'] as String? ?? '',
+      order: (scene['order'] as num?)?.toInt() ?? 0,
+      videoUrl: scene['animationUrl'] as String? ?? '',
+      thumbnailUrl:
+          scene['generatedImageUrl'] as String? ??
+          scene['generated_image_url'] as String? ??
+          '',
+      dialogueText: dialogueText,
+      narratorText:
+          scene['narrationText'] as String? ??
+          scene['narration_text'] as String? ??
+          scene['description'] as String?,
+      videoDurationMs: (durationSec * 1000).toInt(),
+    );
+  }
 }
 
 /// Une page du VisioBook (contient plusieurs panels)
@@ -105,6 +141,57 @@ class VisiobookData {
   }
 
   int get totalPanels => allPanels.length;
+
+  /// Construit un VisiobookData à partir des scènes du backend.
+  /// [projectJson] : réponse GET /projects/:id (titre, config, etc.)
+  /// [scenes] : réponse GET /projects/:id/content/scenes (liste de scènes)
+  /// Chaque scène devient un panel, groupées en pages de [scenesPerPage].
+  factory VisiobookData.fromScenesResponse({
+    required Map<String, dynamic> projectJson,
+    required List<dynamic> scenes,
+    int scenesPerPage = 4,
+  }) {
+    // Trier les scènes par order
+    final sortedScenes =
+        List<Map<String, dynamic>>.from(
+          scenes.map((s) => s as Map<String, dynamic>),
+        )..sort(
+          (a, b) =>
+              ((a['order'] as num?) ?? 0).compareTo((b['order'] as num?) ?? 0),
+        );
+
+    // Grouper en pages
+    final pages = <VisiobookPage>[];
+    for (var i = 0; i < sortedScenes.length; i += scenesPerPage) {
+      final end = (i + scenesPerPage > sortedScenes.length)
+          ? sortedScenes.length
+          : i + scenesPerPage;
+      final pageScenes = sortedScenes.sublist(i, end);
+      pages.add(
+        VisiobookPage(
+          pageNumber: (i ~/ scenesPerPage) + 1,
+          panels: pageScenes.map((s) => VisiobookPanel.fromScene(s)).toList(),
+        ),
+      );
+    }
+
+    final config = projectJson['config'] as Map<String, dynamic>? ?? {};
+
+    return VisiobookData(
+      projectId: projectJson['id'] as String? ?? '',
+      title: projectJson['title'] as String? ?? 'Sans titre',
+      pages: pages,
+      coverUrl: pages.isNotEmpty && pages.first.panels.isNotEmpty
+          ? pages.first.panels.first.thumbnailUrl
+          : null,
+      totalPages: pages.length,
+      style: config['style'] as String?,
+      language: config['language'] as String?,
+      createdAt:
+          DateTime.tryParse(projectJson['createdAt'] as String? ?? '') ??
+          DateTime.now(),
+    );
+  }
 
   factory VisiobookData.fromJson(Map<String, dynamic> json) {
     // Handle wrapper: { "data": { ... } }

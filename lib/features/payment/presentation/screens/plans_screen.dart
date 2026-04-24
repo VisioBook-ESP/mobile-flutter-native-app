@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +28,7 @@ class _PlansScreenState extends State<PlansScreen> {
   }
 
   /// Order of plans for comparison: free < pro < enterprise
-  static const _planOrder = ['free', 'pro', 'enterprise'];
+  static const _planOrder = ['free', 'premium', 'enterprise'];
 
   int _planIndex(String planId) {
     final idx = _planOrder.indexOf(planId);
@@ -209,7 +211,7 @@ class _PlansScreenState extends State<PlansScreen> {
   ) {
     final isCurrent = _isCurrentPlan(plan.id, currentPlanId);
     final isDowngrade = _isDowngrade(plan.id, currentPlanId);
-    final isRecommended = plan.id == 'pro';
+    final isRecommended = plan.id == 'premium';
     final savings = _savingsPercent(plan);
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -440,7 +442,7 @@ class _PlansScreenState extends State<PlansScreen> {
     switch (planId) {
       case 'free':
         return LucideIcons.user;
-      case 'pro':
+      case 'premium':
         return LucideIcons.crown;
       case 'enterprise':
         return LucideIcons.sparkles;
@@ -508,16 +510,72 @@ class _PlansScreenState extends State<PlansScreen> {
   ) async {
     final interval = _isYearly ? 'year' : 'month';
 
-    // For now, show a SnackBar since the Stripe backend isn't ready
-    await provider.createPaymentIntent(planId: plan.id, interval: interval);
+    final result = await provider.createPaymentIntent(
+      planId: plan.id,
+      interval: interval,
+    );
 
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Paiement Stripe \u00e0 venir'),
-          behavior: SnackBarBehavior.floating,
+    if (result == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              provider.error ?? 'Erreur lors de la cr\u00e9ation du paiement',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    try {
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: result['clientSecret']!,
+          customerId: result['customerId'],
+          customerEphemeralKeySecret: result['ephemeralKey'],
+          merchantDisplayName: 'VisioBook',
         ),
       );
+
+      await Stripe.instance.presentPaymentSheet();
+
+      // Attendre que le webhook Stripe traite le paiement
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Paiement réussi → recharger les données
+      await provider.loadAll();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Abonnement activ\u00e9 avec succ\u00e8s !'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        context.pop();
+      }
+    } on StripeException catch (e) {
+      if (context.mounted) {
+        final message = e.error.localizedMessage ?? 'Paiement annul\u00e9';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+        );
+      }
+    } on MissingPluginException {
+      // flutter_stripe n'a pas d'implémentation desktop
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Le paiement Stripe n\u2019est disponible que sur mobile '
+              '(iOS / Android).',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 

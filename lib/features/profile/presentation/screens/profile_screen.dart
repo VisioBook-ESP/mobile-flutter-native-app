@@ -165,8 +165,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 24),
           _buildSecuritySection(context, provider),
           const SizedBox(height: 24),
-          _buildPaymentSection(context, paymentProvider),
-          const SizedBox(height: 24),
           _buildAboutSection(context),
           const SizedBox(height: 24),
           _buildSettingsSection(context),
@@ -241,15 +239,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final currentPlan = paymentProvider.currentPlan;
     final planName = currentPlan?.name ?? 'Free';
 
-    final projectsProgress = quota?.projectsUsagePercent.clamp(0.0, 1.0) ?? 0.0;
-    final videosProgress = quota?.videosUsagePercent.clamp(0.0, 1.0) ?? 0.0;
+    final generationsProgress =
+        quota?.generationsUsagePercent.clamp(0.0, 1.0) ?? 0.0;
+    final storageProgress = quota?.storageUsagePercent.clamp(0.0, 1.0) ?? 0.0;
 
-    final projectsUsed = quota?.projectsUsed ?? 0;
-    final projectsLimit = quota?.projectsLimit ?? 0;
-    final videosUsed = quota?.videosUsed ?? 0;
-    final videosLimit = quota?.videosLimit ?? 0;
+    final generationsUsed = quota?.generationsUsed ?? 0;
+    final generationsLimit = quota?.generationsLimit ?? 0;
+    final storageUsed = quota?.storageUsedGB ?? 0.0;
+    final storageLimit = quota?.storageLimitGB ?? 0.0;
 
-    String limitLabel(int limit) => limit < 0 ? '\u221e' : '$limit';
+    String intLimitLabel(int limit) => limit < 0 ? '\u221e' : '$limit';
+    String storageLimitLabel(double limit) =>
+        limit <= 0 ? '\u221e' : '${limit.toStringAsFixed(0)} Go';
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return _buildCard(
@@ -305,7 +306,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: videosProgress,
+                value: generationsProgress,
                 minHeight: 8,
                 backgroundColor: isDark
                     ? Colors.white.withValues(alpha: 0.1)
@@ -321,14 +322,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                '$videosUsed / ${limitLabel(videosLimit)}',
+                '$generationsUsed / ${intLimitLabel(generationsLimit)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
             const SizedBox(height: 16),
-            // Projects (storage) usage
+            // Storage usage
             Text(
-              'Projets',
+              'Stockage',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: isDark ? AppColors.neutral400 : AppColors.neutral600,
               ),
@@ -337,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: projectsProgress,
+                value: storageProgress,
                 minHeight: 8,
                 backgroundColor: isDark
                     ? Colors.white.withValues(alpha: 0.1)
@@ -353,7 +354,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                '$projectsUsed / ${limitLabel(projectsLimit)}',
+                '${storageUsed.toStringAsFixed(1)} Go / ${storageLimitLabel(storageLimit)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
@@ -361,14 +362,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             AppButton(
               text: 'Changer de plan',
               fullWidth: true,
-              onPressed: () => context.push(AppRoutes.plans),
-            ),
-            const SizedBox(height: 8),
-            AppButton(
-              text: 'G\u00e9rer mon abonnement',
-              variant: AppButtonVariant.outline,
-              fullWidth: true,
-              onPressed: () => context.push(AppRoutes.subscription),
+              onPressed: () async {
+                final provider = context.read<PaymentProvider>();
+                await context.push(AppRoutes.plans);
+                if (mounted) {
+                  provider.loadAll();
+                }
+              },
             ),
           ],
         ),
@@ -688,115 +688,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // -- Payment ---------------------------------------------------------------
-
-  Widget _buildPaymentSection(
-    BuildContext context,
-    PaymentProvider paymentProvider,
-  ) {
-    final subscription = paymentProvider.subscription;
-    final currentPlan = paymentProvider.currentPlan;
-    final planName = currentPlan?.name ?? 'Free';
-    final isActive = subscription?.isActive ?? false;
-    final isCanceled = subscription?.isCanceled ?? false;
-
-    String statusLabel;
-    Color statusColor;
-    if (isCanceled) {
-      statusLabel = 'Annul\u00e9';
-      statusColor = AppColors.error;
-    } else if (isActive) {
-      statusLabel = 'Actif';
-      statusColor = const Color(0xFF16A34A);
-    } else {
-      statusLabel = 'Gratuit';
-      statusColor = AppColors.neutral500;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              LucideIcons.creditCard,
-              size: 20,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            const SizedBox(width: 8),
-            Text('Paiement', style: Theme.of(context).textTheme.headlineSmall),
-          ],
-        ),
-        const SizedBox(height: 12),
-        _buildCard(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Plan $planName',
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: statusColor,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                statusLabel,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: statusColor),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                if (subscription?.currentPeriodEnd != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    isCanceled
-                        ? 'Acc\u00e8s jusqu\'au ${_formatDate(subscription!.currentPeriodEnd!)}'
-                        : 'Renouvellement le ${_formatDate(subscription!.currentPeriodEnd!)}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.neutral500,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                Center(
-                  child: AppButton(
-                    text: 'G\u00e9rer mon abonnement',
-                    variant: AppButtonVariant.outline,
-                    fullWidth: true,
-                    onPressed: () => context.push(AppRoutes.subscription),
-                  ),
-                ),
-              ],
             ),
           ),
         ),

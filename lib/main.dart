@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
+import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/core/network/api_client.dart';
 import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
@@ -32,6 +34,12 @@ import 'package:visiobook_mobile/core/services/settings_provider.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   NotificationService.instance.init();
+
+  // Configurer Stripe avec la clé publishable
+  final stripeKey = EnvironmentConfig.stripePublishableKey;
+  if (stripeKey.isNotEmpty) {
+    Stripe.publishableKey = stripeKey;
+  }
 
   // Style de la barre de statut
   SystemChrome.setSystemUIOverlayStyle(

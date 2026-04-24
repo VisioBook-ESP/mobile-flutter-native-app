@@ -115,23 +115,22 @@ void main() {
       expect(provider.error, isNull);
     });
 
-    test('plans contain free, pro and enterprise', () async {
+    test('plans contain free, premium and enterprise', () async {
       await provider.loadAll();
 
       final planIds = provider.plans.map((p) => p.id).toList();
       expect(planIds, contains('free'));
-      expect(planIds, contains('pro'));
+      expect(planIds, contains('premium'));
       expect(planIds, contains('enterprise'));
     });
 
     test('quota is default free', () async {
       await provider.loadAll();
 
-      expect(provider.quota!.projectsLimit, 2);
-      expect(provider.quota!.videosLimit, 3);
-      expect(provider.quota!.maxVideoLength, 60);
-      expect(provider.quota!.projectsUsed, 0);
-      expect(provider.quota!.videosUsed, 0);
+      expect(provider.quota!.generationsLimit, 3);
+      expect(provider.quota!.storageLimitGB, 1);
+      expect(provider.quota!.generationsUsed, 0);
+      expect(provider.quota!.storageUsedGB, 0);
     });
 
     test('canGenerate is true with default free quota', () async {
@@ -164,7 +163,7 @@ void main() {
       await provider.loadQuota();
 
       expect(provider.quota, isNotNull);
-      expect(provider.quota!.projectsLimit, 2);
+      expect(provider.quota!.generationsLimit, 3);
     });
   });
 
@@ -191,16 +190,15 @@ void main() {
       await provider.loadQuota();
 
       expect(provider.quota, isNotNull);
-      expect(provider.quota!.projectsLimit, 2);
-      expect(provider.quota!.videosLimit, 3);
-      expect(provider.quota!.maxVideoLength, 60);
+      expect(provider.quota!.generationsLimit, 3);
+      expect(provider.quota!.storageLimitGB, 1);
     });
 
     test('loadQuota sets correct usage defaults', () async {
       await provider.loadQuota();
 
-      expect(provider.quota!.projectsUsed, 0);
-      expect(provider.quota!.videosUsed, 0);
+      expect(provider.quota!.generationsUsed, 0);
+      expect(provider.quota!.storageUsedGB, 0);
     });
   });
 

@@ -5,6 +5,16 @@
 	docker-apk docker-apk-debug docker-aab docker-test docker-clean \
 	build-ios-release export-ipa
 
+# Charger les variables depuis .env si le fichier existe
+-include .env
+export
+
+# Construire les --dart-define flags depuis les variables .env
+DART_DEFINES :=
+ifdef STRIPE_PUBLISHABLE_KEY
+  DART_DEFINES += --dart-define=STRIPE_PUBLISHABLE_KEY=$(STRIPE_PUBLISHABLE_KEY)
+endif
+
 # Affiche l'aide
 help:
 	@echo "Commandes disponibles:"
@@ -50,31 +60,31 @@ test-cov:
 
 # Build APK Android (release)
 build-apk:
-	flutter build apk --release
+	flutter build apk --release $(DART_DEFINES)
 
 # Build APK Android (debug)
 build-apk-debug:
-	flutter build apk --debug
+	flutter build apk --debug $(DART_DEFINES)
 
 # Build iOS
 build-ios:
-	flutter build ios --release --no-codesign
+	flutter build ios --release --no-codesign $(DART_DEFINES)
 
 # Lance sur Android
 run-android:
-	flutter run -d android
+	flutter run -d android $(DART_DEFINES)
 
 # Lance sur iOS
 run-ios:
-	flutter run -d ios
+	flutter run -d ios $(DART_DEFINES)
 
 # Lance sur macOS
 run-macos:
-	flutter run -d macos
+	flutter run -d macos $(DART_DEFINES)
 
 # Lance sur Web
 run-web:
-	flutter run -d chrome
+	flutter run -d chrome $(DART_DEFINES)
 
 # Check complet (format + analyze + test)
 check: format analyze test

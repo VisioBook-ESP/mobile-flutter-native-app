@@ -236,7 +236,7 @@ class _ExportShareSheetState extends State<ExportShareSheet> {
       selected: isSelected,
       onSelected: (_) => provider.setQuality(quality),
       selectedColor: AppColors.neutral900,
-      backgroundColor: AppColors.neutral100,
+      backgroundColor: Colors.white.withValues(alpha: 0.7),
       labelStyle: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w500,

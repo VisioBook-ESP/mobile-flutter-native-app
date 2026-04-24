@@ -140,12 +140,19 @@ class _TextDetailScreenState extends State<TextDetailScreen> {
                           decoration: BoxDecoration(
                             color: isDark
                                 ? Colors.white.withValues(alpha: 0.15)
-                                : AppColors.neutral900,
+                                : AppColors.neutral900.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(10),
+                            border: isDark
+                                ? null
+                                : Border.all(
+                                    color: AppColors.neutral900.withValues(
+                                      alpha: 0.12,
+                                    ),
+                                  ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             LucideIcons.fileText,
-                            color: Colors.white,
+                            color: isDark ? Colors.white : AppColors.neutral900,
                             size: 20,
                           ),
                         ),

@@ -286,10 +286,13 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
           color: isSelected
               ? (isDark
                     ? Colors.white.withValues(alpha: 0.15)
-                    : AppColors.neutral900)
+                    : AppColors.neutral900.withValues(alpha: 0.08))
               : (isDark
                     ? Colors.white.withValues(alpha: 0.08)
                     : AppColors.neutral100),
+          border: isSelected && !isDark
+              ? Border.all(color: AppColors.neutral900.withValues(alpha: 0.15))
+              : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusXl),
         ),
         child: Text(
@@ -298,7 +301,7 @@ class _VisiobooksHistoryScreenState extends State<VisiobooksHistoryScreen> {
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: isSelected
-                ? Colors.white
+                ? (isDark ? Colors.white : AppColors.neutral900)
                 : (isDark ? AppColors.neutral300 : AppColors.neutral600),
           ),
         ),
@@ -517,7 +520,7 @@ class _VisioBookCard extends StatelessWidget {
         return Container(
           color: isDark
               ? Colors.white.withValues(alpha: 0.08)
-              : AppColors.neutral100,
+              : Colors.white.withValues(alpha: 0.7),
           child: Center(
             child: Icon(
               LucideIcons.playCircle,

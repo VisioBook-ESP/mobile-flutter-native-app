@@ -130,7 +130,7 @@ class _PlansScreenState extends State<PlansScreen> {
       decoration: BoxDecoration(
         color: isDark
             ? Colors.white.withValues(alpha: 0.08)
-            : AppColors.neutral100,
+            : Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(100),
         border: Border.all(
           color: isDark ? AppColors.neutral700 : AppColors.neutral200,
@@ -148,7 +148,7 @@ class _PlansScreenState extends State<PlansScreen> {
                   color: !_isYearly
                       ? (isDark
                             ? Colors.white.withValues(alpha: 0.15)
-                            : AppColors.neutral900)
+                            : AppColors.neutral900.withValues(alpha: 0.08))
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(100),
                 ),
@@ -159,7 +159,7 @@ class _PlansScreenState extends State<PlansScreen> {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: !_isYearly
-                          ? (isDark ? Colors.white : Colors.white)
+                          ? (isDark ? Colors.white : AppColors.neutral900)
                           : AppColors.neutral500,
                     ),
                   ),
@@ -177,7 +177,7 @@ class _PlansScreenState extends State<PlansScreen> {
                   color: _isYearly
                       ? (isDark
                             ? Colors.white.withValues(alpha: 0.15)
-                            : AppColors.neutral900)
+                            : AppColors.neutral900.withValues(alpha: 0.08))
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(100),
                 ),
@@ -188,7 +188,7 @@ class _PlansScreenState extends State<PlansScreen> {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: _isYearly
-                          ? (isDark ? Colors.white : Colors.white)
+                          ? (isDark ? Colors.white : AppColors.neutral900)
                           : AppColors.neutral500,
                     ),
                   ),
@@ -221,7 +221,7 @@ class _PlansScreenState extends State<PlansScreen> {
         color: isRecommended
             ? (isDark
                   ? Colors.white.withValues(alpha: 0.1)
-                  : AppColors.neutral900)
+                  : AppColors.neutral900.withValues(alpha: 0.06))
             : (isDark
                   ? Colors.white.withValues(alpha: 0.05)
                   : AppColors.neutral100),
@@ -229,7 +229,7 @@ class _PlansScreenState extends State<PlansScreen> {
           color: isRecommended
               ? (isDark
                     ? Colors.white.withValues(alpha: 0.25)
-                    : AppColors.neutral900)
+                    : AppColors.neutral900.withValues(alpha: 0.2))
               : (isDark ? AppColors.neutral700 : AppColors.neutral200),
           width: isRecommended ? 2 : 1,
         ),
@@ -249,9 +249,7 @@ class _PlansScreenState extends State<PlansScreen> {
                     Icon(
                       _planIcon(plan.id),
                       size: 20,
-                      color: isRecommended
-                          ? Colors.white
-                          : Theme.of(context).colorScheme.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -259,9 +257,7 @@ class _PlansScreenState extends State<PlansScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: isRecommended
-                            ? Colors.white
-                            : Theme.of(context).colorScheme.onSurface,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -286,8 +282,9 @@ class _PlansScreenState extends State<PlansScreen> {
                           ),
                         ),
                       ),
-                    if (isCurrent && !isRecommended)
+                    if (isCurrent)
                       Container(
+                        margin: EdgeInsets.only(left: isRecommended ? 6 : 0),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 3,
@@ -295,35 +292,22 @@ class _PlansScreenState extends State<PlansScreen> {
                         decoration: BoxDecoration(
                           color: isDark
                               ? Colors.white.withValues(alpha: 0.15)
-                              : AppColors.neutral900,
+                              : AppColors.neutral900.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(100),
+                          border: isDark
+                              ? null
+                              : Border.all(
+                                  color: AppColors.neutral900.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Plan actuel',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    if (isCurrent && isRecommended)
-                      Container(
-                        margin: const EdgeInsets.only(left: 6),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: const Text(
-                          'Plan actuel',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: isDark ? Colors.white : AppColors.neutral900,
                           ),
                         ),
                       ),
@@ -334,11 +318,7 @@ class _PlansScreenState extends State<PlansScreen> {
                   plan.description,
                   style: TextStyle(
                     fontSize: 13,
-                    color: isRecommended
-                        ? Colors.white.withValues(alpha: 0.7)
-                        : (isDark
-                              ? AppColors.neutral400
-                              : AppColors.neutral500),
+                    color: isDark ? AppColors.neutral400 : AppColors.neutral500,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -350,9 +330,7 @@ class _PlansScreenState extends State<PlansScreen> {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: isRecommended
-                            ? Colors.white
-                            : Theme.of(context).colorScheme.onSurface,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     if (_isYearly && savings > 0) ...[
@@ -395,9 +373,7 @@ class _PlansScreenState extends State<PlansScreen> {
                           Icon(
                             LucideIcons.check,
                             size: 16,
-                            color: isRecommended
-                                ? Colors.white
-                                : Theme.of(context).colorScheme.onSurface,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -405,11 +381,9 @@ class _PlansScreenState extends State<PlansScreen> {
                               feature,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: isRecommended
-                                    ? Colors.white.withValues(alpha: 0.9)
-                                    : (isDark
-                                          ? AppColors.neutral300
-                                          : AppColors.neutral700),
+                                color: isDark
+                                    ? AppColors.neutral300
+                                    : AppColors.neutral700,
                               ),
                             ),
                           ),

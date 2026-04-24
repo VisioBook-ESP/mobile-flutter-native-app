@@ -174,7 +174,7 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
       decoration: BoxDecoration(
         color: isDark
             ? Colors.white.withValues(alpha: 0.05)
-            : AppColors.neutral100,
+            : Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         border: Border.all(
           color: isDark ? AppColors.neutral700 : AppColors.neutral200,
@@ -320,7 +320,7 @@ class _ProjectViewScreenState extends State<ProjectViewScreen> {
       decoration: BoxDecoration(
         color: isDark
             ? Colors.white.withValues(alpha: 0.05)
-            : AppColors.neutral100,
+            : Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: Border.all(
           color: isDark ? AppColors.neutral700 : AppColors.neutral200,
@@ -370,7 +370,7 @@ class _ActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDark
               ? Colors.white.withValues(alpha: 0.05)
-              : AppColors.neutral100,
+              : Colors.white.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           border: Border.all(
             color: isDark ? AppColors.neutral700 : AppColors.neutral200,

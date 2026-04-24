@@ -169,6 +169,15 @@ class ApiClient {
   Future<Response> deleteShareLinks(String id) =>
       _dio.delete('${EnvironmentConfig.projectServiceUrl}/projects/$id/share');
 
+  // Versions
+  Future<Response> getVersions(String projectId) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions',
+  );
+
+  Future<Response> getVersion(String projectId, String versionId) => _dio.get(
+    '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/versions/$versionId',
+  );
+
   // Player / VisioBook
   Future<Response> getVisioBook(String projectId) => _dio.get(
     '${EnvironmentConfig.projectServiceUrl}/projects/$projectId/visiobook',

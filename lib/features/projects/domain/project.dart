@@ -23,11 +23,19 @@ enum ProjectStatus {
       case 'draft':
         return ProjectStatus.draft;
       case 'processing':
+      case 'analyzing':
+      case 'generating':
+      case 'configuring':
         return ProjectStatus.processing;
       case 'ready':
+      case 'active':
+      case 'completed':
         return ProjectStatus.ready;
       case 'error':
+      case 'failed':
         return ProjectStatus.error;
+      case 'archived':
+        return ProjectStatus.draft;
       default:
         return ProjectStatus.draft;
     }
@@ -51,10 +59,13 @@ class Generation {
   factory Generation.fromJson(Map<String, dynamic> json) {
     return Generation(
       id: json['id'] as String,
-      thumbnailUrl: json['thumbnailUrl'] as String?,
-      videoUrl: json['videoUrl'] as String?,
+      thumbnailUrl:
+          json['thumbnailUrl'] as String? ?? json['thumbnail_url'] as String?,
+      videoUrl: json['videoUrl'] as String? ?? json['video_url'] as String?,
       createdAt: DateTime.parse(
-        json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
+        json['createdAt'] as String? ??
+            json['created_at'] as String? ??
+            DateTime.now().toIso8601String(),
       ),
     );
   }
@@ -101,6 +112,10 @@ class Project {
   }
 
   factory Project.fromJson(Map<String, dynamic> json) {
+    // Extraire le style depuis config si présent
+    final config = json['config'] as Map<String, dynamic>?;
+    final style = json['style'] as String? ?? config?['style'] as String?;
+
     return Project(
       id: json['id'] as String,
       title: json['title'] as String? ?? 'Sans titre',
@@ -108,20 +123,26 @@ class Project {
       author: json['author'] as String?,
       genre: json['genre'] as String?,
       status: ProjectStatus.fromString(json['status'] as String? ?? 'draft'),
-      coverUrl: json['coverUrl'] as String?,
-      videoUrl: json['videoUrl'] as String?,
-      videoDurationSeconds: json['videoDurationSeconds'] as int?,
-      style: json['style'] as String?,
+      coverUrl: json['coverUrl'] as String? ?? json['cover_url'] as String?,
+      videoUrl: json['videoUrl'] as String? ?? json['video_url'] as String?,
+      videoDurationSeconds:
+          (json['videoDurationSeconds'] as num?)?.toInt() ??
+          (json['video_duration_seconds'] as num?)?.toInt(),
+      style: style,
       generations:
           (json['generations'] as List<dynamic>?)
               ?.map((g) => Generation.fromJson(g as Map<String, dynamic>))
               .toList() ??
           [],
       createdAt: DateTime.parse(
-        json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
+        json['createdAt'] as String? ??
+            json['created_at'] as String? ??
+            DateTime.now().toIso8601String(),
       ),
       updatedAt: DateTime.parse(
-        json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
+        json['updatedAt'] as String? ??
+            json['updated_at'] as String? ??
+            DateTime.now().toIso8601String(),
       ),
     );
   }

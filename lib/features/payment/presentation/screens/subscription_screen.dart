@@ -318,18 +318,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   context,
                   title: 'G\u00e9n\u00e9rations',
                   icon: LucideIcons.sparkles,
-                  used: quota.videosUsed,
-                  limit: isEnterprise ? -1 : quota.videosLimit,
-                  progress: isEnterprise ? 0.0 : quota.videosUsagePercent,
+                  used: quota.generationsUsed,
+                  limit: isEnterprise ? -1 : quota.generationsLimit,
+                  progress: isEnterprise ? 0.0 : quota.generationsUsagePercent,
                 ),
                 const SizedBox(height: 20),
                 _buildQuotaItem(
                   context,
-                  title: 'Projets',
-                  icon: LucideIcons.folderOpen,
-                  used: quota.projectsUsed,
-                  limit: isEnterprise ? -1 : quota.projectsLimit,
-                  progress: isEnterprise ? 0.0 : quota.projectsUsagePercent,
+                  title: 'Stockage',
+                  icon: LucideIcons.hardDrive,
+                  used: quota.storageUsedGB.round(),
+                  limit: isEnterprise ? -1 : quota.storageLimitGB.round(),
+                  progress: isEnterprise ? 0.0 : quota.storageUsagePercent,
                 ),
               ],
             ),
@@ -615,7 +615,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       decoration: BoxDecoration(
         color: isDark
             ? Colors.white.withValues(alpha: 0.05)
-            : AppColors.neutral100,
+            : Colors.white.withValues(alpha: 0.7),
         border: Border.all(
           color: isDark ? AppColors.neutral700 : AppColors.neutral200,
         ),

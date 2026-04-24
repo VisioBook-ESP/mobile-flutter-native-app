@@ -231,7 +231,7 @@ void main() {
       expect(plans.isNotEmpty, isTrue);
       expect(plans.length, equals(3));
       expect(plans[0].name, equals('Free'));
-      expect(plans[1].name, equals('Pro'));
+      expect(plans[1].name, equals('Premium'));
       expect(plans[2].name, equals('Enterprise'));
     });
 
@@ -243,9 +243,8 @@ void main() {
     test('getQuota returns default free quota in mock mode', () async {
       final quota = await paymentService.getQuota();
       expect(quota, isA<Quota>());
-      expect(quota.projectsLimit, equals(2));
-      expect(quota.videosLimit, equals(3));
-      expect(quota.maxVideoLength, equals(60));
+      expect(quota.generationsLimit, equals(3));
+      expect(quota.storageLimitGB, equals(1));
     });
   });
 
@@ -783,164 +782,139 @@ void main() {
   group('Quota', () {
     test('defaultFree returns correct values', () {
       final quota = Quota.defaultFree();
-      expect(quota.projectsUsed, equals(0));
-      expect(quota.projectsLimit, equals(2));
-      expect(quota.videosUsed, equals(0));
-      expect(quota.videosLimit, equals(3));
-      expect(quota.maxVideoLength, equals(60));
+      expect(quota.generationsUsed, equals(0));
+      expect(quota.generationsLimit, equals(3));
+      expect(quota.storageUsedGB, equals(0));
+      expect(quota.storageLimitGB, equals(1));
     });
 
-    test('fromJson parses all fields', () {
+    test('fromJson parses nested format', () {
       final quota = Quota.fromJson({
-        'projectsUsed': 3,
-        'projectsLimit': 10,
-        'videosUsed': 5,
-        'videosLimit': 20,
-        'maxVideoLength': 300,
+        'generations': {'used': 5, 'limit': 20, 'resetDate': '2026-05-01'},
+        'storage': {'used': 0.5, 'limit': 10.0},
       });
-      expect(quota.projectsUsed, equals(3));
-      expect(quota.projectsLimit, equals(10));
-      expect(quota.videosUsed, equals(5));
-      expect(quota.videosLimit, equals(20));
-      expect(quota.maxVideoLength, equals(300));
+      expect(quota.generationsUsed, equals(5));
+      expect(quota.generationsLimit, equals(20));
+      expect(quota.storageUsedGB, equals(0.5));
+      expect(quota.storageLimitGB, equals(10.0));
+      expect(quota.resetDate, equals('2026-05-01'));
     });
 
     test('fromJson uses defaults for missing fields', () {
       final quota = Quota.fromJson({});
-      expect(quota.projectsUsed, equals(0));
-      expect(quota.projectsLimit, equals(0));
-      expect(quota.videosUsed, equals(0));
-      expect(quota.videosLimit, equals(0));
-      expect(quota.maxVideoLength, equals(0));
+      expect(quota.generationsUsed, equals(0));
+      expect(quota.generationsLimit, equals(0));
+      expect(quota.storageUsedGB, equals(0));
+      expect(quota.storageLimitGB, equals(0));
     });
 
-    test('toJson includes all fields', () {
+    test('toJson includes all fields in nested format', () {
       final quota = Quota(
-        projectsUsed: 1,
-        projectsLimit: 5,
-        videosUsed: 2,
-        videosLimit: 10,
-        maxVideoLength: 120,
+        generationsUsed: 2,
+        generationsLimit: 10,
+        storageUsedGB: 0.5,
+        storageLimitGB: 5.0,
+        resetDate: '2026-05-01',
       );
       final json = quota.toJson();
-      expect(json['projectsUsed'], equals(1));
-      expect(json['projectsLimit'], equals(5));
-      expect(json['videosUsed'], equals(2));
-      expect(json['videosLimit'], equals(10));
-      expect(json['maxVideoLength'], equals(120));
+      expect(json['generations']['used'], equals(2));
+      expect(json['generations']['limit'], equals(10));
+      expect(json['generations']['resetDate'], equals('2026-05-01'));
+      expect(json['storage']['used'], equals(0.5));
+      expect(json['storage']['limit'], equals(5.0));
     });
 
-    test('projectsUsagePercent calculates correctly', () {
+    test('generationsUsagePercent calculates correctly', () {
       final quota = Quota(
-        projectsUsed: 1,
-        projectsLimit: 4,
-        videosUsed: 0,
-        videosLimit: 10,
-        maxVideoLength: 60,
+        generationsUsed: 1,
+        generationsLimit: 4,
+        storageUsedGB: 0,
+        storageLimitGB: 1,
       );
-      expect(quota.projectsUsagePercent, closeTo(0.25, 0.01));
+      expect(quota.generationsUsagePercent, closeTo(0.25, 0.01));
     });
 
-    test('projectsUsagePercent returns 0 when limit is 0', () {
+    test('generationsUsagePercent returns 0 when limit is 0', () {
       final quota = Quota(
-        projectsUsed: 5,
-        projectsLimit: 0,
-        videosUsed: 0,
-        videosLimit: 0,
-        maxVideoLength: 0,
+        generationsUsed: 5,
+        generationsLimit: 0,
+        storageUsedGB: 0,
+        storageLimitGB: 0,
       );
-      expect(quota.projectsUsagePercent, equals(0));
+      expect(quota.generationsUsagePercent, equals(0));
     });
 
-    test('videosUsagePercent calculates correctly', () {
+    test('storageUsagePercent calculates correctly', () {
       final quota = Quota(
-        projectsUsed: 0,
-        projectsLimit: 2,
-        videosUsed: 3,
-        videosLimit: 6,
-        maxVideoLength: 60,
+        generationsUsed: 0,
+        generationsLimit: 10,
+        storageUsedGB: 3.0,
+        storageLimitGB: 6.0,
       );
-      expect(quota.videosUsagePercent, closeTo(0.5, 0.01));
+      expect(quota.storageUsagePercent, closeTo(0.5, 0.01));
     });
 
-    test('hasProjectsRemaining returns true when under limit', () {
+    test('hasGenerationsRemaining returns true when under limit', () {
       final quota = Quota(
-        projectsUsed: 1,
-        projectsLimit: 2,
-        videosUsed: 0,
-        videosLimit: 3,
-        maxVideoLength: 60,
+        generationsUsed: 1,
+        generationsLimit: 3,
+        storageUsedGB: 0,
+        storageLimitGB: 1,
       );
-      expect(quota.hasProjectsRemaining, isTrue);
+      expect(quota.hasGenerationsRemaining, isTrue);
     });
 
-    test('hasProjectsRemaining returns false when at limit', () {
+    test('hasGenerationsRemaining returns false when at limit', () {
       final quota = Quota(
-        projectsUsed: 2,
-        projectsLimit: 2,
-        videosUsed: 0,
-        videosLimit: 3,
-        maxVideoLength: 60,
+        generationsUsed: 3,
+        generationsLimit: 3,
+        storageUsedGB: 0,
+        storageLimitGB: 1,
       );
-      expect(quota.hasProjectsRemaining, isFalse);
+      expect(quota.hasGenerationsRemaining, isFalse);
     });
 
-    test('hasProjectsRemaining returns true for unlimited (-1)', () {
+    test('hasGenerationsRemaining returns true for unlimited (-1)', () {
       final quota = Quota(
-        projectsUsed: 100,
-        projectsLimit: -1,
-        videosUsed: 0,
-        videosLimit: 3,
-        maxVideoLength: 60,
+        generationsUsed: 100,
+        generationsLimit: -1,
+        storageUsedGB: 0,
+        storageLimitGB: 1,
       );
-      expect(quota.hasProjectsRemaining, isTrue);
+      expect(quota.hasGenerationsRemaining, isTrue);
     });
 
-    test('hasVideosRemaining returns true when under limit', () {
+    test('hasVideosRemaining returns true when under limit (compat)', () {
       final quota = Quota(
-        projectsUsed: 0,
-        projectsLimit: 2,
-        videosUsed: 1,
-        videosLimit: 3,
-        maxVideoLength: 60,
+        generationsUsed: 1,
+        generationsLimit: 3,
+        storageUsedGB: 0,
+        storageLimitGB: 1,
       );
       expect(quota.hasVideosRemaining, isTrue);
     });
 
-    test('hasVideosRemaining returns false when at limit', () {
+    test('hasVideosRemaining returns false when at limit (compat)', () {
       final quota = Quota(
-        projectsUsed: 0,
-        projectsLimit: 2,
-        videosUsed: 3,
-        videosLimit: 3,
-        maxVideoLength: 60,
+        generationsUsed: 3,
+        generationsLimit: 3,
+        storageUsedGB: 0,
+        storageLimitGB: 1,
       );
       expect(quota.hasVideosRemaining, isFalse);
     });
 
-    test('canGenerate returns true when both remaining', () {
+    test('canGenerate returns true when generations remaining', () {
       final quota = Quota.defaultFree();
       expect(quota.canGenerate, isTrue);
     });
 
-    test('canGenerate returns false when projects exhausted', () {
+    test('canGenerate returns false when generations exhausted', () {
       final quota = Quota(
-        projectsUsed: 2,
-        projectsLimit: 2,
-        videosUsed: 0,
-        videosLimit: 3,
-        maxVideoLength: 60,
-      );
-      expect(quota.canGenerate, isFalse);
-    });
-
-    test('canGenerate returns false when videos exhausted', () {
-      final quota = Quota(
-        projectsUsed: 0,
-        projectsLimit: 2,
-        videosUsed: 3,
-        videosLimit: 3,
-        maxVideoLength: 60,
+        generationsUsed: 3,
+        generationsLimit: 3,
+        storageUsedGB: 0,
+        storageLimitGB: 1,
       );
       expect(quota.canGenerate, isFalse);
     });

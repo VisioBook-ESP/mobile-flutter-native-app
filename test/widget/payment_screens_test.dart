@@ -125,7 +125,7 @@ void main() {
 
       // Plan names from SubscriptionPlan.defaults
       expect(find.text('Free'), findsWidgets);
-      expect(find.text('Pro'), findsWidgets);
+      expect(find.text('Premium'), findsWidgets);
       expect(find.text('Enterprise'), findsWidgets);
     });
 
@@ -140,11 +140,10 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       // Features from SubscriptionPlan.defaults
-      expect(find.text('2 projets'), findsOneWidget);
-      expect(find.text('20 projets'), findsOneWidget);
+      expect(find.textContaining('rations/mois'), findsWidgets);
+      expect(find.textContaining('Go de stockage'), findsWidgets);
       expect(find.textContaining('illimit'), findsWidgets);
-      expect(find.text('Support prioritaire'), findsOneWidget);
-      expect(find.text('API access'), findsOneWidget);
+      expect(find.text('Support d\u00e9di\u00e9'), findsOneWidget);
     });
   });
 
@@ -163,7 +162,7 @@ void main() {
       expect(find.text('Utilisation'), findsOneWidget);
       // Quota item titles
       expect(find.textContaining('rations'), findsWidgets);
-      expect(find.text('Projets'), findsOneWidget);
+      expect(find.text('Stockage'), findsOneWidget);
       // Progress bars exist
       expect(find.byType(LinearProgressIndicator), findsWidgets);
       // Usage text (e.g. "X / Y utilisees")
@@ -192,7 +191,7 @@ void main() {
 
       // All 3 plan names should still be visible after toggle
       expect(find.text('Free'), findsWidgets);
-      expect(find.text('Pro'), findsWidgets);
+      expect(find.text('Premium'), findsWidgets);
       expect(find.text('Enterprise'), findsWidgets);
     });
 
@@ -207,7 +206,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('Free'), findsWidgets);
-      expect(find.text('Pro'), findsWidgets);
+      expect(find.text('Premium'), findsWidgets);
       expect(find.text('Enterprise'), findsWidgets);
     });
   });

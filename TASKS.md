@@ -22,10 +22,8 @@
 | 10 | Historique | P1 | Done | 100% |
 | 11 | Polish & QA | P2 | Done | 100% |
 | 12 | Docker & Multi-platform Build | P1 | Done | 100% |
-| 13 | Integration API | P0 | Done | 100% |
+| 13 | Integration API - Donnees utilisateur | P0 | Done | 100% |
 | 14 | Profil Utilisateur | P1 | Done | 100% |
-| 15 | Paiement & Abonnements | P1 | Done | 100% |
-| 16 | UI Glassmorphism | P1 | Done | 100% |
 
 ---
 
@@ -169,30 +167,93 @@ Voir l'historique git pour le detail. Toutes les phases 0 a 12 sont 100% termin�
 
 ## Phase 16: UI Glassmorphism [P1] ✅
 
-- [x] Boutons primary : fond glass semi-transparent au lieu de noir opaque
-- [x] Cards et containers : blanc 70% opacite au lieu d'opaque
-- [x] Inputs : fond glass avec bordure subtile
-- [x] Filtres (Tous/Recents, Tous/Prets/En cours) : glass au lieu de noir
-- [x] Badges (Premium, Plan actuel) : glass avec bordure
-- [x] Avatar initiales : glass au lieu de noir
-- [x] Coherence mode clair / mode sombre
+### 13.2 - Lier le contenu importe au projet [P0] ✅
+- [x] `initFromImport()` : stocker le `fileId` dans le provider (pas seulement dans l'id temporaire)
+- [x] Passer le `fileId` a `createProject()` lors de la sauvegarde
+- [x] `StorageService.uploadFile()` : brancher le callback `onProgress` sur Dio `onSendProgress`
+- [x] `uploadScannedImages()` : envoyer TOUTES les images (pas juste `imagePaths.first`)
+- [x] Integrer le content-ingestion-service (upload + extract text en 2 etapes)
+
+### 13.3 - Envoyer la config a la generation [P0] ✅
+- [x] `ApiClient.generateProject()` : accepter un body `Map<String, dynamic>` optionnel
+- [x] `ProjectService.generateProject()` : accepter et passer un `ProjectConfig`
+- [x] `GenerationService.startGeneration()` : accepter et passer un `ProjectConfig`
+- [x] `ProjectDetailProvider.generateProject()` : passer `_config` au service
+- [x] `ProjectProvider.generateProject()` : accepter et passer un `ProjectConfig`
+
+### 13.4 - Export & Partage [P0] ✅
+- [x] `ExportService.downloadVideo()` : utiliser `ApiClient.getDownloadUrl()` puis download
+- [x] `ExportService.generateShareLink()` : utiliser `_apiClient.shareProject()`
+- [x] Verifier que le `videoId` pour le download vient bien des donnees du projet/workflow
+
+### 13.5 - Auth : champs manquants [P1] ✅
+- [x] Login : stocker le `refresh_token` retourne
+- [x] Stocker et exposer `firstName`/`userName` depuis la reponse login
+- [x] `AuthProvider.checkAuthStatus()` : recharger le nom user depuis le storage
+
+### 13.6 - VisioBook Reader : deserialisation [P0] ✅
+- [x] Verifier que `VisiobookData.fromJson()` correspond au format reel
+- [x] Gerer le cas ou le backend retourne un wrapper
+- [x] `VisiobookPanel.fromJson()` : gerer les types numeriques flexibles
+
+### 13.7 - Environment & Routing [P1] ✅
+- [x] Ajouter `ingestionServiceUrl` dans `EnvironmentConfig`
+- [x] Verifier les URLs/ports quand les services seront deployes
+
+### 13.8 - Tests [P0] ✅
+- [x] Tests unitaires pour les nouveaux champs
+- [x] Test d'integration du flux complet
+
+### 13.9 - Documentation API [P1] ✅
+- [x] Recuperer les specs API depuis docs-architecture
+- [x] Sauvegarder dans `docs/api/`
 
 ---
 
-## Issues reportees a PI 4 (post-rendu)
+## Phase 14: Profil Utilisateur [P1]
 
-| Issue | Titre | Raison |
-|-------|-------|--------|
-| #47 | Ancien mot de passe pour changement | Backend ne supporte pas old_password |
-| #53 | Verification email post-inscription | Backend n'a pas /auth/verify |
-| #46 | Flux mot de passe oublie | Backend n'a pas forgot/reset-password (issue core-user-service#58) |
-| #49 | Notifications permissions | Depend du core-notification-service (PI 4.1) |
-| #45 | Audio ambiance par page | Fonctionnalite player avancee |
-| #54 | Ingestion polling backoff exponentiel | Optimisation non bloquante |
-| #56 | Player pause au toucher | Bonus UX |
-| #57 | Generation bouton annuler API | Bonus, bouton UI existe deja |
-| #44 | Tests 80% couverture | PI 4.2, scanner non testable en unit |
-| #69 | Tests UX beta testing | PI 4.3 |
+> Ref: Core User Service (port 9999)
+> Paiement/abonnements : voir issue #52
+
+### Ecran Profil [P1] ✅
+- [x] Header profil (avatar, nom, email)
+- [x] Section "Informations personnelles"
+- [x] Modifier nom / prenom / username
+- [x] Modifier email (inline-editable avec hint verification)
+- [x] Modifier mot de passe (ancien + nouveau)
+- ~~Upload / modifier avatar~~ (supprime)
+
+### Section Credits & Tokens [P1] ✅
+- [x] Affichage solde credits/tokens
+- [x] Jauge visuelle (credits restants / total)
+- ~~Historique d'utilisation des credits~~ (deplace vers #52, ce sont des quotas d'abonnement)
+
+### Section Paiement [P1]
+- [x] UI "Mes moyens de paiement" (liste vide + placeholder)
+- ~~UI "Ajouter un moyen de paiement"~~ (deplace vers #52)
+- ~~UI "Acheter des credits"~~ (deplace vers #52, ce sont des plans d'abonnement)
+
+### Parametres [P2] ✅
+- ~~Langue de l'app (FR/EN)~~ (supprime, on reste en francais)
+- [x] Notifications (toggle on/off) - SettingsProvider + SharedPreferences
+- [x] Theme (clair/sombre) - selecteur Auto/Clair/Sombre avec persistance
+
+### Compte [P1]
+- [x] Bouton "Se deconnecter"
+- [x] Bouton "Supprimer mon compte" (avec confirmation)
+- [x] Mentions legales / CGU
+- [x] Version de l'app
+
+### Navigation [P1]
+- [x] Route /profile
+- [x] Acces depuis le tab Profil de la bottom nav bar (remplacer le modal actuel)
+
+### API Endpoints [P1]
+- [x] GET /api/v1/users/me
+- [x] PUT /api/v1/users/me
+- [x] PUT /api/v1/users/me/password
+- [x] DELETE /api/v1/users/me
+- [x] GET /api/v1/users/me/credits (quand disponible)
 
 ---
 

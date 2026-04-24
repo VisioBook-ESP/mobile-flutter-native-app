@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:visiobook_mobile/features/payment/domain/subscription.dart';
 import 'package:visiobook_mobile/features/payment/domain/subscription_plan.dart';
+// PlanLimits is exported from subscription_plan.dart
 import 'package:visiobook_mobile/features/profile/domain/user_profile.dart';
 
 void main() {
@@ -169,24 +170,32 @@ void main() {
   group('SubscriptionPlan', () {
     test('fromJson parses full payload', () {
       final plan = SubscriptionPlan.fromJson({
-        'id': 'pro',
-        'name': 'Pro',
-        'description': 'For professionals',
-        'monthlyPrice': 19.99,
-        'yearlyPrice': 199.99,
-        'maxProjects': 20,
-        'maxVideosPerMonth': 50,
-        'maxVideoLength': 600,
+        'id': 'premium',
+        'name': 'Premium',
+        'description': 'For creators',
+        'price': 9.99,
+        'priceYearly': 99.99,
+        'currency': 'eur',
+        'limits': {
+          'generationsPerMonth': 50,
+          'storageGB': 10,
+          'maxProjectSize': 50,
+          'exportQuality': '1080p',
+          'watermark': false,
+        },
         'features': ['Feature A', 'Feature B'],
       });
-      expect(plan.id, equals('pro'));
-      expect(plan.name, equals('Pro'));
-      expect(plan.description, equals('For professionals'));
-      expect(plan.monthlyPrice, equals(19.99));
-      expect(plan.yearlyPrice, equals(199.99));
-      expect(plan.maxProjects, equals(20));
-      expect(plan.maxVideosPerMonth, equals(50));
-      expect(plan.maxVideoLength, equals(600));
+      expect(plan.id, equals('premium'));
+      expect(plan.name, equals('Premium'));
+      expect(plan.description, equals('For creators'));
+      expect(plan.monthlyPrice, equals(9.99));
+      expect(plan.yearlyPrice, equals(99.99));
+      expect(plan.currency, equals('eur'));
+      expect(plan.limits.generationsPerMonth, equals(50));
+      expect(plan.limits.storageGB, equals(10));
+      expect(plan.limits.maxProjectSize, equals(50));
+      expect(plan.limits.exportQuality, equals('1080p'));
+      expect(plan.limits.watermark, isFalse);
       expect(plan.features, equals(['Feature A', 'Feature B']));
     });
 
@@ -197,10 +206,9 @@ void main() {
       expect(plan.description, equals(''));
       expect(plan.monthlyPrice, equals(0));
       expect(plan.yearlyPrice, equals(0));
-      expect(plan.maxProjects, equals(0));
-      expect(plan.maxVideosPerMonth, equals(0));
-      expect(plan.maxVideoLength, equals(0));
-      expect(plan.features, isEmpty);
+      expect(plan.currency, equals('eur'));
+      expect(plan.limits.generationsPerMonth, equals(3));
+      expect(plan.features, isNotEmpty);
     });
 
     test('toJson includes all fields', () {
@@ -210,20 +218,23 @@ void main() {
         description: 'A test',
         monthlyPrice: 9.99,
         yearlyPrice: 99.99,
-        maxProjects: 5,
-        maxVideosPerMonth: 10,
-        maxVideoLength: 120,
+        currency: 'eur',
+        limits: const PlanLimits(
+          generationsPerMonth: 10,
+          storageGB: 5,
+          maxProjectSize: 20,
+          exportQuality: '1080p',
+          watermark: false,
+        ),
         features: ['f1'],
       );
       final json = plan.toJson();
       expect(json['id'], equals('test'));
       expect(json['name'], equals('Test Plan'));
       expect(json['description'], equals('A test'));
-      expect(json['monthlyPrice'], equals(9.99));
-      expect(json['yearlyPrice'], equals(99.99));
-      expect(json['maxProjects'], equals(5));
-      expect(json['maxVideosPerMonth'], equals(10));
-      expect(json['maxVideoLength'], equals(120));
+      expect(json['price'], equals(9.99));
+      expect(json['priceYearly'], equals(99.99));
+      expect(json['currency'], equals('eur'));
       expect(json['features'], equals(['f1']));
     });
 
@@ -231,7 +242,7 @@ void main() {
       final plans = SubscriptionPlan.defaults;
       expect(plans.length, equals(3));
       expect(plans[0].id, equals('free'));
-      expect(plans[1].id, equals('pro'));
+      expect(plans[1].id, equals('premium'));
       expect(plans[2].id, equals('enterprise'));
     });
 
@@ -239,15 +250,15 @@ void main() {
       final free = SubscriptionPlan.defaults[0];
       expect(free.monthlyPrice, equals(0));
       expect(free.yearlyPrice, equals(0));
-      expect(free.maxProjects, equals(2));
-      expect(free.maxVideosPerMonth, equals(3));
-      expect(free.maxVideoLength, equals(60));
+      expect(free.limits.generationsPerMonth, equals(3));
+      expect(free.limits.storageGB, equals(1));
+      expect(free.limits.watermark, isTrue);
     });
 
     test('defaults enterprise plan has unlimited markers', () {
       final enterprise = SubscriptionPlan.defaults[2];
-      expect(enterprise.maxProjects, equals(-1));
-      expect(enterprise.maxVideosPerMonth, equals(-1));
+      expect(enterprise.limits.generationsPerMonth, equals(-1));
+      expect(enterprise.limits.storageGB, equals(100));
     });
 
     test('fromJson handles int prices cast to double', () {
@@ -257,9 +268,6 @@ void main() {
         'description': '',
         'monthlyPrice': 10,
         'yearlyPrice': 100,
-        'maxProjects': 1,
-        'maxVideosPerMonth': 1,
-        'maxVideoLength': 60,
         'features': [],
       });
       expect(plan.monthlyPrice, equals(10.0));
@@ -267,7 +275,7 @@ void main() {
     });
 
     test('fromJson -> toJson roundtrip', () {
-      final original = SubscriptionPlan.defaults[1]; // Pro
+      final original = SubscriptionPlan.defaults[1]; // Premium
       final json = original.toJson();
       final restored = SubscriptionPlan.fromJson(json);
       expect(restored.id, equals(original.id));

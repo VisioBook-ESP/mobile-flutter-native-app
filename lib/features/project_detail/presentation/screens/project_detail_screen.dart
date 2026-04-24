@@ -10,6 +10,7 @@ import 'package:visiobook_mobile/features/project_detail/domain/project_config.d
 import 'package:visiobook_mobile/features/project_detail/presentation/providers/project_detail_provider.dart';
 import 'package:visiobook_mobile/features/project_detail/presentation/widgets/option_selector.dart';
 import 'package:visiobook_mobile/features/project_detail/presentation/widgets/style_selector.dart';
+import 'package:visiobook_mobile/features/payment/presentation/providers/payment_provider.dart';
 
 /// Ecran de detail et configuration d'un projet
 class ProjectDetailScreen extends StatefulWidget {
@@ -305,6 +306,20 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               onPressed: provider.isGenerating
                   ? null
                   : () async {
+                      // Vérifier les quotas avant de générer
+                      final paymentProvider = context.read<PaymentProvider>();
+                      await paymentProvider.loadQuota();
+                      if (!paymentProvider.canGenerate && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Quota de g\u00e9n\u00e9rations atteint. '
+                              'Passez \u00e0 un plan sup\u00e9rieur.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
                       provider.setTitle(_titleController.text);
                       final result = await provider.generateProject();
                       if (result != null && context.mounted) {

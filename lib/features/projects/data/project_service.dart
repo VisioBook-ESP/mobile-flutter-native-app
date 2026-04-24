@@ -24,19 +24,8 @@ class ProjectService {
       final response = await _apiClient.getProjects();
       final data = response.data;
 
-      if (data is List) {
-        final projects = data.map((json) => Project.fromJson(json)).toList();
-        return ProjectResult(success: true, data: projects);
-      }
-
-      if (data is Map && data['projects'] is List) {
-        final projects = (data['projects'] as List)
-            .map((json) => Project.fromJson(json))
-            .toList();
-        return ProjectResult(success: true, data: projects);
-      }
-
-      return ProjectResult(success: true, data: []);
+      final projects = _parseProjectList(data);
+      return ProjectResult(success: true, data: projects);
     } on DioException catch (e) {
       return ProjectResult(success: false, error: _handleError(e));
     } catch (e) {
@@ -48,21 +37,8 @@ class ProjectService {
   Future<ProjectResult<List<Project>>> getRecentProjects() async {
     try {
       final response = await _apiClient.getRecentProjects();
-      final data = response.data;
-
-      if (data is List) {
-        final projects = data.map((json) => Project.fromJson(json)).toList();
-        return ProjectResult(success: true, data: projects);
-      }
-
-      if (data is Map && data['projects'] is List) {
-        final projects = (data['projects'] as List)
-            .map((json) => Project.fromJson(json))
-            .toList();
-        return ProjectResult(success: true, data: projects);
-      }
-
-      return ProjectResult(success: true, data: []);
+      final projects = _parseProjectList(response.data);
+      return ProjectResult(success: true, data: projects);
     } on DioException catch (e) {
       return ProjectResult(success: false, error: _handleError(e));
     } catch (e) {
@@ -146,6 +122,21 @@ class ProjectService {
     } catch (e) {
       return ProjectResult(success: false, error: 'Erreur inattendue: $e');
     }
+  }
+
+  /// Parse une liste de projets depuis différents formats de réponse API.
+  /// Supporte : List directe, { items: [...] } (paginé), { projects: [...] }
+  List<Project> _parseProjectList(dynamic data) {
+    if (data is List) {
+      return data.map((json) => Project.fromJson(json)).toList();
+    }
+    if (data is Map) {
+      final items = data['items'] as List? ?? data['projects'] as List?;
+      if (items != null) {
+        return items.map((json) => Project.fromJson(json)).toList();
+      }
+    }
+    return [];
   }
 
   String _handleError(DioException e) {

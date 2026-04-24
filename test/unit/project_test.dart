@@ -16,6 +16,16 @@ void main() {
       expect(ProjectStatus.fromString('READY'), ProjectStatus.ready);
     });
 
+    test('fromString maps backend statuses correctly', () {
+      expect(ProjectStatus.fromString('active'), ProjectStatus.ready);
+      expect(ProjectStatus.fromString('completed'), ProjectStatus.ready);
+      expect(ProjectStatus.fromString('analyzing'), ProjectStatus.processing);
+      expect(ProjectStatus.fromString('generating'), ProjectStatus.processing);
+      expect(ProjectStatus.fromString('configuring'), ProjectStatus.processing);
+      expect(ProjectStatus.fromString('failed'), ProjectStatus.error);
+      expect(ProjectStatus.fromString('archived'), ProjectStatus.draft);
+    });
+
     test('fromString defaults to draft for unknown values', () {
       expect(ProjectStatus.fromString('unknown'), ProjectStatus.draft);
       expect(ProjectStatus.fromString(''), ProjectStatus.draft);
@@ -324,6 +334,73 @@ void main() {
 
       expect(json['createdAt'], created.toIso8601String());
       expect(json['updatedAt'], updated.toIso8601String());
+    });
+
+    test('fromJson parses backend format with config and snake_case', () {
+      final json = {
+        'id': 'uuid-backend',
+        'title': 'Backend Project',
+        'status': 'active',
+        'config': {'style': 'cartoon', 'language': 'fr', 'format': 'portrait'},
+        'cover_url': 'https://example.com/cover.jpg',
+        'video_url': 'https://example.com/video.mp4',
+        'video_duration_seconds': 120,
+        'created_at': '2025-06-01T00:00:00.000Z',
+        'updated_at': '2025-06-02T00:00:00.000Z',
+      };
+
+      final project = Project.fromJson(json);
+
+      expect(project.id, 'uuid-backend');
+      expect(project.status, ProjectStatus.ready);
+      expect(project.style, 'cartoon');
+      expect(project.coverUrl, 'https://example.com/cover.jpg');
+      expect(project.videoUrl, 'https://example.com/video.mp4');
+      expect(project.videoDurationSeconds, 120);
+      expect(project.createdAt, DateTime.parse('2025-06-01T00:00:00.000Z'));
+      expect(project.updatedAt, DateTime.parse('2025-06-02T00:00:00.000Z'));
+    });
+
+    test('fromJson extracts style from config when style field is absent', () {
+      final json = {
+        'id': 'proj-config-style',
+        'title': 'Config Style',
+        'config': {'style': 'manga'},
+        'createdAt': '2025-01-01T00:00:00.000Z',
+        'updatedAt': '2025-01-01T00:00:00.000Z',
+      };
+
+      final project = Project.fromJson(json);
+      expect(project.style, 'manga');
+    });
+
+    test('fromJson prefers top-level style over config style', () {
+      final json = {
+        'id': 'proj-style-priority',
+        'title': 'Style Priority',
+        'style': 'realistic',
+        'config': {'style': 'cartoon'},
+        'createdAt': '2025-01-01T00:00:00.000Z',
+        'updatedAt': '2025-01-01T00:00:00.000Z',
+      };
+
+      final project = Project.fromJson(json);
+      expect(project.style, 'realistic');
+    });
+
+    test('Generation.fromJson handles snake_case fields', () {
+      final json = {
+        'id': 'gen-snake',
+        'thumbnail_url': 'https://example.com/thumb.jpg',
+        'video_url': 'https://example.com/video.mp4',
+        'created_at': '2025-06-01T00:00:00.000Z',
+      };
+
+      final gen = Generation.fromJson(json);
+
+      expect(gen.thumbnailUrl, 'https://example.com/thumb.jpg');
+      expect(gen.videoUrl, 'https://example.com/video.mp4');
+      expect(gen.createdAt, DateTime.parse('2025-06-01T00:00:00.000Z'));
     });
 
     test('constructor defaults generations to empty list', () {

@@ -37,4 +37,8 @@ class EnvironmentConfig {
 
   /// Payment Service (port 8087)
   static String get paymentServiceUrl => '$apiBaseUrl/api/v1';
+
+  /// Stripe publishable key (passée via --dart-define)
+  static String get stripePublishableKey =>
+      const String.fromEnvironment('STRIPE_PUBLISHABLE_KEY');
 }

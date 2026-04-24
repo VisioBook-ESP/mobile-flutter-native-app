@@ -38,6 +38,10 @@ class AppTheme {
   static const double radiusLg = 24.0;
   static const double radiusXl = 28.0;
 
+  // Glass colors for light mode (semi-transparent white)
+  static const Color _lightGlass = Color(0xB3FFFFFF); // white 70%
+  static const Color _lightGlassBorder = Color(0x26000000); // black 15%
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -48,39 +52,43 @@ class AppTheme {
         onPrimary: Colors.white,
         secondary: AppColors.neutral100,
         onSecondary: AppColors.neutral900,
-        surface: Colors.white,
+        surface: Color(0xB3FFFFFF),
         onSurface: AppColors.neutral900,
         error: AppColors.error,
         onError: Colors.white,
         outline: AppColors.neutral200,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         foregroundColor: AppColors.neutral900,
         elevation: 0,
       ),
       cardTheme: CardThemeData(
-        color: Colors.white,
+        color: _lightGlass,
         elevation: 0,
         shadowColor: AppColors.glassShadow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusMd),
+          side: const BorderSide(color: _lightGlassBorder, width: 0.5),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: _lightGlass,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMd),
-          borderSide: const BorderSide(color: AppColors.neutral200),
+          borderSide: const BorderSide(color: _lightGlassBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMd),
-          borderSide: const BorderSide(color: AppColors.neutral200),
+          borderSide: const BorderSide(color: _lightGlassBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMd),
-          borderSide: const BorderSide(color: AppColors.neutral900, width: 2),
+          borderSide: BorderSide(
+            color: AppColors.neutral900.withValues(alpha: 0.4),
+            width: 2,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,

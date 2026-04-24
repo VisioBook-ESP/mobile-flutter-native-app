@@ -128,7 +128,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           decoration: BoxDecoration(
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.white.withValues(alpha: 0.1)
-                : AppColors.neutral100,
+                : Colors.white.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(40),
           ),
           child: Icon(

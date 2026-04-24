@@ -54,10 +54,12 @@ class _AppButtonState extends State<AppButton> {
         border = Border.all(color: Colors.white.withValues(alpha: 0.25));
       } else {
         backgroundColor = _isPressed
-            ? AppColors.neutral900.withValues(alpha: 0.85)
-            : AppColors.neutral900;
-        textColor = Colors.white;
-        border = null;
+            ? AppColors.neutral900.withValues(alpha: 0.12)
+            : AppColors.neutral900.withValues(alpha: 0.08);
+        textColor = AppColors.neutral900;
+        border = Border.all(
+          color: AppColors.neutral900.withValues(alpha: 0.15),
+        );
       }
     } else {
       if (isDark) {
@@ -68,10 +70,12 @@ class _AppButtonState extends State<AppButton> {
         border = Border.all(color: Colors.white.withValues(alpha: 0.2));
       } else {
         backgroundColor = _isPressed
-            ? AppColors.neutral900.withValues(alpha: 0.05)
-            : Colors.transparent;
+            ? AppColors.neutral900.withValues(alpha: 0.06)
+            : AppColors.neutral900.withValues(alpha: 0.03);
         textColor = AppColors.neutral900;
-        border = Border.all(color: AppColors.neutral900, width: 2);
+        border = Border.all(
+          color: AppColors.neutral900.withValues(alpha: 0.12),
+        );
       }
     }
 

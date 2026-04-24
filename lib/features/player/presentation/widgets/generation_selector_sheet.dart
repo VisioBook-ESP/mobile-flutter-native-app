@@ -163,7 +163,7 @@ class _GenerationTile extends StatelessWidget {
               width: 80,
               height: 60,
               decoration: BoxDecoration(
-                color: AppColors.neutral100,
+                color: Colors.white.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppColors.neutral200),
               ),

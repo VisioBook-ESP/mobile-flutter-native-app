@@ -322,7 +322,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: AppColors.neutral100,
+                    color: Colors.white.withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Icon(
@@ -665,7 +665,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: AppColors.neutral100,
+                        color: Colors.white.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Icon(

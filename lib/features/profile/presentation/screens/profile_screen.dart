@@ -189,8 +189,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             decoration: BoxDecoration(
               color: Theme.of(context).brightness == Brightness.dark
                   ? Colors.white.withValues(alpha: 0.15)
-                  : AppColors.neutral900,
+                  : AppColors.neutral900.withValues(alpha: 0.08),
               shape: BoxShape.circle,
+              border: Theme.of(context).brightness == Brightness.light
+                  ? Border.all(
+                      color: AppColors.neutral900.withValues(alpha: 0.12),
+                    )
+                  : null,
             ),
             child: Center(
               child: Text(
@@ -198,7 +203,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: TextStyle(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? Colors.white
-                      : Colors.white,
+                      : AppColors.neutral900,
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
                 ),
@@ -280,13 +285,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: BoxDecoration(
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.15)
-                        : AppColors.neutral900,
+                        : AppColors.neutral900.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
+                    border: isDark
+                        ? null
+                        : Border.all(
+                            color: AppColors.neutral900.withValues(alpha: 0.12),
+                          ),
                   ),
                   child: Text(
                     planName,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : AppColors.neutral900,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -903,7 +913,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ? AppColors.info.withValues(alpha: 0.15)
                 : isDark
                 ? Colors.white.withValues(alpha: 0.05)
-                : AppColors.neutral100,
+                : Colors.white.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: selected ? AppColors.info : Colors.transparent,
@@ -1011,9 +1021,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: isDark
             ? Colors.white.withValues(alpha: 0.05)
-            : AppColors.neutral100,
+            : Colors.white.withValues(alpha: 0.7),
         border: Border.all(
-          color: isDark ? AppColors.neutral700 : AppColors.neutral200,
+          color: isDark
+              ? AppColors.neutral700
+              : Colors.black.withValues(alpha: 0.08),
         ),
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       ),

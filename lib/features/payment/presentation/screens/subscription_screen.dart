@@ -615,7 +615,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       decoration: BoxDecoration(
         color: isDark
             ? Colors.white.withValues(alpha: 0.05)
-            : AppColors.neutral100,
+            : Colors.white.withValues(alpha: 0.7),
         border: Border.all(
           color: isDark ? AppColors.neutral700 : AppColors.neutral200,
         ),

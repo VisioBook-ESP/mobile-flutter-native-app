@@ -1,12 +1,22 @@
 # VisioBook Mobile
 
-Application mobile Flutter pour VisioBook - transformez vos textes en videos grace a l'IA.
+Application mobile Flutter pour VisioBook — transformez vos textes en vidéos grâce à l'IA.
 
-## Prerequis
+## Fonctionnalités
+
+- **Import** : PDF, TXT, DOCX, EPUB ou scan de document (OCR)
+- **Configuration** : style graphique, langue audio, durée
+- **Génération IA** : suivi en temps réel avec étapes et progression
+- **VisioBook Reader** : lecteur vertical type Webtoon avec scènes animées
+- **Export** : téléchargement vidéo (480p/720p/1080p) + lien de partage
+- **Abonnements** : plans Free/Premium/Enterprise via Stripe Payment Sheet
+- **Profil** : gestion compte, quotas, thème clair/sombre, notifications
+
+## Prérequis
 
 - Flutter SDK >= 3.10.7
 - Dart SDK
-- Xcode (macOS/iOS) avec signing configure
+- Xcode (macOS/iOS) avec signing configuré
 - Android Studio (Android)
 - Docker (optionnel, pour build Android sans Flutter)
 
@@ -16,10 +26,18 @@ Application mobile Flutter pour VisioBook - transformez vos textes en videos gra
 make install
 ```
 
+## Configuration
+
+Créer un fichier `.env` à la racine (non versionné) :
+
+```
+STRIPE_PUBLISHABLE_KEY=pk_test_xxxxx
+```
+
 ## Lancement
 
 ```bash
-make run-macos    # macOS
+make run-macos    # macOS (charge automatiquement .env)
 make run-ios      # iOS
 make run-android  # Android
 ```
@@ -30,223 +48,109 @@ make run-android  # Android
 make check     # Format + Analyze + Test
 make format    # Formate le code Dart
 make analyze   # Analyse statique (lint)
-make test      # Lance les tests
-make ci        # Simulation CI complete
+make test      # Lance les tests (~795 tests)
+make ci        # Simulation CI complète
 ```
 
-Voir `make help` pour la liste complete.
+Voir `make help` pour la liste complète.
 
 ## Architecture
 
 ```
 lib/
-├── config/          # Configuration environnement (dev/prod)
+├── config/              # Configuration environnement (dev/prod), clé Stripe
 ├── core/
-│   ├── network/     # Client HTTP (Dio) avec intercepteurs
-│   ├── routing/     # Navigation (GoRouter)
-│   ├── theme/       # Theme et Design System
-│   ├── utils/       # Validators, Secure Storage
-│   └── widgets/     # Composants reutilisables (AppButton, AppInput, BottomNavBar)
+│   ├── network/         # Client HTTP (Dio) avec auth interceptor + token refresh
+│   ├── routing/         # Navigation (GoRouter)
+│   ├── services/        # NotificationService, SettingsProvider
+│   ├── theme/           # Thème glassmorphism (clair/sombre) + Design System
+│   ├── utils/           # Validators, Secure Storage
+│   └── widgets/         # AppButton, AppInput, BottomNavBar, GradientBackground
 └── features/
-    ├── auth/        # Authentification (splash, onboarding, login, register, mot de passe oublie)
-    ├── projects/    # Dashboard et liste des projets
-    ├── project_detail/ # Configuration projet (style, langue, duree)
-    ├── import/      # Import de fichiers (PDF, TXT, DOCX, EPUB)
-    └── player/      # Lecteur video avec selecteur de generation
+    ├── auth/            # Splash, onboarding, login, register, forgot/reset password
+    ├── projects/        # Dashboard et liste des projets
+    ├── project_detail/  # Configuration projet (style, langue, durée)
+    ├── import/          # Import fichiers + scanner OCR
+    ├── generation/      # Suivi génération avec SSE/polling
+    ├── player/          # VisioBook Reader (scroll vertical, scènes)
+    ├── export/          # Téléchargement vidéo + partage
+    ├── history/         # Bibliothèque textes et VisioBooks
+    ├── profile/         # Profil utilisateur, paramètres
+    └── payment/         # Plans, abonnements Stripe, quotas
 ```
 
-## Configuration API
+## API
 
-Les URLs des microservices sont configurees dans `lib/config/environment.dart` :
+Tous les services passent par un gateway unique :
 
-| Service | Port | Role |
-|---------|------|------|
-| Core User Service | 9999 | Auth, profils |
-| Core Project Service | 8086 | Projets, workflows |
-| Support Storage Service | 8089 | Upload, stockage, streaming |
-| AI Analysis Service | 8083 | Analyse IA, generation |
+| Environnement | URL |
+|---------------|-----|
+| Production | `https://visiobook.cloud/api/v1` |
+| Dev | `http://51.178.52.51/api/v1` |
 
-## Tester sur iPhone (premiere fois)
+### Services connectés
 
-1. **Activer le mode developpeur** sur l'iPhone : Reglages > Confidentialite et securite > Mode developpeur > Activer (redemarrage requis)
+| Service | Rôle | Statut |
+|---------|------|--------|
+| Core User Service | Auth, profils, sessions | En prod |
+| Content Ingestion Service | Upload, OCR, extraction texte | En prod |
+| Core Project Service | Projets, versions, workflows | En prod |
+| Core Payment Service | Abonnements Stripe, quotas | En prod |
+| AI Analysis Service | Analyse IA, génération scènes | En prod |
+| AI Media Generation | Images, animations (ComfyUI) | En prod |
 
-2. **Brancher l'iPhone en USB** au Mac. Sur l'iPhone, appuyer sur **Faire confiance** quand la popup apparait
+## Design System
 
-3. **Configurer le signing Xcode** (une seule fois) :
+L'app utilise un thème **glassmorphism** :
+- Fonds semi-transparents avec bordures subtiles
+- Dégradé pastel animé en arrière-plan
+- Support complet mode clair et sombre
+- Composants glass : boutons, cards, inputs, filtres, badges
+
+## Tests
+
 ```bash
-open ios/Runner.xcworkspace
-```
-Dans Xcode :
-   - Cliquer sur **Runner** dans le panneau de gauche
-   - Onglet **Signing & Capabilities**
-   - Cocher **Automatically manage signing**
-   - Selectionner votre **Team** (votre Apple ID personnel suffit)
-   - Le Bundle Identifier doit etre unique (ex: `com.visiobook.visiobookMobile`)
-
-4. **Faire confiance au certificat** sur l'iPhone : Reglages > General > VPN et gestion de l'appareil > votre Apple ID > Faire confiance
-
-5. **Lancer l'app** :
-```bash
-flutter run
-```
-Flutter detecte automatiquement l'iPhone connecte. Si plusieurs appareils sont branches, il demande de choisir.
-
-> **Note** : Les fichiers Xcode modifies par le signing (`project.pbxproj`, `xcworkspacedata`) sont propres a chaque developpeur. Ne pas les commit — chaque dev configure son propre signing.
-
-> **Note** : Le build iOS necessite obligatoirement **macOS + Xcode**. Pas de contournement possible (restriction Apple).
-
-## Tester sur Android (premiere fois)
-
-### Option A : Avec Flutter installe
-
-1. **Activer le mode developpeur** sur le telephone : Parametres > A propos du telephone > appuyer 7 fois sur **Numero de build**
-2. **Activer le debogage USB** : Parametres > Options pour les developpeurs > Debogage USB
-3. Brancher le telephone en USB, accepter le debogage USB sur le telephone
-4. Lancer :
-```bash
-flutter run
+make test        # ~795 tests (unit + widget)
+make test-cov    # Avec couverture
 ```
 
-### Option B : Sans Flutter (via Docker)
+## Tester sur iPhone
 
-Pour les devs qui n'ont pas Flutter/Android SDK installe :
-1. Installer Docker Desktop
-2. Build l'APK :
+1. Activer le **mode développeur** sur l'iPhone
+2. Brancher en USB, accepter "Faire confiance"
+3. Configurer le signing dans Xcode : `open ios/Runner.xcworkspace`
+4. Lancer : `make run-ios`
+
+## Tester sur Android
+
 ```bash
+# Avec Flutter
+flutter run -d android
+
+# Sans Flutter (via Docker)
 make docker-apk
-```
-3. Installer l'APK sur le telephone (voir section "Installer l'APK" ci-dessous)
-
-### Option C : Sans `adb` (transfert de fichier)
-
-1. Build l'APK via Docker (`make docker-apk`)
-2. Envoyer `build-output/app-release.apk` sur le telephone (email, Drive, USB)
-3. Ouvrir le fichier APK sur le telephone
-4. Autoriser l'installation depuis des sources inconnues si demande
-
-## Configuration macOS (desktop)
-
-Pour le developpement macOS, ouvrir Xcode une fois pour configurer la signature :
-
-```bash
-open macos/Runner.xcworkspace
+# Puis installer l'APK sur le téléphone
 ```
 
-Puis dans **Signing & Capabilities** : activer **Automatically manage signing** et selectionner votre Team.
-
-## Docker - Build Android (sans Flutter)
-
-Docker permet de build l'APK Android **sans installer Flutter ni Android SDK**.
-Utile pour les devs sur PC Windows ou Linux qui veulent tester sur Android.
-
-> **Note**: Le build iOS necessite obligatoirement macOS + Xcode. Docker ne peut pas contourner cette limitation Apple.
-
-### Build Android via Docker
+## Docker
 
 ```bash
-# Build APK release (recommande pour tester)
-make docker-apk
-
-# Build APK debug (plus rapide, pour dev)
-make docker-apk-debug
-
-# Build AAB pour le Play Store
-make docker-aab
-```
-
-Les fichiers generes se trouvent dans le dossier `build-output/`.
-
-### Tests via Docker
-
-```bash
-make docker-test
-```
-
-### Nettoyage Docker
-
-```bash
-make docker-clean
-```
-
-## Build iOS (macOS uniquement)
-
-Le build iOS necessite macOS + Xcode. Prerequis : CocoaPods (`sudo gem install cocoapods`).
-
-```bash
-# Build iOS sans signature (pour test)
-make build-ios-release
-
-# Export IPA pour TestFlight (necessite un profil de signature)
-make export-ipa
-```
-
-## Installer l'APK sur un telephone Android
-
-### Via `adb` (USB)
-
-`adb` s'installe **sans Android Studio** :
-- **macOS** : `brew install android-platform-tools`
-- **Linux** : `sudo apt install adb`
-- **Windows** : telecharger [Platform Tools](https://developer.android.com/tools/releases/platform-tools) (zip a extraire, ajouter au PATH)
-
-Puis :
-1. Activer le **mode developpeur** et le **debogage USB** sur le telephone
-2. Connecter le telephone en USB
-3. Executer :
-```bash
-adb install build-output/app-release.apk
-```
-
-### Via transfert de fichier (sans rien installer)
-1. Copier `build-output/app-release.apk` sur le telephone (email, Drive, USB)
-2. Ouvrir le fichier APK sur le telephone
-3. Autoriser l'installation depuis des sources inconnues si demande
-
-## Test sur differents environnements
-
-| Plateforme | Methode | Prerequis |
-|-----------|---------|-----------|
-| Android physique | APK sideload | Docker (any OS) |
-| Android emulateur | APK + Android Studio | Android Studio |
-| macOS desktop | `make run-macos` | macOS + Flutter SDK |
-| iPhone physique | TestFlight ou Xcode | macOS + Xcode |
-| iPhone simulateur | `make run-ios` | macOS + Xcode |
-
-## Troubleshooting
-
-### iPhone non detecte par Flutter
-- Verifier que le **mode developpeur** est active sur l'iPhone (Reglages > Confidentialite et securite > Mode developpeur)
-- Verifier que la popup **"Faire confiance"** a ete acceptee sur l'iPhone
-- Verifier que le certificat developpeur est approuve (Reglages > General > VPN et gestion de l'appareil)
-- Essayer un autre cable USB (certains cables ne font que la charge)
-- Lancer `flutter clean && flutter pub get && flutter run`
-
-### "Dart VM Service was not discovered after 60 seconds"
-- Verifier que le Mac et l'iPhone sont sur le **meme reseau Wi-Fi**
-- Activer le **mode developpeur** sur l'iPhone
-- Relancer : `flutter clean && flutter run`
-
-### L'app se ferme immediatement sur iPhone
-- Aller dans Reglages > General > VPN et gestion de l'appareil > Faire confiance au certificat developpeur
-- Verifier le signing dans Xcode (Runner > Signing & Capabilities)
-
-### Le build Docker est lent
-Le premier build telecharge le SDK Flutter (~2GB). Les builds suivants utilisent le cache Docker.
-
-### Erreur de memoire Docker
-Le build Android necessite au moins 4GB de RAM. Augmentez la memoire dans Docker Desktop > Settings > Resources.
-
-### Erreur Gradle
-```bash
-make docker-clean
-make docker-apk
+make docker-apk        # APK release
+make docker-apk-debug  # APK debug
+make docker-aab        # AAB Play Store
+make docker-test       # Tests dans Docker
+make docker-clean      # Nettoyage
 ```
 
 ## Stack technique
 
-- **State Management** : Provider
+- **State Management** : Provider (ChangeNotifier)
 - **Navigation** : GoRouter
-- **HTTP** : Dio avec token refresh automatique
+- **HTTP** : Dio avec token refresh automatique (JWT RSA)
 - **Stockage** : Flutter Secure Storage (Keychain/Encrypted SharedPrefs)
-- **Video** : Chewie + video_player
+- **Paiement** : flutter_stripe (Payment Sheet natif)
+- **Vidéo** : Chewie + video_player
+- **Notifications** : flutter_local_notifications
+- **Préférences** : SharedPreferences (thème, notifications)
 - **Icons** : Lucide Icons
+- **Scanner** : camera + edge_detection

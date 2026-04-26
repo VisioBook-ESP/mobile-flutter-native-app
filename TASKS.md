@@ -22,8 +22,20 @@
 | 10 | Historique | P1 | Done | 100% |
 | 11 | Polish & QA | P2 | Done | 100% |
 | 12 | Docker & Multi-platform Build | P1 | Done | 100% |
+<<<<<<< HEAD
+<<<<<<< HEAD
+| 13 | Integration API | P0 | Done | 100% |
+| 14 | Profil Utilisateur | P1 | Done | 100% |
+| 15 | Paiement & Abonnements | P1 | Done | 100% |
+| 16 | UI Glassmorphism | P1 | Done | 100% |
+=======
 | 13 | Integration API - Donnees utilisateur | P0 | Done | 100% |
 | 14 | Profil Utilisateur | P1 | Done | 100% |
+>>>>>>> origin/dev
+=======
+| 13 | Integration API - Donnees utilisateur | P0 | Done | 100% |
+| 14 | Profil Utilisateur | P1 | Done | 100% |
+>>>>>>> 64275e1d8f243ab471440293033b83600e1eac98
 
 ---
 
@@ -63,14 +75,30 @@ Voir l'historique git pour le detail. Toutes les phases 0 a 12 sont 100% termin�
 - [x] Body optionnel sur generateProject, passage ProjectConfig
 
 ### 13.4 - Export & Partage [P0] ✅
+<<<<<<< HEAD
+<<<<<<< HEAD
 - [x] downloadVideo via videoUrl des versions du projet
 - [x] generateShareLink via shareProject
 - [x] videoUrl recupere depuis ProjectVersion (pas de videoId separe)
+=======
+- [x] `ExportService.downloadVideo()` : utiliser `ApiClient.getDownloadUrl()` puis download
+- [x] `ExportService.generateShareLink()` : utiliser `_apiClient.shareProject()`
+- [x] Verifier que le `videoId` pour le download vient bien des donnees du projet/workflow
+>>>>>>> origin/dev
+=======
+- [x] downloadVideo via videoUrl des versions du projet
+- [x] generateShareLink via shareProject
+- [x] videoUrl recupere depuis ProjectVersion (pas de videoId separe)
+>>>>>>> 64275e1d8f243ab471440293033b83600e1eac98
 
 ### 13.5 - Auth : champs manquants [P1] ✅
 - [x] refresh_token, firstName/userName, checkAuthStatus
 
 ### 13.6 - VisioBook Reader : deserialisation [P0] ✅
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 64275e1d8f243ab471440293033b83600e1eac98
 - [x] VisiobookData.fromJson() + fromScenesResponse() pour format backend
 - [x] Wrapper {"data": {...}} gere
 - [x] VisiobookPanel.fromScene() pour convertir les scenes backend en panels
@@ -84,6 +112,22 @@ Voir l'historique git pour le detail. Toutes les phases 0 a 12 sont 100% termin�
 - [x] Tests unitaires pour les nouveaux champs
 - [x] Tests fromScene, fromScenesResponse
 - [x] Tests endpoints API (getVersions, getVersion)
+<<<<<<< HEAD
+=======
+- [x] Verifier que `VisiobookData.fromJson()` correspond au format reel
+- [x] Gerer le cas ou le backend retourne un wrapper
+- [x] `VisiobookPanel.fromJson()` : gerer les types numeriques flexibles
+
+### 13.7 - Environment & Routing [P1] ✅
+- [x] Ajouter `ingestionServiceUrl` dans `EnvironmentConfig`
+- [x] Verifier les URLs/ports quand les services seront deployes
+
+### 13.8 - Tests [P0] ✅
+- [x] Tests unitaires pour les nouveaux champs
+- [x] Test d'integration du flux complet
+>>>>>>> origin/dev
+=======
+>>>>>>> 64275e1d8f243ab471440293033b83600e1eac98
 
 ### 13.9 - Documentation API [P1] ✅
 - [x] Specs API recuperees et sauvegardees
@@ -92,6 +136,10 @@ Voir l'historique git pour le detail. Toutes les phases 0 a 12 sont 100% termin�
 
 ## Phase 14: Profil Utilisateur [P1] ✅
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 64275e1d8f243ab471440293033b83600e1eac98
 > Ref: Core User Service
 
 ### Ecran Profil ✅
@@ -112,6 +160,38 @@ Voir l'historique git pour le detail. Toutes les phases 0 a 12 sont 100% termin�
 - ~~Langue de l'app (FR/EN)~~ (supprime, on reste en francais)
 
 ### Compte ✅
+<<<<<<< HEAD
+=======
+> Ref: Core User Service (port 9999)
+> Paiement/abonnements : voir issue #52
+
+### Ecran Profil [P1] ✅
+- [x] Header profil (avatar, nom, email)
+- [x] Section "Informations personnelles"
+- [x] Modifier nom / prenom / username
+- [x] Modifier email (inline-editable avec hint verification)
+- [x] Modifier mot de passe (ancien + nouveau)
+- ~~Upload / modifier avatar~~ (supprime)
+
+### Section Credits & Tokens [P1] ✅
+- [x] Affichage solde credits/tokens
+- [x] Jauge visuelle (credits restants / total)
+- ~~Historique d'utilisation des credits~~ (deplace vers #52, ce sont des quotas d'abonnement)
+
+### Section Paiement [P1]
+- [x] UI "Mes moyens de paiement" (liste vide + placeholder)
+- ~~UI "Ajouter un moyen de paiement"~~ (deplace vers #52)
+- ~~UI "Acheter des credits"~~ (deplace vers #52, ce sont des plans d'abonnement)
+
+### Parametres [P2] ✅
+- ~~Langue de l'app (FR/EN)~~ (supprime, on reste en francais)
+- [x] Notifications (toggle on/off) - SettingsProvider + SharedPreferences
+- [x] Theme (clair/sombre) - selecteur Auto/Clair/Sombre avec persistance
+
+### Compte [P1]
+>>>>>>> origin/dev
+=======
+>>>>>>> 64275e1d8f243ab471440293033b83600e1eac98
 - [x] Bouton "Se deconnecter"
 - [x] Bouton "Supprimer mon compte" (avec confirmation)
 - [x] Mentions legales / CGU

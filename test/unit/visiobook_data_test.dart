@@ -326,6 +326,15 @@ void main() {
       expect(data.createdAt.day, 15);
     });
 
+    test('handles { "data": { ... } } wrapper directly in fromJson', () {
+      final wrappedJson = {'data': specJson};
+      final data = VisiobookData.fromJson(wrappedJson);
+
+      expect(data.projectId, '550e8400-e29b-41d4-a716-446655440000');
+      expect(data.title, "L'Explorateur des Etoiles");
+      expect(data.pages.length, 1);
+    });
+
     test('sorts pages by pageNumber', () {
       final json = {
         'projectId': 'abc-123',
@@ -377,6 +386,201 @@ void main() {
       expect(data.pages[0].pageNumber, 1);
       expect(data.pages[1].pageNumber, 2);
       expect(data.pages[2].pageNumber, 3);
+    });
+  });
+
+  group('VisiobookPanel.fromScene', () {
+    test('maps backend scene fields correctly', () {
+      final scene = {
+        'id': 'scene-001',
+        'order': 2,
+        'text': 'Scene text excerpt',
+        'description': 'A magical forest at dawn',
+        'generatedImageUrl': 'https://storage.example.com/scenes/001/image.png',
+        'animationUrl': 'https://storage.example.com/scenes/001/animation.mp4',
+        'duration': 7.5,
+        'narrationText': 'The forest whispered ancient secrets.',
+        'dialogues': [
+          {'speaker': 'Luna', 'line': 'Listen to the trees!'},
+        ],
+      };
+
+      final panel = VisiobookPanel.fromScene(scene);
+
+      expect(panel.id, 'scene-001');
+      expect(panel.order, 2);
+      expect(
+        panel.videoUrl,
+        'https://storage.example.com/scenes/001/animation.mp4',
+      );
+      expect(
+        panel.thumbnailUrl,
+        'https://storage.example.com/scenes/001/image.png',
+      );
+      expect(panel.narratorText, 'The forest whispered ancient secrets.');
+      expect(panel.dialogueText, 'Luna : Listen to the trees!');
+      expect(panel.videoDurationMs, 7500);
+    });
+
+    test('concatenates multiple dialogues', () {
+      final scene = {
+        'id': 'scene-002',
+        'order': 0,
+        'duration': 5,
+        'dialogues': [
+          {'speaker': 'Luna', 'line': 'Hello!'},
+          {'speaker': 'Atlas', 'line': 'Greetings!'},
+        ],
+      };
+
+      final panel = VisiobookPanel.fromScene(scene);
+
+      expect(panel.dialogueText, 'Luna : Hello!\nAtlas : Greetings!');
+    });
+
+    test('falls back to description when narrationText is absent', () {
+      final scene = {
+        'id': 'scene-003',
+        'order': 0,
+        'description': 'A quiet village',
+        'duration': 3,
+      };
+
+      final panel = VisiobookPanel.fromScene(scene);
+
+      expect(panel.narratorText, 'A quiet village');
+      expect(panel.dialogueText, isNull);
+    });
+
+    test('handles empty scene with defaults', () {
+      final scene = <String, dynamic>{};
+
+      final panel = VisiobookPanel.fromScene(scene);
+
+      expect(panel.id, '');
+      expect(panel.order, 0);
+      expect(panel.videoUrl, '');
+      expect(panel.thumbnailUrl, '');
+      expect(panel.videoDurationMs, 5000);
+    });
+
+    test('handles snake_case generatedImageUrl', () {
+      final scene = {
+        'id': 's1',
+        'order': 0,
+        'generated_image_url': 'https://storage.example.com/img.png',
+        'duration': 4,
+      };
+
+      final panel = VisiobookPanel.fromScene(scene);
+
+      expect(panel.thumbnailUrl, 'https://storage.example.com/img.png');
+    });
+  });
+
+  group('VisiobookData.fromScenesResponse', () {
+    test('builds pages from backend scenes grouped by scenesPerPage', () {
+      final project = {
+        'id': 'proj-123',
+        'title': 'Test Visiobook',
+        'config': {'style': 'cartoon', 'language': 'fr'},
+        'createdAt': '2025-06-01T00:00:00Z',
+      };
+
+      final scenes = List.generate(
+        6,
+        (i) => {
+          'id': 'scene-$i',
+          'order': i,
+          'description': 'Scene $i description',
+          'generatedImageUrl': 'https://storage.example.com/scene_$i.png',
+          'duration': 5,
+        },
+      );
+
+      final data = VisiobookData.fromScenesResponse(
+        projectJson: project,
+        scenes: scenes,
+        scenesPerPage: 4,
+      );
+
+      expect(data.projectId, 'proj-123');
+      expect(data.title, 'Test Visiobook');
+      expect(data.style, 'cartoon');
+      expect(data.language, 'fr');
+      expect(data.totalPages, 2);
+      expect(data.pages[0].pageNumber, 1);
+      expect(data.pages[0].panels.length, 4);
+      expect(data.pages[1].pageNumber, 2);
+      expect(data.pages[1].panels.length, 2);
+      expect(data.totalPanels, 6);
+    });
+
+    test('sorts scenes by order before grouping', () {
+      final project = {
+        'id': 'proj-sort',
+        'title': 'Sort Test',
+        'createdAt': '2025-01-01T00:00:00Z',
+      };
+
+      final scenes = [
+        {'id': 's2', 'order': 2, 'duration': 3},
+        {'id': 's0', 'order': 0, 'duration': 3},
+        {'id': 's1', 'order': 1, 'duration': 3},
+      ];
+
+      final data = VisiobookData.fromScenesResponse(
+        projectJson: project,
+        scenes: scenes,
+        scenesPerPage: 10,
+      );
+
+      expect(data.pages.length, 1);
+      expect(data.pages[0].panels[0].id, 's0');
+      expect(data.pages[0].panels[1].id, 's1');
+      expect(data.pages[0].panels[2].id, 's2');
+    });
+
+    test('handles empty scenes list', () {
+      final project = {
+        'id': 'proj-empty',
+        'title': 'Empty',
+        'createdAt': '2025-01-01T00:00:00Z',
+      };
+
+      final data = VisiobookData.fromScenesResponse(
+        projectJson: project,
+        scenes: [],
+      );
+
+      expect(data.pages, isEmpty);
+      expect(data.totalPages, 0);
+      expect(data.totalPanels, 0);
+      expect(data.coverUrl, isNull);
+    });
+
+    test('uses first panel thumbnail as coverUrl', () {
+      final project = {
+        'id': 'proj-cover',
+        'title': 'Cover',
+        'createdAt': '2025-01-01T00:00:00Z',
+      };
+
+      final scenes = [
+        {
+          'id': 's0',
+          'order': 0,
+          'generatedImageUrl': 'https://example.com/cover.png',
+          'duration': 5,
+        },
+      ];
+
+      final data = VisiobookData.fromScenesResponse(
+        projectJson: project,
+        scenes: scenes,
+      );
+
+      expect(data.coverUrl, 'https://example.com/cover.png');
     });
   });
 }

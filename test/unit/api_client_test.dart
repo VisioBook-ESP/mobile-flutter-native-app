@@ -155,6 +155,27 @@ void main() {
     });
   });
 
+  group('ApiClient version endpoints', () {
+    test('getVersions calls correct URL', () async {
+      try {
+        await apiClient.getVersions('proj-1');
+      } on DioException catch (e) {
+        expect(e.requestOptions.path, contains('/projects/proj-1/versions'));
+      }
+    });
+
+    test('getVersion calls correct URL', () async {
+      try {
+        await apiClient.getVersion('proj-1', 'ver-1');
+      } on DioException catch (e) {
+        expect(
+          e.requestOptions.path,
+          contains('/projects/proj-1/versions/ver-1'),
+        );
+      }
+    });
+  });
+
   group('ApiClient version & workflow endpoints', () {
     test('createVersion calls correct URL', () async {
       try {

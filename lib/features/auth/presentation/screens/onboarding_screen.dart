@@ -172,7 +172,7 @@ class _SlideWidget extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.1)
-                  : AppColors.neutral100,
+                  : Colors.white.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(50),
             ),
             child: Icon(

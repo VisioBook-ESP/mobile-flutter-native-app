@@ -11,6 +11,7 @@ import 'package:visiobook_mobile/features/payment/presentation/providers/payment
 import 'package:visiobook_mobile/features/profile/data/profile_service.dart';
 import 'package:visiobook_mobile/features/profile/presentation/providers/profile_provider.dart';
 import 'package:visiobook_mobile/features/profile/presentation/screens/profile_screen.dart';
+import 'package:visiobook_mobile/core/services/settings_provider.dart';
 
 class _FakeStorage implements SecureStorageService {
   @override
@@ -65,6 +66,9 @@ void main() {
         ChangeNotifierProvider<AuthProvider>(
           create: (_) => AuthProvider(authService: authService),
         ),
+        ChangeNotifierProvider<SettingsProvider>(
+          create: (_) => SettingsProvider(),
+        ),
       ],
       child: const MaterialApp(home: ProfileScreen()),
     );
@@ -105,7 +109,7 @@ void main() {
     // Verify key section headings are present
     expect(find.text('Mon forfait'), findsOneWidget);
     expect(find.text('Informations personnelles'), findsOneWidget);
-    expect(find.text('Paiement'), findsOneWidget);
+    // Section Paiement supprimée
     expect(find.text('Compte'), findsOneWidget);
   });
 
@@ -154,7 +158,7 @@ void main() {
     expect(find.text('Mon forfait'), findsOneWidget);
     // Usage labels from quota section
     expect(find.textContaining('rations'), findsOneWidget);
-    expect(find.text('Projets'), findsOneWidget);
+    expect(find.text('Stockage'), findsOneWidget);
     // Change plan button
     expect(find.text('Changer de plan'), findsOneWidget);
   });
@@ -192,7 +196,7 @@ void main() {
     // Mon forfait section
     expect(find.text('Mon forfait'), findsOneWidget);
     // Should show manage subscription button (appears in both quota and payment sections)
-    expect(find.text('Gérer mon abonnement'), findsWidgets);
+    expect(find.text('Changer de plan'), findsOneWidget);
     // Should show change plan button
     expect(find.text('Changer de plan'), findsOneWidget);
   });

@@ -10,6 +10,7 @@ import 'package:visiobook_mobile/features/auth/presentation/providers/auth_provi
 import 'package:visiobook_mobile/features/payment/presentation/providers/payment_provider.dart';
 import 'package:visiobook_mobile/features/profile/domain/user_profile.dart';
 import 'package:visiobook_mobile/features/profile/presentation/providers/profile_provider.dart';
+import 'package:visiobook_mobile/core/services/settings_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -164,9 +165,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 24),
           _buildSecuritySection(context, provider),
           const SizedBox(height: 24),
-          _buildPaymentSection(context, paymentProvider),
-          const SizedBox(height: 24),
           _buildAboutSection(context),
+          const SizedBox(height: 24),
+          _buildSettingsSection(context),
           const SizedBox(height: 24),
           _buildAccountSection(context, provider),
           const SizedBox(height: 120),
@@ -188,8 +189,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             decoration: BoxDecoration(
               color: Theme.of(context).brightness == Brightness.dark
                   ? Colors.white.withValues(alpha: 0.15)
-                  : AppColors.neutral900,
+                  : AppColors.neutral900.withValues(alpha: 0.08),
               shape: BoxShape.circle,
+              border: Theme.of(context).brightness == Brightness.light
+                  ? Border.all(
+                      color: AppColors.neutral900.withValues(alpha: 0.12),
+                    )
+                  : null,
             ),
             child: Center(
               child: Text(
@@ -197,7 +203,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: TextStyle(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? Colors.white
-                      : Colors.white,
+                      : AppColors.neutral900,
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
                 ),
@@ -238,15 +244,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final currentPlan = paymentProvider.currentPlan;
     final planName = currentPlan?.name ?? 'Free';
 
-    final projectsProgress = quota?.projectsUsagePercent.clamp(0.0, 1.0) ?? 0.0;
-    final videosProgress = quota?.videosUsagePercent.clamp(0.0, 1.0) ?? 0.0;
+    final generationsProgress =
+        quota?.generationsUsagePercent.clamp(0.0, 1.0) ?? 0.0;
+    final storageProgress = quota?.storageUsagePercent.clamp(0.0, 1.0) ?? 0.0;
 
-    final projectsUsed = quota?.projectsUsed ?? 0;
-    final projectsLimit = quota?.projectsLimit ?? 0;
-    final videosUsed = quota?.videosUsed ?? 0;
-    final videosLimit = quota?.videosLimit ?? 0;
+    final generationsUsed = quota?.generationsUsed ?? 0;
+    final generationsLimit = quota?.generationsLimit ?? 0;
+    final storageUsed = quota?.storageUsedGB ?? 0.0;
+    final storageLimit = quota?.storageLimitGB ?? 0.0;
 
-    String limitLabel(int limit) => limit < 0 ? '\u221e' : '$limit';
+    String intLimitLabel(int limit) => limit < 0 ? '\u221e' : '$limit';
+    String storageLimitLabel(double limit) =>
+        limit <= 0 ? '\u221e' : '${limit.toStringAsFixed(0)} Go';
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return _buildCard(
@@ -276,13 +285,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: BoxDecoration(
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.15)
-                        : AppColors.neutral900,
+                        : AppColors.neutral900.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
+                    border: isDark
+                        ? null
+                        : Border.all(
+                            color: AppColors.neutral900.withValues(alpha: 0.12),
+                          ),
                   ),
                   child: Text(
                     planName,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : AppColors.neutral900,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -302,7 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: videosProgress,
+                value: generationsProgress,
                 minHeight: 8,
                 backgroundColor: isDark
                     ? Colors.white.withValues(alpha: 0.1)
@@ -318,14 +332,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                '$videosUsed / ${limitLabel(videosLimit)}',
+                '$generationsUsed / ${intLimitLabel(generationsLimit)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
             const SizedBox(height: 16),
-            // Projects (storage) usage
+            // Storage usage
             Text(
-              'Projets',
+              'Stockage',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: isDark ? AppColors.neutral400 : AppColors.neutral600,
               ),
@@ -334,7 +348,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: projectsProgress,
+                value: storageProgress,
                 minHeight: 8,
                 backgroundColor: isDark
                     ? Colors.white.withValues(alpha: 0.1)
@@ -350,7 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                '$projectsUsed / ${limitLabel(projectsLimit)}',
+                '${storageUsed.toStringAsFixed(1)} Go / ${storageLimitLabel(storageLimit)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
@@ -358,14 +372,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             AppButton(
               text: 'Changer de plan',
               fullWidth: true,
-              onPressed: () => context.push(AppRoutes.plans),
-            ),
-            const SizedBox(height: 8),
-            AppButton(
-              text: 'G\u00e9rer mon abonnement',
-              variant: AppButtonVariant.outline,
-              fullWidth: true,
-              onPressed: () => context.push(AppRoutes.subscription),
+              onPressed: () async {
+                final provider = context.read<PaymentProvider>();
+                await context.push(AppRoutes.plans);
+                if (mounted) {
+                  provider.loadAll();
+                }
+              },
             ),
           ],
         ),
@@ -692,115 +705,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // -- Payment ---------------------------------------------------------------
-
-  Widget _buildPaymentSection(
-    BuildContext context,
-    PaymentProvider paymentProvider,
-  ) {
-    final subscription = paymentProvider.subscription;
-    final currentPlan = paymentProvider.currentPlan;
-    final planName = currentPlan?.name ?? 'Free';
-    final isActive = subscription?.isActive ?? false;
-    final isCanceled = subscription?.isCanceled ?? false;
-
-    String statusLabel;
-    Color statusColor;
-    if (isCanceled) {
-      statusLabel = 'Annul\u00e9';
-      statusColor = AppColors.error;
-    } else if (isActive) {
-      statusLabel = 'Actif';
-      statusColor = const Color(0xFF16A34A);
-    } else {
-      statusLabel = 'Gratuit';
-      statusColor = AppColors.neutral500;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              LucideIcons.creditCard,
-              size: 20,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            const SizedBox(width: 8),
-            Text('Paiement', style: Theme.of(context).textTheme.headlineSmall),
-          ],
-        ),
-        const SizedBox(height: 12),
-        _buildCard(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Plan $planName',
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: statusColor,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                statusLabel,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: statusColor),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                if (subscription?.currentPeriodEnd != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    isCanceled
-                        ? 'Acc\u00e8s jusqu\'au ${_formatDate(subscription!.currentPeriodEnd!)}'
-                        : 'Renouvellement le ${_formatDate(subscription!.currentPeriodEnd!)}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.neutral500,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                Center(
-                  child: AppButton(
-                    text: 'G\u00e9rer mon abonnement',
-                    variant: AppButtonVariant.outline,
-                    fullWidth: true,
-                    onPressed: () => context.push(AppRoutes.subscription),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   // -- About -----------------------------------------------------------------
 
   Widget _buildAboutSection(BuildContext context) {
@@ -901,6 +805,163 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // -- Settings --------------------------------------------------------------
+
+  Widget _buildSettingsSection(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              LucideIcons.sliders,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Param\u00e8tres',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildCard(
+          child: Column(
+            children: [
+              // Notifications toggle
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      LucideIcons.bell,
+                      size: 20,
+                      color: isDark
+                          ? AppColors.neutral400
+                          : AppColors.neutral500,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Notifications',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                    Switch.adaptive(
+                      value: settings.notificationsEnabled,
+                      activeTrackColor: AppColors.info,
+                      onChanged: (value) => settings.toggleNotifications(value),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.neutral700 : AppColors.neutral200,
+              ),
+              // Theme selector
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isDark ? LucideIcons.moon : LucideIcons.sun,
+                      size: 20,
+                      color: isDark
+                          ? AppColors.neutral400
+                          : AppColors.neutral500,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Th\u00e8me',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                    _buildThemeSelector(context, settings),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildThemeSelector(BuildContext context, SettingsProvider settings) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Widget chip(String label, ThemeMode mode, IconData icon) {
+      final selected = settings.themeMode == mode;
+      return GestureDetector(
+        onTap: () => settings.setThemeMode(mode),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.info.withValues(alpha: 0.15)
+                : isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.white.withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: selected ? AppColors.info : Colors.transparent,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: selected
+                    ? AppColors.info
+                    : isDark
+                    ? AppColors.neutral400
+                    : AppColors.neutral500,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                  color: selected
+                      ? AppColors.info
+                      : isDark
+                      ? AppColors.neutral400
+                      : AppColors.neutral500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        chip('Auto', ThemeMode.system, LucideIcons.smartphone),
+        const SizedBox(width: 6),
+        chip('Clair', ThemeMode.light, LucideIcons.sun),
+        const SizedBox(width: 6),
+        chip('Sombre', ThemeMode.dark, LucideIcons.moon),
+      ],
+    );
+  }
+
   // -- Account ---------------------------------------------------------------
 
   Widget _buildAccountSection(BuildContext context, ProfileProvider provider) {
@@ -960,9 +1021,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: isDark
             ? Colors.white.withValues(alpha: 0.05)
-            : AppColors.neutral100,
+            : Colors.white.withValues(alpha: 0.7),
         border: Border.all(
-          color: isDark ? AppColors.neutral700 : AppColors.neutral200,
+          color: isDark
+              ? AppColors.neutral700
+              : Colors.black.withValues(alpha: 0.08),
         ),
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       ),

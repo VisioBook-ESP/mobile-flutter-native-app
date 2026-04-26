@@ -27,52 +27,54 @@ class StorageService {
     ImportFile importFile, {
     String? projectId,
     Function(double)? onProgress,
-  }) async {
-    try {
-      final file = File(importFile.path);
-      if (!await file.exists()) {
-        return StorageResult(success: false, error: 'Fichier introuvable');
-      }
+  }) {
+    return _withRetry(() async {
+      try {
+        final file = File(importFile.path);
+        if (!await file.exists()) {
+          return StorageResult(success: false, error: 'Fichier introuvable');
+        }
 
-      final contentType = importFile.type.mimeType != null
-          ? MediaType.parse(importFile.type.mimeType!)
-          : null;
+        final contentType = importFile.type.mimeType != null
+            ? MediaType.parse(importFile.type.mimeType!)
+            : null;
 
-      final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          importFile.path,
-          filename: importFile.name,
-          contentType: contentType,
-        ),
-        'project_id': projectId ?? '',
-      });
+        final formData = FormData.fromMap({
+          'file': await MultipartFile.fromFile(
+            importFile.path,
+            filename: importFile.name,
+            contentType: contentType,
+          ),
+          'project_id': projectId ?? '',
+        });
 
-      final response = await _apiClient.dio.post(
-        '${EnvironmentConfig.ingestionServiceUrl}/upload/',
-        data: formData,
-        options: Options(contentType: 'multipart/form-data'),
-        onSendProgress: onProgress != null
-            ? (sent, total) {
-                if (total > 0) {
-                  onProgress(sent / total);
+        final response = await _apiClient.dio.post(
+          '${EnvironmentConfig.ingestionServiceUrl}/upload/',
+          data: formData,
+          options: Options(contentType: 'multipart/form-data'),
+          onSendProgress: onProgress != null
+              ? (sent, total) {
+                  if (total > 0) {
+                    onProgress(sent / total);
+                  }
                 }
-              }
-            : null,
-      );
+              : null,
+        );
 
-      final data = response.data;
-      return StorageResult(
-        success: true,
-        data: UploadResult.success(
-          fileId: data['fileId'] as String? ?? '',
-          fileUrl: '',
-        ),
-      );
-    } on DioException catch (e) {
-      return StorageResult(success: false, error: _handleError(e));
-    } catch (e) {
-      return StorageResult(success: false, error: 'Erreur inattendue: $e');
-    }
+        final data = response.data;
+        return StorageResult(
+          success: true,
+          data: UploadResult.success(
+            fileId: data['fileId'] as String? ?? '',
+            fileUrl: '',
+          ),
+        );
+      } on DioException catch (e) {
+        return StorageResult(success: false, error: _handleError(e));
+      } catch (e) {
+        return StorageResult(success: false, error: 'Erreur inattendue: $e');
+      }
+    });
   }
 
   /// Lance l'ingestion asynchrone d'un fichier deja uploade
@@ -130,48 +132,50 @@ class StorageService {
   Future<StorageResult<UploadResult>> extractTextFromFile(
     ImportFile importFile, {
     Function(double)? onProgress,
-  }) async {
-    try {
-      final file = File(importFile.path);
-      if (!await file.exists()) {
-        return StorageResult(success: false, error: 'Fichier introuvable');
-      }
+  }) {
+    return _withRetry(() async {
+      try {
+        final file = File(importFile.path);
+        if (!await file.exists()) {
+          return StorageResult(success: false, error: 'Fichier introuvable');
+        }
 
-      final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          importFile.path,
-          filename: importFile.name,
-        ),
-      });
+        final formData = FormData.fromMap({
+          'file': await MultipartFile.fromFile(
+            importFile.path,
+            filename: importFile.name,
+          ),
+        });
 
-      final response = await _apiClient.dio.post(
-        '${EnvironmentConfig.ingestionServiceUrl}/extract/text',
-        data: formData,
-        options: Options(contentType: 'multipart/form-data'),
-        onSendProgress: onProgress != null
-            ? (sent, total) {
-                if (total > 0) {
-                  onProgress(sent / total);
+        final response = await _apiClient.dio.post(
+          '${EnvironmentConfig.ingestionServiceUrl}/extract/text',
+          data: formData,
+          options: Options(contentType: 'multipart/form-data'),
+          onSendProgress: onProgress != null
+              ? (sent, total) {
+                  if (total > 0) {
+                    onProgress(sent / total);
+                  }
                 }
-              }
-            : null,
-      );
+              : null,
+        );
 
-      final data = response.data;
-      return StorageResult(
-        success: true,
-        data: UploadResult.success(
-          fileId: '',
-          fileUrl: '',
-          extractedText: data['text'] as String?,
-          wordCount: data['wordCount'] as int?,
-        ),
-      );
-    } on DioException catch (e) {
-      return StorageResult(success: false, error: _handleError(e));
-    } catch (e) {
-      return StorageResult(success: false, error: 'Erreur inattendue: $e');
-    }
+        final data = response.data;
+        return StorageResult(
+          success: true,
+          data: UploadResult.success(
+            fileId: '',
+            fileUrl: '',
+            extractedText: data['text'] as String?,
+            wordCount: data['wordCount'] as int?,
+          ),
+        );
+      } on DioException catch (e) {
+        return StorageResult(success: false, error: _handleError(e));
+      } catch (e) {
+        return StorageResult(success: false, error: 'Erreur inattendue: $e');
+      }
+    });
   }
 
   /// Recupere la liste des fichiers de l'utilisateur
@@ -200,6 +204,35 @@ class StorageService {
     } catch (e) {
       return StorageResult(success: false, error: 'Erreur inattendue: $e');
     }
+  }
+
+  /// Execute une operation avec retry automatique
+  Future<StorageResult<T>> _withRetry<T>(
+    Future<StorageResult<T>> Function() operation, {
+    int maxAttempts = 3,
+  }) async {
+    StorageResult<T>? lastResult;
+
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+      lastResult = await operation();
+
+      if (lastResult.success) return lastResult;
+
+      // Ne pas retry sur les erreurs client (4xx)
+      if (lastResult.error != null &&
+          (lastResult.error!.contains('introuvable') ||
+              lastResult.error!.contains('volumineux') ||
+              lastResult.error!.contains('non supporté'))) {
+        return lastResult;
+      }
+
+      // Attendre avant le prochain essai (sauf le dernier)
+      if (attempt < maxAttempts) {
+        await Future.delayed(Duration(seconds: 1 << (attempt - 1)));
+      }
+    }
+
+    return lastResult!;
   }
 
   String _handleError(DioException e) {

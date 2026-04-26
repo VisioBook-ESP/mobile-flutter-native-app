@@ -123,7 +123,7 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
                       filled: true,
                       fillColor: isDark
                           ? Colors.white.withValues(alpha: 0.08)
-                          : AppColors.neutral100,
+                          : Colors.white.withValues(alpha: 0.7),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                         borderSide: BorderSide.none,
@@ -229,10 +229,13 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
           color: isSelected
               ? (isDark
                     ? Colors.white.withValues(alpha: 0.15)
-                    : AppColors.neutral900)
+                    : AppColors.neutral900.withValues(alpha: 0.08))
               : (isDark
                     ? Colors.white.withValues(alpha: 0.08)
                     : AppColors.neutral100),
+          border: isSelected && !isDark
+              ? Border.all(color: AppColors.neutral900.withValues(alpha: 0.15))
+              : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusSm),
         ),
         child: Text(
@@ -241,7 +244,7 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: isSelected
-                ? Colors.white
+                ? (isDark ? Colors.white : AppColors.neutral900)
                 : (isDark ? AppColors.neutral300 : AppColors.neutral600),
           ),
         ),
@@ -269,7 +272,7 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
         decoration: BoxDecoration(
           color: isDark
               ? Colors.white.withValues(alpha: 0.08)
-              : AppColors.neutral100,
+              : Colors.white.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(AppTheme.radiusSm),
         ),
         child: Icon(
@@ -353,7 +356,7 @@ class _TextsHistoryScreenState extends State<TextsHistoryScreen> {
               decoration: BoxDecoration(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.08)
-                    : AppColors.neutral100,
+                    : Colors.white.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(AppTheme.radiusXl),
               ),
               child: const Icon(

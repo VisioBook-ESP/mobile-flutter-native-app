@@ -275,7 +275,8 @@ Finalement, le petit prince arriva sur Terre, ou il rencontra un renard qui lui 
         );
 
         if (!uploadResult.success || uploadResult.data == null) {
-          _error = uploadResult.error;
+          _error =
+              uploadResult.error ?? 'Échec de l\'upload de l\'image ${i + 1}';
           _state = ImportState.error;
           notifyListeners();
           return false;
@@ -284,8 +285,15 @@ Finalement, le petit prince arriva sur Terre, ou il rencontra un renard qui lui 
         firstFileId ??= uploadResult.data!.fileId;
       }
 
+      if (firstFileId == null) {
+        _error = 'Aucune image uploadée';
+        _state = ImportState.error;
+        notifyListeners();
+        return false;
+      }
+
       // Lancer l'ingestion (le backend fait l'OCR)
-      if (firstFileId != null && firstFileId.isNotEmpty) {
+      if (firstFileId.isNotEmpty) {
         _uploadProgress = 0.95;
         notifyListeners();
         final ingestionResult = await _storageService.startIngestion(
@@ -306,10 +314,7 @@ Finalement, le petit prince arriva sur Terre, ou il rencontra un renard qui lui 
         selectedAt: DateTime.now(),
       );
 
-      _uploadResult = UploadResult.success(
-        fileId: firstFileId ?? '',
-        fileUrl: '',
-      );
+      _uploadResult = UploadResult.success(fileId: firstFileId, fileUrl: '');
       _uploadProgress = 1.0;
       _state = ImportState.uploaded;
       notifyListeners();

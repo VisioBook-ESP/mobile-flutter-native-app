@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
+import 'package:visiobook_mobile/config/environment.dart';
 import 'package:visiobook_mobile/core/network/api_client.dart';
 import 'package:visiobook_mobile/core/routing/app_router.dart';
 import 'package:visiobook_mobile/core/theme/app_theme.dart';
@@ -27,10 +29,17 @@ import 'package:visiobook_mobile/features/projects/data/project_service.dart';
 import 'package:visiobook_mobile/features/projects/presentation/providers/project_provider.dart';
 
 import 'package:visiobook_mobile/core/services/notification_service.dart';
+import 'package:visiobook_mobile/core/services/settings_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   NotificationService.instance.init();
+
+  // Configurer Stripe avec la clé publishable
+  final stripeKey = EnvironmentConfig.stripePublishableKey;
+  if (stripeKey.isNotEmpty) {
+    Stripe.publishableKey = stripeKey;
+  }
 
   // Style de la barre de statut
   SystemChrome.setSystemUIOverlayStyle(
@@ -122,14 +131,20 @@ class VisioBookApp extends StatelessWidget {
             paymentService: PaymentService(apiClient: apiClient),
           ),
         ),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
-      child: MaterialApp.router(
-        title: 'VisioBook',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        routerConfig: appRouter.router,
+      child: Builder(
+        builder: (context) {
+          final settings = context.watch<SettingsProvider>();
+          return MaterialApp.router(
+            title: 'VisioBook',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: settings.themeMode,
+            routerConfig: appRouter.router,
+          );
+        },
       ),
     );
   }

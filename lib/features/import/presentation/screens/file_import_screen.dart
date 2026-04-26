@@ -65,9 +65,34 @@ class FileImportScreen extends StatelessWidget {
                       _FilePickerZone(onTap: () => provider.pickFile()),
 
                     // Erreur
-                    if (provider.error != null) ...[
+                    if (provider.error != null && !provider.isUploading) ...[
                       const SizedBox(height: 16),
                       _ErrorMessage(message: provider.error!),
+                      const SizedBox(height: 12),
+                      AppButton(
+                        text: 'Réessayer',
+                        variant: AppButtonVariant.outline,
+                        fullWidth: true,
+                        icon: const Icon(LucideIcons.refreshCw, size: 18),
+                        onPressed: () async {
+                          provider.clearError();
+                          final success = await provider.uploadFile();
+                          if (success && context.mounted) {
+                            final jobId = provider.lastIngestionJobId;
+                            final fileId = provider.lastIngestionFileId;
+                            if (jobId != null && fileId != null) {
+                              context
+                                  .read<TextsProvider>()
+                                  .startIngestionTracking(
+                                    fileId,
+                                    jobId,
+                                    provider.selectedFile?.name ?? 'Fichier',
+                                  );
+                            }
+                            context.push(AppRoutes.textPreview);
+                          }
+                        },
+                      ),
                     ],
 
                     // Progress bar

@@ -90,7 +90,7 @@ class _StyleCard extends StatelessWidget {
                 width: double.infinity,
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.08)
-                    : AppColors.neutral100,
+                    : Colors.white.withValues(alpha: 0.7),
                 child: Image.network(
                   style.previewUrl,
                   fit: BoxFit.cover,

@@ -12,7 +12,7 @@ enum ProjectStatus {
       case ProjectStatus.processing:
         return 'En cours...';
       case ProjectStatus.ready:
-        return 'Pret';
+        return 'Prêt';
       case ProjectStatus.error:
         return 'Erreur';
     }

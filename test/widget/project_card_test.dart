@@ -53,7 +53,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Pret'), findsOneWidget);
+      expect(find.text('Prêt'), findsOneWidget);
     });
 
     testWidgets('shows status badge for error', (tester) async {

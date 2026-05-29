@@ -548,38 +548,12 @@ class _GenerationScreenState extends State<GenerationScreen>
               ),
               const SizedBox(height: 12),
               AppButton(
-                text: 'Ajuster les paramètres',
+                text: 'Annuler',
                 variant: AppButtonVariant.outline,
                 fullWidth: true,
                 onPressed: () {
-                  provider.clearGeneration(widget.projectId);
-                  context.go(
-                    AppRoutes.projectEditConfig.replaceAll(
-                      ':id',
-                      widget.projectId,
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              GestureDetector(
-                onTap: () {
-                  provider.clearGeneration(widget.projectId);
                   context.go(AppRoutes.dashboard);
                 },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    'Retour au dashboard',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withValues(alpha: 0.6),
-                      decoration: TextDecoration.underline,
-                      decorationColor: Colors.white.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ),
               ),
             ],
           ),

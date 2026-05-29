@@ -60,38 +60,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
               return _buildErrorState(projectProvider.error);
             }
 
-            return RefreshIndicator(
-              onRefresh: () => projectProvider.loadProjects(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-                    _buildGreeting(context),
-                    const SizedBox(height: 24),
-                    if (projectProvider.projects.isNotEmpty) ...[
-                      StatsCard(
-                        visiobooksCount: projectProvider.readyProjects.length,
-                        textsCount: projectProvider.textsCount,
-                      ),
-                      const SizedBox(height: 32),
-                    ],
-                    if (projectProvider.readyProjects.isNotEmpty) ...[
-                      _SectionHeader(title: 'Mes VisioBooks'),
-                      _buildProjectsList(projectProvider.readyProjects),
-                      const SizedBox(height: 24),
-                    ],
-                    if (projectProvider.draftProjects.isNotEmpty) ...[
-                      _SectionHeader(title: 'En cours'),
-                      _buildProjectsList(projectProvider.draftProjects),
-                      const SizedBox(height: 24),
-                    ],
-                    if (projectProvider.projects.isEmpty) _buildEmptyState(),
-                    const SizedBox(height: 100),
-                  ],
-                ),
-              ),
+            return Consumer<GenerationProvider>(
+              builder: (context, genProvider, _) {
+                // Filtrer les projets "ready" en excluant ceux avec une
+                // generation active (en cours ou en erreur)
+                final readyProjects = projectProvider.readyProjects.where((p) {
+                  if (!genProvider.hasActiveGeneration(p.id)) return true;
+                  if (genProvider.isInProgress(p.id)) return false;
+                  if (genProvider.isFailed(p.id)) return false;
+                  return true;
+                }).toList();
+
+                // Les projets "en cours" incluent les drafts/processing + les
+                // projets ready dont la generation est en cours ou a echoue
+                final draftProjects = [
+                  ...projectProvider.draftProjects,
+                  ...projectProvider.readyProjects.where((p) {
+                    if (!genProvider.hasActiveGeneration(p.id)) return false;
+                    return genProvider.isInProgress(p.id) ||
+                        genProvider.isFailed(p.id);
+                  }),
+                ];
+
+                return RefreshIndicator(
+                  onRefresh: () => projectProvider.loadProjects(),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        _buildGreeting(context),
+                        const SizedBox(height: 24),
+                        if (projectProvider.projects.isNotEmpty) ...[
+                          StatsCard(
+                            visiobooksCount: readyProjects.length,
+                            textsCount: projectProvider.textsCount,
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                        if (readyProjects.isNotEmpty) ...[
+                          _SectionHeader(title: 'Mes VisioBooks'),
+                          _buildProjectsList(readyProjects),
+                          const SizedBox(height: 24),
+                        ],
+                        if (draftProjects.isNotEmpty) ...[
+                          _SectionHeader(title: 'En cours'),
+                          _buildProjectsList(draftProjects),
+                          const SizedBox(height: 24),
+                        ],
+                        if (projectProvider.projects.isEmpty)
+                          _buildEmptyState(),
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
           },
         ),
@@ -125,6 +150,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ? genProvider.getProgress(project.id)
                   : null;
 
+              // Calculer le statut effectif base sur la generation
+              ProjectStatus? effectiveStatus;
+              if (hasGeneration) {
+                if (genProvider.isInProgress(project.id)) {
+                  effectiveStatus = ProjectStatus.processing;
+                } else if (genProvider.isFailed(project.id)) {
+                  effectiveStatus = ProjectStatus.error;
+                }
+              }
+
               return Padding(
                 padding: EdgeInsets.only(
                   right: index < projects.length - 1 ? 16 : 0,
@@ -132,17 +167,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: ProjectCard(
                   project: project,
                   generationProgress: progress,
+                  effectiveStatus: effectiveStatus,
                   onTap: () {
-                    if (hasGeneration && genProvider.isInProgress(project.id)) {
+                    if (hasGeneration) {
                       final gen = genProvider.getGeneration(project.id)!;
-                      context.push(
-                        '/project/${project.id}/generate/${gen.versionId}/${gen.executionId}',
-                      );
-                    } else {
-                      // Clear la generation terminee au premier clic
-                      if (hasGeneration) {
+                      final hasFailed = genProvider.isFailed(project.id);
+                      final isInProgress = genProvider.isInProgress(project.id);
+
+                      if (isInProgress || hasFailed) {
+                        // En cours ou echouee : afficher l'ecran de generation
+                        context.push(
+                          '/project/${project.id}/generate/${gen.versionId}/${gen.executionId}',
+                        );
+                      } else {
+                        // Generation terminee avec succes
                         genProvider.clearGeneration(project.id);
+                        context.push('/project/${project.id}');
                       }
+                    } else {
                       context.push('/project/${project.id}');
                     }
                   },

@@ -105,6 +105,17 @@ class _FakeGenerationProvider extends ChangeNotifier
       _activeGenerations[projectId]?.workflowState?.errorMessage;
 
   @override
+  bool isFailed(String projectId) {
+    final gen = _activeGenerations[projectId];
+    if (gen == null) return false;
+    if (gen.error != null) return true;
+    if (gen.isCancelled) return true;
+    final status = gen.workflowState?.status;
+    return status == WorkflowStatus.failed ||
+        status == WorkflowStatus.cancelled;
+  }
+
+  @override
   void startMockGenerations(List<String> projectIds) {}
 
   @override

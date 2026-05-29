@@ -348,11 +348,11 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
                     child: Column(
                       children: [
                         AppButton(
-                          text: 'Créer un projet',
+                          text: 'Générer un VisioBook',
                           fullWidth: true,
                           size: AppButtonSize.lg,
                           icon: const Icon(
-                            LucideIcons.plus,
+                            LucideIcons.bookOpen,
                             size: 20,
                             color: Colors.white,
                           ),
@@ -374,9 +374,14 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
                         ),
                         const SizedBox(height: 12),
                         AppButton(
-                          text: 'Annuler',
+                          text: 'Générer plus tard',
                           variant: AppButtonVariant.outline,
                           fullWidth: true,
+                          icon: Icon(
+                            LucideIcons.clock,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                           onPressed: () {
                             provider.reset();
                             context.go(AppRoutes.dashboard);

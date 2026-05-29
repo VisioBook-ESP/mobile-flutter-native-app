@@ -103,6 +103,17 @@ class _FakeGenerationProvider extends ChangeNotifier
       _activeGenerations[projectId]?.workflowState?.errorMessage;
 
   @override
+  bool isFailed(String projectId) {
+    final gen = _activeGenerations[projectId];
+    if (gen == null) return false;
+    if (gen.error != null) return true;
+    if (gen.isCancelled) return true;
+    final status = gen.workflowState?.status;
+    return status == WorkflowStatus.failed ||
+        status == WorkflowStatus.cancelled;
+  }
+
+  @override
   void startMockGenerations(List<String> projectIds) {}
 
   @override
@@ -206,7 +217,7 @@ void main() {
 
       // Project status labels from ProjectStatus.label
       // At least one status badge should be present
-      final statusLabels = ['Brouillon', 'En cours...', 'Pret', 'Erreur'];
+      final statusLabels = ['Brouillon', 'En cours...', 'Prêt', 'Erreur'];
       bool foundAtLeastOne = false;
       for (final label in statusLabels) {
         if (find.text(label).evaluate().isNotEmpty) {

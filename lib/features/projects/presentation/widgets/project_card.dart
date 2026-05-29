@@ -8,11 +8,16 @@ class ProjectCard extends StatelessWidget {
   final VoidCallback? onTap;
   final double? generationProgress;
 
+  /// Statut effectif base sur l'etat de generation en cours.
+  /// Surcharge project.status pour l'affichage du badge.
+  final ProjectStatus? effectiveStatus;
+
   const ProjectCard({
     super.key,
     required this.project,
     this.onTap,
     this.generationProgress,
+    this.effectiveStatus,
   });
 
   @override
@@ -72,7 +77,7 @@ class ProjectCard extends StatelessWidget {
             ),
             // Barre de progression + infos si generation en cours
             if (generationProgress != null &&
-                project.status == ProjectStatus.processing)
+                (effectiveStatus ?? project.status) == ProjectStatus.processing)
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Column(
@@ -162,8 +167,9 @@ class ProjectCard extends StatelessWidget {
   Widget _buildStatusBadge(BuildContext context) {
     Color color;
     IconData? icon;
+    final status = effectiveStatus ?? project.status;
 
-    switch (project.status) {
+    switch (status) {
       case ProjectStatus.draft:
         color = AppColors.neutral500;
         icon = LucideIcons.edit3;
@@ -188,7 +194,7 @@ class ProjectCard extends StatelessWidget {
         Icon(icon, size: 12, color: color),
         const SizedBox(width: 4),
         Text(
-          project.status.label,
+          status.label,
           style: Theme.of(
             context,
           ).textTheme.bodySmall?.copyWith(fontSize: 12, color: color),

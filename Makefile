@@ -74,9 +74,10 @@ build-ios:
 run-android:
 	flutter run -d android $(DART_DEFINES)
 
-# Lance sur iOS
+# Lance sur iOS (passer IOS_DEVICE_ID pour cibler un device specifique)
+IOS_DEVICE_ID ?= $(shell flutter devices 2>/dev/null | grep '• ios' | head -1 | awk -F '• ' '{print $$2}' | xargs)
 run-ios:
-	flutter run -d ios $(DART_DEFINES)
+	flutter run -d "$(IOS_DEVICE_ID)" $(DART_DEFINES)
 
 # Lance sur macOS
 run-macos:

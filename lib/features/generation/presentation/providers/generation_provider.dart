@@ -94,6 +94,17 @@ class GenerationProvider extends ChangeNotifier {
   bool isInProgress(String projectId) =>
       _activeGenerations[projectId]?.workflowState?.isInProgress ?? false;
 
+  /// Vrai si une generation a echoue (status failed/cancelled ou erreur)
+  bool isFailed(String projectId) {
+    final gen = _activeGenerations[projectId];
+    if (gen == null) return false;
+    if (gen.error != null) return true;
+    if (gen.isCancelled) return true;
+    final status = gen.workflowState?.status;
+    return status == WorkflowStatus.failed ||
+        status == WorkflowStatus.cancelled;
+  }
+
   /// URL de la video generee
   String? getVideoUrl(String projectId) =>
       _activeGenerations[projectId]?.workflowState?.videoUrl;

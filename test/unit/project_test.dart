@@ -35,7 +35,7 @@ void main() {
     test('label returns correct French labels', () {
       expect(ProjectStatus.draft.label, 'Brouillon');
       expect(ProjectStatus.processing.label, 'En cours...');
-      expect(ProjectStatus.ready.label, 'Pret');
+      expect(ProjectStatus.ready.label, 'Prêt');
       expect(ProjectStatus.error.label, 'Erreur');
     });
   });
